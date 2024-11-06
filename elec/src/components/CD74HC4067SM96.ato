@@ -1,0 +1,58 @@
+component CD74HC4067SM96:
+   """
+    CD74HC4067SM96 multiplexer with 16 inputs and 4 select lines
+    E is an inverted enable pin. When E is low, the multiplexer is enabled and the selected input is passed to the output. When E is high, the output is high-impedance.
+
+    Truth table:
+    S3 S2 S1 S0 | Selected Input
+    0  0  0  0  | I0
+    0  0  0  1  | I1  
+    0  0  1  0  | I2
+    0  0  1  1  | I3
+    0  1  0  0  | I4
+    0  1  0  1  | I5
+    0  1  1  0  | I6
+    0  1  1  1  | I7
+    1  0  0  0  | I8
+    1  0  0  1  | I9
+    1  0  1  0  | I10
+    1  0  1  1  | I11
+    1  1  0  0  | I12
+    1  1  0  1  | I13
+    1  1  1  0  | I14
+    1  1  1  1  | I15
+    """
+    # component CD74HC4067SM96
+    footprint = "SSOP-24_L8.1-W5.3-P0.65-LS7.8-BL"
+    lcsc_id = "C98457"
+    mpn = "C98457"
+    # pins
+    power = new Power
+
+    signal COMMON_IO ~ pin 1
+    signal CH7 ~ pin 2
+    signal CH6 ~ pin 3
+    signal CH5 ~ pin 4
+    signal CH4 ~ pin 5
+    signal CH3 ~ pin 6
+    signal CH2 ~ pin 7
+    signal CH1 ~ pin 8
+    signal CH0 ~ pin 9
+    signal S0 ~ pin 10
+    signal S1 ~ pin 11
+    signal GND ~ pin 12
+    signal S3 ~ pin 13
+    signal S2 ~ pin 14
+    signal nEnable ~ pin 15
+    signal CH15 ~ pin 16
+    signal CH14 ~ pin 17
+    signal CH13 ~ pin 18
+    signal CH12 ~ pin 19
+    signal CH11 ~ pin 20
+    signal CH10 ~ pin 21
+    signal CH9 ~ pin 22
+    signal CH8 ~ pin 23
+    signal VCC ~ pin 24
+
+    power.vcc ~ VCC
+    power.gnd ~ GND
