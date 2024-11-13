@@ -1,0 +1,100 @@
+from "generics/interfaces.ato" import I2C, Power
+
+from "components/MCP4728.ato" import MCP4728
+from "components/iso1640.ato" import ISO1640BDR
+from "components/b1205s.ato" import B1205S_2WR2
+from "components/ads1115.ato" import ADS1115IDGSR
+from "components/ldk220m-r/elec/src/ldk220m-r.ato" import LDK220M_R
+from "generics/resistors.ato" import SeriesPowerResistors, Resistor, I2CPullup
+from "generics/capacitors.ato" import Capacitor
+
+
+module Thermistor:
+    """
+    Simulates 4 thermistors using DAC with buffered outputs
+    I2C interface
+    Isolated power supply
+    ADC for diagnostics/measurement
+    """
+    # External connections
+    power_12v = new Power
+    power_3v3 = new Power
+    _power_5v = new Power
+    _power_3v3 = new Power
+    i2c = new I2C
+    _i2c = new I2C
+    signal thermistor_gnd
+    signal thermistor_1
+    signal thermistor_2
+    signal thermistor_3
+    signal thermistor_4
+
+    # Components
+    isolated_converter = new B1205S_2WR2
+    digital_isolator = new ISO1640BDR
+    i2c_pullup = new I2CPullup
+    adc = new ADS1115IDGSR
+    dac = new MCP4728
+    ldo = new LDK220M_R
+
+    # Addresses
+    digital_isolator.address = "0x20"
+    adc.address = "0x48"
+    dac.address = "0x60"
+
+    # Power
+    power_12v ~ isolated_converter.power_in
+    isolated_converter.power_out ~ _power_5v
+    _power_5v ~ ldo.power_in
+    ldo.power_out ~ _power_3v3
+    thermistor_gnd ~ _power_3v3.gnd
+    thermistor_gnd ~ _power_5v.gnd # Connect both grounds together
+
+
+    # I2C isolation
+    i2c ~ digital_isolator.i2c_non_isolated
+    digital_isolator.i2c_isolated ~ _i2c
+    power_3v3 ~ digital_isolator.power_non_isolated
+    _power_3v3 ~ digital_isolator.power_isolated
+
+    # I2C pullup
+    i2c_pullup.i2c ~ _i2c
+    i2c_pullup.power ~ _power_3v3
+
+    # DAC
+    _i2c ~ dac.i2c
+    _power_3v3 ~ dac.power
+    thermistor_1 ~ dac.VOUTA
+    thermistor_2 ~ dac.VOUTB
+    thermistor_3 ~ dac.VOUTC
+    thermistor_4 ~ dac.VOUTD
+
+    # ADC
+    _i2c ~ adc.i2c
+    _power_3v3 ~ adc.power
+    thermistor_1 ~ adc.AIN0
+    thermistor_2 ~ adc.AIN1
+    thermistor_3 ~ adc.AIN2
+    thermistor_4 ~ adc.AIN3
+
+
+    # Slap some caps on it
+    cap1 = new Capacitor
+    cap1.value = 100nF +/- 20%
+    cap1.package = "0402"
+    cap1.power ~ _power_3v3
+
+    cap2 = new Capacitor 
+    cap2.value = 100nF +/- 20%
+    cap2.package = "0402"
+    cap2.power ~ _power_3v3
+
+    cap3 = new Capacitor
+    cap3.value = 100nF +/- 20%
+    cap3.package = "0402"
+    cap3.power ~ _power_3v3
+
+    cap4 = new Capacitor
+    cap4.value = 100nF +/- 20%
+    cap4.package = "0402"
+    cap4.power ~ power_3v3

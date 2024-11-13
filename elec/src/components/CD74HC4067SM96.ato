@@ -55,5 +55,6 @@ component CD74HC4067SM96:
    signal CH8 ~ pin 23
    signal VCC ~ pin 24
 
+
    power.vcc ~ VCC
    power.gnd ~ GND

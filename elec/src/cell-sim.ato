@@ -12,6 +12,8 @@ from "generics/filters.ato" import PiFilter
 from "generics/vdivs.ato" import _VDiv
 
 from "cell.ato" import Cell
+from "thermistor.ato" import Thermistor
+from "ethernet.ato" import W5500Ethernet
 from "components/esp32-s3/elec/src/esp32-s3.ato" import ESP32S3
 from "components/level-shifter/elec/src/level-shifter.ato" import LevelShifter
 from "components/sk6805-ec20/elec/src/sk6805-ec20.ato" import SK6805EC20
@@ -30,8 +32,8 @@ from "components/RVT1E471M1010_C3351.ato" import RVT1E471M1010_C3351
 from "components/7447709101.ato" import Wurth7447709101
 from "components/FMF06FTHR010.ato" import FMF06FTHR010_LHL
 from "components/IDC-VSH-connector.ato" import IDC_VSH_connector
-from "ethernet.ato" import W5500Ethernet
 from "components/Molex_5018762240.ato" import Molex_5018762240
+
 
 
 module CellSim:
@@ -61,6 +63,8 @@ module CellSim:
     input_filter.L1 -> Wurth7447709101 # 100uH
     input_filter.C2.value = 10uF +/- 20%
     input_filter.C2.package = "0805"
+
+    current_sensor.output ~ micro.io21
 
     # Input ceramic capacitors
     input_cap_1 = new Capacitor
@@ -155,10 +159,18 @@ module CellSim:
     dmm_mux = new CD74HC4067SM96
     power_3v3 ~ dmm_mux.power
     micro.io5 ~ dmm_mux.nEnable
-    micro.io1 ~ dmm_mux.CH0
-    micro.io2 ~ dmm_mux.CH1
-    micro.io3 ~ dmm_mux.CH2
-    micro.io4 ~ dmm_mux.CH3
+    micro.io1 ~ dmm_mux.S0
+    micro.io2 ~ dmm_mux.S1
+    micro.io3 ~ dmm_mux.S2
+    micro.io4 ~ dmm_mux.S3
+    micro.io5 ~ dmm_mux.nEnable
+    power_3v3.vcc ~ dmm_mux.COMMON_IO # Outputs 3.3V to selected channel
+
+    # Thermistor
+    thermistor = new Thermistor
+    power_3v3 ~ thermistor.power_3v3
+    power_in ~ thermistor.power_12v
+    micro.i2c2 ~ thermistor.i2c
 
     # Connect cells in a stack
     cell1 = new Cell
@@ -342,6 +354,16 @@ module CellSim:
     cell11.power_out.vcc ~ molex_vsh.p2
     cell12.power_out.vcc ~ molex_vsh.p1
 
+    # Thermistor connections to VSH
+    thermistor.thermistor_1 ~ molex_vsh.p15
+    thermistor.thermistor_gnd ~ molex_vsh.p16
+    thermistor.thermistor_2 ~ molex_vsh.p17
+    thermistor.thermistor_gnd ~ molex_vsh.p18
+    thermistor.thermistor_3 ~ molex_vsh.p19
+    thermistor.thermistor_gnd ~ molex_vsh.p20
+    thermistor.thermistor_4 ~ molex_vsh.p21
+    thermistor.thermistor_gnd ~ molex_vsh.p22
+
     # Power net tie jumpers
     power_jumper_vcc = new Resistor
     power_jumper_vcc.value = 0ohm
@@ -360,7 +382,6 @@ module CellSim:
     micro.i2c ~ i2c_debug.i2c
     micro.i2c2 ~ i2c_debug.i2c2
     i2c_debug.gnd ~ power_in.gnd
-
 
     # Netname overrides
     power_in.vcc.override_net_name = "POWER_IN_VCC"
@@ -384,6 +405,20 @@ module CellSim:
     micro.spi2.mosi.override_net_name = "MICRO_SPI_2_MOSI"
     micro.spi2.miso.override_net_name = "MICRO_SPI_2_MISO"
     micro.spi2.cs.override_net_name = "MICRO_SPI_2_CS"
+
+    current_sensor.output.override_net_name = "INPUT_CURRENT_SENSOR_OUTPUT"
+
+    dmm_mux.nEnable.override_net_name = "DMM_MUX_ENABLE"
+    dmm_mux.S0.override_net_name = "DMM_MUX_S0"
+    dmm_mux.S1.override_net_name = "DMM_MUX_S1"
+    dmm_mux.S2.override_net_name = "DMM_MUX_S2"
+    dmm_mux.S3.override_net_name = "DMM_MUX_S3"
+
+    level_shifter.lv_signal.override_net_name = "LED_DATA_3V3"
+    level_shifter.hv_signal.override_net_name = "LED_DATA_5V"
+
+    thermistor._power_3v3.override_net_name = "THERMISTOR_POWER_3V3"
+    thermistor._power_5v.override_net_name = "THERMISTOR_POWER_5V"
 
     cell1._power_5v.vcc.override_net_name = "CELL1_5V_VCC"
     cell1._power_3v3.vcc.override_net_name = "CELL1_3V3_VCC"
