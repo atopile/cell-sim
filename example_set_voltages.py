@@ -16,11 +16,11 @@ def find_cellsim_port():
         return None
 
     print("Scanning for CellSim device...")
-    
+
     # Queue for the first found port
     port_queue = Queue()
     stop_event = threading.Event()
-    
+
     def try_port(port):
         if stop_event.is_set():
             return
@@ -49,12 +49,12 @@ def find_cellsim_port():
         if not port_queue.empty():
             stop_event.set()  # Signal remaining threads to stop
             return port_queue.get()
-        
+
         if all(not t.is_alive() for t in threads):
             break
-            
+
         time.sleep(0.1)
-    
+
     print("No CellSim device found!")
     return None
 
@@ -66,14 +66,14 @@ def main():
         exit(1)
 
     cellsim = CellSim(port)
-    
+
     # Test setting all voltages at once
     print("Setting all voltages to 3.5V...")
     cellsim.setAllVoltages(3.5)
     time.sleep(1)
 
     voltages = cellsim.getAllVoltages()
-    print(f"Voltages: {voltages}")
+    print(f"Voltages: {[f'{v:.3f}' for v in voltages]}")
 
     # Create a rainbow pattern from 1V to 4V across the 16 channels
     print("\nSetting rainbow voltage pattern...")
@@ -81,15 +81,15 @@ def main():
         voltage = 1.0 + (3.0 * i / 15)  # Spread 1V to 4V across 16 channels
         cellsim.setVoltage(i + 1, voltage)
 
-    time.sleep(1)
-    voltages = cellsim.getAllVoltages()
-    print(f"Voltages: {voltages}")
-
-    currents = cellsim.getAllCurrents()
-    print(f"Currents: {currents}")
-
     cellsim.enableOutputAll()
     time.sleep(1)
+
+    time.sleep(1)
+    voltages = cellsim.getAllVoltages()
+    print(f"Voltages: {[f'{v:.5f}' for v in voltages]}")
+
+    currents = cellsim.getAllCurrents()
+    print(f"Currents: {[f'{c:.5f}' for c in currents]}")
 
     cellsim.disableOutputAll()
     time.sleep(1)
@@ -117,5 +117,5 @@ def main():
     cellsim.close()
 
 
-if __name__ == '__main__':
-    main() 
+if __name__ == "__main__":
+    main()
