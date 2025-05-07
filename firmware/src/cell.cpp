@@ -1,8 +1,8 @@
 #include "Cell.h"
 
 // Constructor
-Cell::Cell(uint8_t mux_channel, TwoWire& wire_interface) :
-    mux_channel(mux_channel), wire(wire_interface) {
+Cell::Cell(uint8_t mux_channel, TwoWire &wire_interface) : mux_channel(mux_channel), wire(wire_interface)
+{
     // ...
 }
 
@@ -65,10 +65,14 @@ void Cell::setVoltage(float voltage)
     float ldo_voltage = voltage;
 
     // Buck voltage limits
-    if (buck_voltage < MIN_BUCK_VOLTAGE) buck_voltage = MIN_BUCK_VOLTAGE;
-    if (buck_voltage > MAX_BUCK_VOLTAGE) buck_voltage = MAX_BUCK_VOLTAGE;
-    if (ldo_voltage < MIN_LDO_VOLTAGE) ldo_voltage = MIN_LDO_VOLTAGE;
-    if (ldo_voltage > MAX_LDO_VOLTAGE) ldo_voltage = MAX_LDO_VOLTAGE;
+    if (buck_voltage < MIN_BUCK_VOLTAGE)
+        buck_voltage = MIN_BUCK_VOLTAGE;
+    if (buck_voltage > MAX_BUCK_VOLTAGE)
+        buck_voltage = MAX_BUCK_VOLTAGE;
+    if (ldo_voltage < MIN_LDO_VOLTAGE)
+        ldo_voltage = MIN_LDO_VOLTAGE;
+    if (ldo_voltage > MAX_LDO_VOLTAGE)
+        ldo_voltage = MAX_LDO_VOLTAGE;
 
     // Set the output voltage
     setBuckVoltage(buck_voltage);
@@ -132,7 +136,6 @@ void Cell::setBuckVoltage(float voltage)
     setMuxChannel();
     uint16_t setpoint = calculateSetpoint(voltage, true);
 
-
     buck_dac.setVoltage(setpoint, false);
 }
 
@@ -175,7 +178,8 @@ void Cell::calibrate()
     // Calibrate the buck between 234 and 2625
     float delta = 2625 - 234;
     int step = round(delta / NUM_POINTS);
-    for (int i = 0; i < NUM_POINTS; i++) {
+    for (int i = 0; i < NUM_POINTS; i++)
+    {
         enable();
         turnOnOutputRelay();
         float setpoint = 234 + i * step;
@@ -188,10 +192,11 @@ void Cell::calibrate()
     // Set buck output to max
     buck_dac.setVoltage(234, false);
     delay(50);
-    // Calibrate the ldo between 42 and 3760    
+    // Calibrate the ldo between 42 and 3760
     delta = 3760 - 42;
     step = round(delta / NUM_POINTS);
-    for (int i = 0; i < NUM_POINTS; i++) {
+    for (int i = 0; i < NUM_POINTS; i++)
+    {
         enable();
         turnOnOutputRelay();
         float setpoint = 42 + i * step;
@@ -205,23 +210,27 @@ void Cell::calibrate()
 uint16_t Cell::calculateSetpoint(float voltage, bool useBuckCalibration)
 {
     // Use the appropriate calibration array; each element is {measured voltage, DAC setpoint}
-    const std::pair<float, float>* calibration_points = useBuckCalibration ? BUCK_SETPOINTS : LDO_SETPOINTS;
+    const std::pair<float, float> *calibration_points = useBuckCalibration ? BUCK_SETPOINTS : LDO_SETPOINTS;
     const int numPoints = NUM_POINTS;
     // For descending data: clamp if voltage is above the maximum or below the minimum.
-    if (voltage >= calibration_points[0].first) {
+    if (voltage >= calibration_points[0].first)
+    {
         return calibration_points[0].second;
     }
-    if (voltage <= calibration_points[numPoints - 1].first) {
+    if (voltage <= calibration_points[numPoints - 1].first)
+    {
         return calibration_points[numPoints - 1].second;
     }
     // Find the first index where the measured voltage becomes less than or equal to the target.
     int index = 1;
-    while (index < numPoints && calibration_points[index].first > voltage) {
+    while (index < numPoints && calibration_points[index].first > voltage)
+    {
         index++;
     }
     int above_index = index - 1;
     int below_index = index;
-    if (above_index == below_index) {
+    if (above_index == below_index)
+    {
         return calibration_points[above_index].second;
     }
     // Linear interpolation:
