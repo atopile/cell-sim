@@ -12,6 +12,12 @@
 // LED
 const int ledPin = 15;
 
+// Input voltage sense (resistor divider to ADC)
+const int inputVoltagePin = 16;                                          // IO16
+const float R_TOP_OHMS = 86600.0f;                                       // 86.6kΩ
+const float R_BOTTOM_OHMS = 6190.0f;                                     // 6.19kΩ
+const float DIVIDER_GAIN = (R_TOP_OHMS + R_BOTTOM_OHMS) / R_BOTTOM_OHMS; // ~14.99
+
 // I2C
 const int wire_1_sdaPin = 7;
 const int wire_1_sclPin = 6;
@@ -58,6 +64,68 @@ float voltageTargets[16];
 void setupLEDs()
 {
     FastLED.addLeds<NEOPIXEL, ledPin>(leds, NUM_LEDS);
+}
+
+static float readInputVoltage()
+{
+#if defined(ESP32)
+    // Ensure ADC is configured for wide range; our divider outputs < ~0.9V at 13V input
+    analogSetPinAttenuation(inputVoltagePin, ADC_11db);
+    int mv = analogReadMilliVolts(inputVoltagePin);
+    return (mv / 1000.0f) * DIVIDER_GAIN;
+#else
+    int raw = analogRead(inputVoltagePin);
+    float vref = 3.3f; // best-effort fallback
+    float v_pin = (raw / 1023.0f) * vref;
+    return v_pin * DIVIDER_GAIN;
+#endif
+}
+
+static void waitForStableInputVoltage()
+{
+    const float MIN_OK_V = 11.0f;
+    const float MAX_OK_V = 13.0f;
+    const unsigned long REQUIRED_STABLE_MS = 2000; // require 2s in-range
+    unsigned long stableStart = 0;
+
+    // Prepare LEDs for pulsing
+    FastLED.setBrightness(255);
+    pinMode(inputVoltagePin, INPUT);
+
+    while (true)
+    {
+        float vin = readInputVoltage();
+        bool inRange = (vin >= MIN_OK_V) && (vin <= MAX_OK_V);
+
+        if (inRange)
+        {
+            if (stableStart == 0)
+            {
+                stableStart = millis();
+            }
+            else if (millis() - stableStart >= REQUIRED_STABLE_MS)
+            {
+                // Clear LEDs and exit error state
+                fill_solid(leds, NUM_LEDS, CRGB::Black);
+                FastLED.show();
+                break;
+            }
+        }
+        else
+        {
+            stableStart = 0;
+        }
+
+        // Pulse LEDs red to indicate waiting/error state
+        uint8_t pulse = sin8((uint8_t)(millis() >> 2)); // smooth 0-255
+        for (int i = 0; i < NUM_LEDS; i++)
+        {
+            leds[i] = CRGB(pulse, 0, 0);
+        }
+        FastLED.show();
+
+        delay(50);
+    }
 }
 
 void updateStatusLEDs(Cell *cells, size_t num_cells)
@@ -122,15 +190,20 @@ void setup()
         digitalWrite(DMM_MUX_PINS[i], LOW);
     }
 
+    // LEDs
+    FastLED.addLeds<NEOPIXEL, ledPin>(leds, NUM_LEDS);
+    FastLED.setBrightness(255);
+
+    // Wait for input voltage to be present and stable in 11-13V window
+    waitForStableInputVoltage();
+
     // Initialize voltage targets for each of the 16 cells
     for (int i = 0; i < 16; i++)
     {
         voltageTargets[i] = 3.5;
     }
 
-    delay(1000);
-
-    // Initialize cells
+    // Initialize cells only after stable input detected
     for (Cell &cell : cells)
     {
         cell.init();
@@ -138,9 +211,6 @@ void setup()
         cell.turnOnOutputRelay();
         cell.calibrate();
     }
-
-    FastLED.addLeds<NEOPIXEL, ledPin>(leds, NUM_LEDS);
-    FastLED.setBrightness(255);
 }
 
 void processUARTCommands()
@@ -251,6 +321,12 @@ void processUARTCommands()
                 response += String(cells[i].getCurrent(), 8);
             }
             USBSerial.println(response);
+        }
+        else if (command == "GETVIN")
+        {
+            float vin = readInputVoltage();
+            USBSerial.print("OK:vin:");
+            USBSerial.println(vin, 3);
         }
         else if (command == "SETALLV")
         {
