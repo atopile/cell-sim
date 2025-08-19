@@ -128,6 +128,74 @@ static void waitForStableInputVoltage()
     }
 }
 
+// Parallel/Batch calibration across all cells
+static void calibrateAllFast(Cell *cells, size_t num_cells)
+{
+    const int NUM_POINTS = cells[0].numCalibrationPoints();
+
+    // Ensure all cells are powered and relays on
+    for (size_t i = 0; i < num_cells; ++i)
+    {
+        cells[i].prepareCalibration();
+    }
+
+    // -------- Buck calibration (setpoint 234 -> 2625, increasing; measured V should decrease) --------
+    {
+        const int start = 234;
+        const int end = 2625;
+        int delta = end - start;
+        int step = delta / NUM_POINTS; // integer division matches previous rounding behavior roughly
+        if (step <= 0)
+            step = 1;
+
+        for (int idx = 0; idx < NUM_POINTS; ++idx)
+        {
+            uint16_t setpoint = start + idx * step;
+            for (size_t i = 0; i < num_cells; ++i)
+            {
+                cells[i].setBuckDacRaw(setpoint);
+            }
+            delay(100); // settle
+            for (size_t i = 0; i < num_cells; ++i)
+            {
+                float v = cells[i].getBuckVoltage();
+                cells[i].setBuckCalibrationPoint(idx, v, setpoint);
+            }
+        }
+    }
+
+    // -------- LDO calibration (ensure buck at 234 first) --------
+    for (size_t i = 0; i < num_cells; ++i)
+    {
+        cells[i].setBuckDacRaw(234);
+    }
+    delay(50);
+
+    {
+        const int start = 42;
+        const int end = 3760;
+        int delta = end - start;
+        int step = delta / NUM_POINTS;
+        if (step <= 0)
+            step = 1;
+
+        for (int idx = 0; idx < NUM_POINTS; ++idx)
+        {
+            uint16_t setpoint = start + idx * step;
+            for (size_t i = 0; i < num_cells; ++i)
+            {
+                cells[i].setLdoDacRaw(setpoint);
+            }
+            delay(100); // settle
+            for (size_t i = 0; i < num_cells; ++i)
+            {
+                float v = cells[i].getVoltage();
+                cells[i].setLdoCalibrationPoint(idx, v, setpoint);
+            }
+        }
+    }
+}
+
 void updateStatusLEDs(Cell *cells, size_t num_cells)
 {
     // Constants for voltage range
@@ -209,8 +277,9 @@ void setup()
         cell.init();
         cell.enable();
         cell.turnOnOutputRelay();
-        cell.calibrate();
     }
+    // Use fast parallel calibration to reduce total time
+    calibrateAllFast(cells, 16);
 }
 
 void processUARTCommands()
@@ -437,11 +506,8 @@ void processUARTCommands()
         }
         else if (command == "CALIBRATE_ALL")
         {
-            for (int i = 0; i < 16; i++)
-            {
-                cells[i].calibrate();
-            }
-            USBSerial.println("OK:all_calibrated");
+            calibrateAllFast(cells, 16);
+            USBSerial.println("OK:all_calibrated_fast");
         }
         else
         {

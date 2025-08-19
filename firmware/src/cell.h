@@ -11,7 +11,7 @@ class Cell
 {
 public:
     // Constructor
-    Cell(uint8_t mux_channel, TwoWire& wire_interface);
+    Cell(uint8_t mux_channel, TwoWire &wire_interface);
 
     // Public methods
     void init();
@@ -29,6 +29,13 @@ public:
     float getBuckVoltage();
     void setBuckVoltage(float voltage);
     void calibrate();
+    // Parallel calibration helpers
+    void prepareCalibration();
+    void setBuckDacRaw(uint16_t setpoint);
+    void setLdoDacRaw(uint16_t setpoint);
+    void setBuckCalibrationPoint(int index, float measuredVoltage, uint16_t setpoint);
+    void setLdoCalibrationPoint(int index, float measuredVoltage, uint16_t setpoint);
+    int numCalibrationPoints() const { return NUM_POINTS; }
     uint8_t GPIO_STATE = 0b00000000;
 
 private:
@@ -55,7 +62,7 @@ private:
 
     // Mux channel
     const uint8_t mux_channel;
-    TwoWire& wire;
+    TwoWire &wire;
 
     // Device instances
     Adafruit_MCP4725 ldo_dac;
@@ -84,11 +91,9 @@ private:
     static const int NUM_POINTS = 32;
     // Each pair is defined as {measured voltage, DAC setpoint}
     std::pair<float, float> BUCK_SETPOINTS[NUM_POINTS] = {
-        {4.5971, 234}, {1.5041, 2625}
-    };
+        {4.5971, 234}, {1.5041, 2625}};
     std::pair<float, float> LDO_SETPOINTS[NUM_POINTS] = {
-        {4.5176, 42}, {0.3334, 3760}
-    };
+        {4.5176, 42}, {0.3334, 3760}};
 };
 
 #endif // CELL_H
