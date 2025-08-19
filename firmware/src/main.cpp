@@ -6,6 +6,8 @@
 #include <Adafruit_MCP4725.h> // DAC
 #include <Adafruit_ADS1X15.h> // ADC
 #include <FastLED.h>          // Addressable LEDs
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 // Pin definitions
 
@@ -37,6 +39,11 @@ const int DMM_MUX_ENABLE = 5;
 // Addressable LEDs
 #define NUM_LEDS 32
 CRGB leds[NUM_LEDS];
+
+// LED animation state (driven by a dedicated FreeRTOS task)
+static volatile bool g_showInputWait = false;
+static volatile bool g_showCalibProgress = false;
+static volatile float g_calibProgress01 = 0.0f;
 
 // Create cells
 Cell cell1(0, Wire);
@@ -88,9 +95,10 @@ static void waitForStableInputVoltage()
     const unsigned long REQUIRED_STABLE_MS = 2000; // require 2s in-range
     unsigned long stableStart = 0;
 
-    // Prepare LEDs for pulsing
+    // Start LED wait animation
     FastLED.setBrightness(255);
     pinMode(inputVoltagePin, INPUT);
+    g_showInputWait = true;
 
     while (true)
     {
@@ -116,15 +124,75 @@ static void waitForStableInputVoltage()
             stableStart = 0;
         }
 
-        // Pulse LEDs red to indicate waiting/error state
-        uint8_t pulse = sin8((uint8_t)(millis() >> 2)); // smooth 0-255
-        for (int i = 0; i < NUM_LEDS; i++)
-        {
-            leds[i] = CRGB(pulse, 0, 0);
-        }
-        FastLED.show();
-
         delay(50);
+    }
+    // Stop LED wait animation and clear
+    g_showInputWait = false;
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+}
+
+static void showCalibrationProgress(float progress01)
+{
+    // Clamp progress to [0,1]
+    if (progress01 < 0.0f)
+        progress01 = 0.0f;
+    if (progress01 > 1.0f)
+        progress01 = 1.0f;
+
+    // Smooth breathing brightness
+    uint8_t breath = 160 + (sin8((uint8_t)(millis() >> 2)) >> 2); // ~160-223
+
+    int total = NUM_LEDS;
+    float exact = progress01 * total;
+    int full = (int)floorf(exact);
+    float frac = exact - full;
+
+    for (int i = 0; i < total; ++i)
+    {
+        if (i < full)
+        {
+            // Filled segment: moving hue for motion
+            uint8_t hue = (uint8_t)((i * 6 + (millis() >> 4)) & 0xFF);
+            leds[i] = CHSV(hue, 200, breath);
+        }
+        else if (i == full && frac > 0.0f)
+        {
+            uint8_t hue = (uint8_t)((i * 6 + (millis() >> 4)) & 0xFF);
+            CRGB c = CHSV(hue, 200, breath);
+            // Scale by fractional fill for partial LED
+            leds[i].r = scale8(c.r, (uint8_t)(frac * 255));
+            leds[i].g = scale8(c.g, (uint8_t)(frac * 255));
+            leds[i].b = scale8(c.b, (uint8_t)(frac * 255));
+        }
+        else
+        {
+            // Unfilled: dim background
+            leds[i] = CRGB(5, 5, 5);
+        }
+    }
+
+    FastLED.show();
+}
+
+// Dedicated LED animator task to keep animations smooth during blocking work
+static void LedAnimatorTask(void *pv)
+{
+    for (;;)
+    {
+        if (g_showInputWait)
+        {
+            // Red breathing full strip
+            uint8_t breath = sin8((uint8_t)(millis() >> 2));
+            CRGB c = CRGB(breath, 0, 0);
+            fill_solid(leds, NUM_LEDS, c);
+            FastLED.show();
+        }
+        else if (g_showCalibProgress)
+        {
+            showCalibrationProgress(g_calibProgress01);
+        }
+        vTaskDelay(16 / portTICK_PERIOD_MS); // ~60 FPS
     }
 }
 
@@ -132,6 +200,10 @@ static void waitForStableInputVoltage()
 static void calibrateAllFast(Cell *cells, size_t num_cells)
 {
     const int NUM_POINTS = cells[0].numCalibrationPoints();
+    const int totalSteps = NUM_POINTS * 2;
+    int stepCounter = 0;
+    g_showCalibProgress = true;
+    g_calibProgress01 = 0.0f;
 
     // Ensure all cells are powered and relays on
     for (size_t i = 0; i < num_cells; ++i)
@@ -155,12 +227,15 @@ static void calibrateAllFast(Cell *cells, size_t num_cells)
             {
                 cells[i].setBuckDacRaw(setpoint);
             }
-            delay(100); // settle
+            // Update progress; animator task will render while we yield
+            g_calibProgress01 = (float)(stepCounter) / (float)totalSteps;
+            vTaskDelay(100 / portTICK_PERIOD_MS);
             for (size_t i = 0; i < num_cells; ++i)
             {
                 float v = cells[i].getBuckVoltage();
                 cells[i].setBuckCalibrationPoint(idx, v, setpoint);
             }
+            stepCounter++;
         }
     }
 
@@ -169,7 +244,8 @@ static void calibrateAllFast(Cell *cells, size_t num_cells)
     {
         cells[i].setBuckDacRaw(234);
     }
-    delay(50);
+    g_calibProgress01 = (float)(stepCounter) / (float)totalSteps;
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     {
         const int start = 42;
@@ -186,14 +262,23 @@ static void calibrateAllFast(Cell *cells, size_t num_cells)
             {
                 cells[i].setLdoDacRaw(setpoint);
             }
-            delay(100); // settle
+            g_calibProgress01 = (float)(stepCounter) / (float)totalSteps;
+            vTaskDelay(100 / portTICK_PERIOD_MS);
             for (size_t i = 0; i < num_cells; ++i)
             {
                 float v = cells[i].getVoltage();
                 cells[i].setLdoCalibrationPoint(idx, v, setpoint);
             }
+            stepCounter++;
         }
     }
+
+    // Finish: show full bar briefly then clear
+    g_calibProgress01 = 1.0f;
+    vTaskDelay(200 / portTICK_PERIOD_MS);
+    g_showCalibProgress = false;
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
 }
 
 void updateStatusLEDs(Cell *cells, size_t num_cells)
@@ -261,6 +346,8 @@ void setup()
     // LEDs
     FastLED.addLeds<NEOPIXEL, ledPin>(leds, NUM_LEDS);
     FastLED.setBrightness(255);
+    // Start LED animator task so animations remain smooth during blocking work
+    xTaskCreatePinnedToCore(LedAnimatorTask, "LedAnimator", 2048, nullptr, 1, nullptr, 1);
 
     // Wait for input voltage to be present and stable in 11-13V window
     waitForStableInputVoltage();
@@ -520,9 +607,9 @@ void loop()
 {
     processUARTCommands();
 
-    // Update LEDs every 100ms
+    // Update LEDs every 100ms (skip while special animations are active)
     static unsigned long lastLEDUpdate = 0;
-    if (millis() - lastLEDUpdate > 100)
+    if (!g_showInputWait && !g_showCalibProgress && (millis() - lastLEDUpdate > 100))
     {
         updateStatusLEDs(cells, 16);
         lastLEDUpdate = millis();
