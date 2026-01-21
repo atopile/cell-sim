@@ -1,18 +1,75 @@
-ato-version: ^0.2.0
+requires-atopile: ^0.14.0
+
 builds:
   default:
     entry: elec/src/cell-sim.ato:CellSim
   cell:
-    entry: elec/src/cell.ato:Cell
-  ethernet:
-    entry: elec/src/ethernet.ato:W5500Ethernet
+    entry: elec/src/modules/cell.ato:Cell
+
 dependencies:
-- name: generics
-- name: tca9548apwr
-- name: qwiic-connectors
-- name: bq24045dsqr
-- name: level-shifter
-- name: programming-headers
-- name: saleae-header
-- name: lv2842xlvddcr
-- name: xt-connectors
+  - type: registry
+    identifier:
+      atopile/buttons
+      #   # release: 0.2.4
+      # - type: registry
+      #   identifier: atopile/ti-tca9548a
+      #   # release: 0.2.0
+      # - type: registry
+      #   identifier: atopile/sparkfun-qwiic
+      # - type: registry
+      #   identifier: atopile/ti-bq2404x
+      # - type: registry
+      #   identifier: atopile/diodes-inc-74lvc1t45dw-7
+      # - type: registry
+      #   identifier: atopile/programming-headers
+      # - type: registry
+      #   identifier: atopile/saleae-header
+      # - type: registry
+      #   identifier: atopile/ti-lv2842x
+  - type: registry
+    identifier: atopile/indicator-leds
+  - type: registry
+    identifier: atopile/xt-connectors
+  - type: registry
+    identifier: atopile/espressif-esp32-s3
+  - type: registry
+    identifier: atopile/usb-connectors
+  - type: registry
+    identifier: atopile/wiznet-w5500
+  - type: registry
+    identifier:
+      atopile/opsco-sk6805-ec20
+      # - type: registry
+      #   identifier: atopile/st-ldk220
+      # - type: registry
+      #   identifier: atopile/ti-lv2842x
+      # - type: registry
+      #   identifier: atopile/ti-tca9548a
+  - type: registry
+    identifier: atopile/ti-iso1640x
+  - type: registry
+    identifier: atopile/microchip-mcp4725
+  - type: registry
+    identifier:
+      atopile/ti-ads1115
+      # - type: registry
+      #   identifier: atopile/ti-tca6408
+      # - type: registry
+      #   identifier: atopile/relays
+      # - type: registry
+      #   identifier: atopile/ti-tlv75901
+      # - type: registry
+      #   identifier: atopile/ti-tps563201
+  - type: registry
+    identifier:
+      atopile/microchip-mcp4728
+      # - type: registry
+      #   identifier: atopile/ylptech-byyxx
+  - type: registry
+    identifier: atopile/banana-plugs
+  - type: registry
+    identifier: atopile/ti-cd74hc4067sm
+    release: 0.1.0
+  - type: registry
+    identifier: atopile/ti-ina185a1
+    release: 0.1.0

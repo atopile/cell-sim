@@ -1,0 +1,95 @@
+import I2C
+import ElectricPower
+import Resistor
+import Capacitor
+
+from "atopile/microchip-mcp4728/microchip-mcp4728.ato" import Microchip_MCP4728
+from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640QDWRQ1
+from "atopile/ti-ads1115/ti-ads1115.ato" import TI_ADS1115
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B1205S_2WR2
+
+module DigitalSimulatedThermistor_4_Channel:
+    """
+    Simulates 4 thermistors using DAC with buffered outputs
+    I2C interface
+    Isolated power supply
+    ADC for diagnostics/measurement
+    """
+    # External connections
+    power_12v = new ElectricPower
+    power_12v.required = True
+
+    power_3v3 = new ElectricPower
+    power_3v3.required = True
+
+    i2c = new I2C
+    i2c.required = True
+
+    thermistor_outputs = new ElectricSignal[4]
+
+    # internal interfaces
+    _power_3v3 = new ElectricPower
+    _i2c = new I2C
+
+    # Components
+    isolated_converter = new YLPTEC_B1205S_2WR2
+    digital_isolator = new TI_ISO1640QDWRQ1
+    adc = new TI_ADS1115
+    dac = new MICROCHIP_MCP4728
+    ldo = new LDK220M_R
+
+    # Addresses
+    digital_isolator.address = "0x20"
+    adc.address = "0x48"
+    dac.address = "0x60"
+
+    # Isolated 12v to 3.3v
+    power_12v ~> isolated_converter ~> ldo ~> _power_3v3
+
+    # I2C isolation
+    i2c ~ digital_isolator.i2cs[0]
+    _i2c ~ digital_isolator.i2cs[1]
+    power_3v3 ~ digital_isolator.power_rails[0]
+    _power_3v3 ~ digital_isolator.power_rails[1]
+
+    # I2C pullup
+    # i2c_pullup.i2c ~ _i2c
+    # i2c_pullup.power ~ _power_3v3
+
+    # DAC
+    _i2c ~ dac.i2c
+    _power_3v3 ~ dac.power
+    thermistor_outputs[0] ~ dac.vouta
+    thermistor_outputs[1] ~ dac.voutb
+    thermistor_outputs[2] ~ dac.voutc
+    thermistor_outputs[3] ~ dac.voutd
+
+    # ADC
+    _i2c ~ adc.i2c
+    _power_3v3 ~ adc.power
+    thermistor_outputs[0] ~ adc.inputs[0]
+    thermistor_outputs[1] ~ adc.inputs[1]
+    thermistor_outputs[2] ~ adc.inputs[2]
+    thermistor_outputs[3] ~ adc.inputs[3]
+
+    # Slap some caps on it
+    cap1 = new Capacitor
+    cap1.capacitance = 100nF +/- 20%
+    cap1.package = "0402"
+    cap1.power ~ _power_3v3
+
+    cap2 = new Capacitor
+    cap2.capacitance = 100nF +/- 20%
+    cap2.package = "0402"
+    cap2.power ~ _power_3v3
+
+    cap3 = new Capacitor
+    cap3.capacitance = 100nF +/- 20%
+    cap3.package = "0402"
+    cap3.power ~ _power_3v3
+
+    cap4 = new Capacitor
+    cap4.capacitance = 100nF +/- 20%
+    cap4.package = "0402"
+    cap4.power ~ power_3v3
