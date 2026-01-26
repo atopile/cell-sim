@@ -4,6 +4,7 @@ import ElectricLogic
 
 from "atopile/ti-tlv75901/ti-tlv75901.ato" import TI_TLV75901
 from "atopile/ti-tps563201/ti-tps563201.ato" import TI_TPS563201
+from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
 
 module DigitalLDO:
     """

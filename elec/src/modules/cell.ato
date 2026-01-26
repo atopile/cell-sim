@@ -1,11 +1,15 @@
+#pragma experiment("TRAITS")
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("FOR_LOOP")
+
 import ElectricPower
 import I2C
 import Resistor
+import has_net_name_suggestion
 
 from "modules/filters.ato" import PiFilter
 
 from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640QDWRQ1
-from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
 from "atopile/ti-ads1115/ti-ads1115.ato" import TI_ADS1115
 from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
 from "atopile/opsco-sk6805-ec20/opsco-sk6805-ec20.ato" import OPSCO_SK6805_EC20
@@ -18,9 +22,7 @@ from "modules/digital_regulators.ato" import DigitalBuck
 from "modules/digital_regulators.ato" import DigitalLDO
 from "modules/helpers.ato" import SeriesPowerResistors
 from "modules/helpers.ato" import SwitchableLoad
-
-# no package available yet:
-from "components/current-sensor.ato" import CurrentSensor  # C2059320
+from "modules/current_sensor.ato" import CurrentSensor
 
 module Cell:
     """
@@ -198,26 +200,25 @@ module Cell:
     gpio.gpios[4] ~ load_switch.control.line
     gpio.gpios[5] ~ output_relay.enable
 
-    # Netname overrides - doesnt work well with patterns
-    # _power_5v.hv.override_net_name = "CELL_5V_VCC"
-    # _power_3v3.hv.override_net_name = "CELL_3V3_VCC"
-    # _power_3v3.lv.override_net_name = "CELL_GND"
-    # _iso_i2c.scl.override_net_name = "CELL_I2C_SCL"
-    # _iso_i2c.sda.override_net_name = "CELL_I2C_SDA"
-    # buck.enable.override_net_name = "CELL_BUCK_ENABLE"
-    # ldo.enable.override_net_name = "CELL_LDO_ENABLE"
-    # load_switch.control.override_net_name = "CELL_LOAD_SWITCH_CONTROL"
-    # output_relay.input.override_net_name = "CELL_OUTPUT_RELAY_CONTROL"
-    # dmm_relay.input.override_net_name = "CELL_DMM_RELAY_CONTROL"
-    # current_sense.output.override_net_name = "CELL_CURRENT_SENSE_OUTPUT"
-    # filter.power_out.hv.override_net_name = "CELL_FILTER_POWER_OUT_VCC"
-    # buck.power_out.hv.override_net_name = "CELL_BUCK_POWER_OUT_VCC"
-    # ldo.power_out.hv.override_net_name = "CELL_LDO_POWER_OUT_VCC"
-    # current_sense.power_out.hv.override_net_name = "CELL_CURRENT_SENSE_POWER_OUT_VCC"
-
-# Custom interface for connecting the cells together
+    _power_5v.hv.suggest_net_name = "CELL_5V_VCC"
+    _power_3v3.hv.suggest_net_name = "CELL_3V3_VCC"
+    _iso_i2c.scl.suggest_net_name = "CELL_I2C_SCL"
+    _iso_i2c.sda.suggest_net_name = "CELL_I2C_SDA"
+    buck.enable.suggest_net_name = "CELL_BUCK_ENABLE"
+    ldo.enable.suggest_net_name = "CELL_LDO_ENABLE"
+    load_switch.control.suggest_net_name = "CELL_LOAD_SWITCH_CONTROL"
+    output_relay.input.suggest_net_name = "CELL_OUTPUT_RELAY_CONTROL"
+    dmm_relay.input.suggest_net_name = "CELL_DMM_RELAY_CONTROL"
+    current_sense.output.suggest_net_name = "CELL_CURRENT_SENSE_OUTPUT"
+    filter.power_out.hv.suggest_net_name = "CELL_FILTER_POWER_OUT_VCC"
+    buck.power_out.hv.suggest_net_name = "CELL_BUCK_POWER_OUT_VCC"
+    ldo.power_out.hv.suggest_net_name = "CELL_LDO_POWER_OUT_VCC"
+    current_sense.power_out.hv.suggest_net_name = "CELL_CURRENT_SENSE_POWER_OUT_VCC"
 
 interface CellJumper:
+    """
+    Custom interface for connecting the cells together
+    """
     cell = new Electrical
     """Carries the power from or to the Cell module"""
     led_data = new ElectricLogic

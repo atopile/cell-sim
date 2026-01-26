@@ -8,24 +8,9 @@ builds:
 
 dependencies:
   - type: registry
-    identifier:
-      atopile/buttons
-      #   # release: 0.2.4
-      # - type: registry
-      #   identifier: atopile/ti-tca9548a
-      #   # release: 0.2.0
-      # - type: registry
-      #   identifier: atopile/sparkfun-qwiic
-      # - type: registry
-      #   identifier: atopile/ti-bq2404x
-      # - type: registry
-      #   identifier: atopile/diodes-inc-74lvc1t45dw-7
-      # - type: registry
-      #   identifier: atopile/programming-headers
-      # - type: registry
-      #   identifier: atopile/saleae-header
-      # - type: registry
-      #   identifier: atopile/ti-lv2842x
+    identifier: atopile/buttons
+  - type: registry
+    identifier: atopile/saleae-header
   - type: registry
     identifier: atopile/indicator-leds
   - type: registry
@@ -37,39 +22,40 @@ dependencies:
   - type: registry
     identifier: atopile/wiznet-w5500
   - type: registry
-    identifier:
-      atopile/opsco-sk6805-ec20
-      # - type: registry
-      #   identifier: atopile/st-ldk220
-      # - type: registry
-      #   identifier: atopile/ti-lv2842x
-      # - type: registry
-      #   identifier: atopile/ti-tca9548a
+    identifier: atopile/opsco-sk6805-ec20
   - type: registry
     identifier: atopile/ti-iso1640x
   - type: registry
     identifier: atopile/microchip-mcp4725
   - type: registry
-    identifier:
-      atopile/ti-ads1115
-      # - type: registry
-      #   identifier: atopile/ti-tca6408
-      # - type: registry
-      #   identifier: atopile/relays
-      # - type: registry
-      #   identifier: atopile/ti-tlv75901
-      # - type: registry
-      #   identifier: atopile/ti-tps563201
+    identifier: atopile/ti-ads1115
   - type: registry
-    identifier:
-      atopile/microchip-mcp4728
-      # - type: registry
-      #   identifier: atopile/ylptech-byyxx
+    identifier: atopile/microchip-mcp4728
+  - type: registry
+    identifier: atopile/ylptech-byyxx
   - type: registry
     identifier: atopile/banana-plugs
   - type: registry
     identifier: atopile/ti-cd74hc4067sm
-    release: 0.1.0
   - type: registry
     identifier: atopile/ti-ina185a1
-    release: 0.1.0
+  - type: registry
+    identifier: atopile/sparkfun-qwiic
+  - type: registry
+    identifier: atopile/ti-tca9548a
+  - type: registry
+    identifier: atopile/diodes-inc-74lvc1t45dw-7
+  - type: registry
+    identifier: atopile/programming-headers
+    # - type: registry
+    #   identifier: atopile/ti-lv2842x
+  - type: registry
+    identifier: atopile/ti-tca6408
+  #   identifier: atopile/relays
+  # - type: registry
+  - type: registry
+    identifier: atopile/st-ldk220
+  - type: registry
+    identifier: atopile/ti-tlv75901
+  - type: registry
+    identifier: atopile/ti-tps563201

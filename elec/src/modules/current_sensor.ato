@@ -19,7 +19,7 @@ module CurrentSensor:
     max_current: A
     """Maximum current to measure"""
 
-    asssert shunt.resistance * max_current * amplifier.gain within 1.2V to 3V
+    assert shunt.resistance * max_current * amplifier.gain within 1.2V to 3V
     shunt.package = "0805"
 
     # connect the

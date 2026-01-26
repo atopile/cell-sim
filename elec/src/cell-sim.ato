@@ -1,3 +1,7 @@
+#pragma experiment("TRAITS")
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("FOR_LOOP")
+
 import Capacitor
 import Resistor
 import I2CPullup
@@ -33,9 +37,7 @@ from "modules/oled_module_connector.ato" import OLEDModuleConnector
 from "modules/idc_connector.ato" import IDC_VSH_connector
 from "modules/current_sensor.ato" import CurrentSensor
 from "modules/digital_thermistor.ato" import DigitalSimulatedThermistor_4_Channel
-
-# TODO:
-import PowerDiodeOr
+from "modules/power_or.ato" import PowerDiodeOr
 
 module CellSim:
     power_in = new Power
@@ -143,10 +145,10 @@ module CellSim:
     buck.v_out = 5V +/- 5%
     power_in ~ buck.power_in
 
-    # Diode or USB supply to 5V rail
+    # Internal buck output or USB supply to 5V rail
     diode_or = new PowerDiodeOr
-    usbc.power ~ diode_or.power_in1
-    buck.power_out ~ diode_or.power_in2
+    usbc.power ~ diode_or.power[0]
+    buck.power_out ~ diode_or.power[1]
     diode_or.power_out ~ power_5v
 
     # regulator to 3.3V
@@ -303,277 +305,36 @@ module CellSim:
     micro.i2c2 ~ i2c_debug.header[1].i2c2
 
     # Netname overrides
-    power_in.hv.has_net_name_suggestion<name = "POWER_IN_VCC", level = "SUGGESTED">
-    power_in.lv.has_net_name_suggestion<name = "POWER_IN_GND", level = "SUGGESTED">
-    power_batt.hv.has_net_name_suggestion<name = "POWER_BATT_VCC", level = "SUGGESTED">
-    power_5v.hv.has_net_name_suggestion<name = "POWER_5V_VCC", level = "SUGGESTED">
-    power_3v3.hv.has_net_name_suggestion<name = "POWER_3V3_VCC", level = "SUGGESTED">
-    dmm_out.hv.has_net_name_suggestion<name = "DMM_OUT_VCC", level = "SUGGESTED">
-    dmm_out.lv.has_net_name_suggestion<name = "DMM_OUT_GND", level = "SUGGESTED">
+    power_in.hv.suggest_net_name = "POWER_IN_VCC"
+    power_in.lv.suggest_net_name = "POWER_IN_GND"
+    power_batt.hv.suggest_net_name = "POWER_BATT_VCC"
+    power_5v.hv.suggest_net_name = "POWER_5V_VCC"
+    power_3v3.hv.suggest_net_name = "POWER_3V3_VCC"
+    dmm_out.hv.suggest_net_name = "DMM_OUT_VCC"
+    dmm_out.lv.suggest_net_name = "DMM_OUT_GND"
 
-    ethernet.interrupt.has_net_name_suggestion<name = "ETHERNET_INTERRUPT", level = "SUGGESTED">
-    ethernet.reset.has_net_name_suggestion<name = "ETHERNET_RESET", level = "SUGGESTED">
+    ethernet.interrupt.suggest_net_name = "ETHERNET_INTERRUPT"
+    ethernet.reset.suggest_net_name = "ETHERNET_RESET"
 
-    micro.i2c.scl.has_net_name_suggestion<name = "MICRO_I2C_1_SCL", level = "SUGGESTED">
-    micro.i2c.sda.has_net_name_suggestion<name = "MICRO_I2C_1_SDA", level = "SUGGESTED">
-    micro.i2c2.scl.has_net_name_suggestion<name = "MICRO_I2C_2_SCL", level = "SUGGESTED">
-    micro.i2c2.sda.has_net_name_suggestion<name = "MICRO_I2C_2_SDA", level = "SUGGESTED">
+    micro.i2c.scl.suggest_net_name = "MICRO_I2C_1_SCL"
+    micro.i2c.sda.suggest_net_name = "MICRO_I2C_1_SDA"
+    micro.i2c2.scl.suggest_net_name = "MICRO_I2C_2_SCL"
+    micro.i2c2.sda.suggest_net_name = "MICRO_I2C_2_SDA"
 
-    micro.spi2.sck.has_net_name_suggestion<name = "MICRO_SPI_2_SCK", level = "SUGGESTED">
-    micro.spi2.mosi.has_net_name_suggestion<name = "MICRO_SPI_2_MOSI", level = "SUGGESTED">
-    micro.spi2.miso.has_net_name_suggestion<name = "MICRO_SPI_2_MISO", level = "SUGGESTED">
-    micro.spi2.cs.has_net_name_suggestion<name = "MICRO_SPI_2_CS", level = "SUGGESTED">
+    micro.spi2.sck.suggest_net_name = "MICRO_SPI_2_SCK"
+    micro.spi2.mosi.suggest_net_name = "MICRO_SPI_2_MOSI"
+    micro.spi2.miso.suggest_net_name = "MICRO_SPI_2_MISO"
+    micro.spi2.cs.suggest_net_name = "MICRO_SPI_2_CS"
 
-    current_sensor.output.has_net_name_suggestion<name = "INPUT_CURRENT_SENSOR_OUTPUT", level = "SUGGESTED">
+    current_sensor.output.suggest_net_name = "INPUT_CURRENT_SENSOR_OUTPUT"
 
-    dmm_mux.S0.has_net_name_suggestion<name = "DMM_MUX_S0", level = "SUGGESTED">
-    dmm_mux.S1.has_net_name_suggestion<name = "DMM_MUX_S1", level = "SUGGESTED">
-    dmm_mux.S2.has_net_name_suggestion<name = "DMM_MUX_S2", level = "SUGGESTED">
-    dmm_mux.S3.has_net_name_suggestion<name = "DMM_MUX_S3", level = "SUGGESTED">
+    dmm_mux.S0.suggest_net_name = "DMM_MUX_S0"
+    dmm_mux.S1.suggest_net_name = "DMM_MUX_S1"
+    dmm_mux.S2.suggest_net_name = "DMM_MUX_S2"
+    dmm_mux.S3.suggest_net_name = "DMM_MUX_S3"
 
-    level_shifter.lv_signal.has_net_name_suggestion<name = "LED_DATA_3V3", level = "SUGGESTED">
-    level_shifter.hv_signal.has_net_name_suggestion<name = "LED_DATA_5V", level = "SUGGESTED">
+    level_shifter.lv_signal.suggest_net_name = "LED_DATA_3V3"
+    level_shifter.hv_signal.suggest_net_name = "LED_DATA_5V"
 
-    digital_thermistor._power_3v3.has_net_name_suggestion<name = "THERMISTOR_POWER_3V3", level = "SUGGESTED">
-    digital_thermistor._power_5v.has_net_name_suggestion<name = "THERMISTOR_POWER_5V", level = "SUGGESTED">
-
-    cells[1]._power_5v.hv.has_net_name_suggestion<name = "cells[1]_5V_VCC", level = "SUGGESTED">
-    cells[1]._power_3v3.hv.has_net_name_suggestion<name = "cells[1]_3V3_VCC", level = "SUGGESTED">
-    cells[1]._power_3v3.lv.has_net_name_suggestion<name = "cells[1]_GND", level = "SUGGESTED">  # only cell 1 has a ground
-    cells[1]._iso_i2c.scl.has_net_name_suggestion<name = "cells[1]_I2C_SCL", level = "SUGGESTED">
-    cells[1]._iso_i2c.sda.has_net_name_suggestion<name = "cells[1]_I2C_SDA", level = "SUGGESTED">
-    cells[1].buck.enable.has_net_name_suggestion<name = "cells[1]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[1].ldo.enable.has_net_name_suggestion<name = "cells[1]_LDO_ENABLE", level = "SUGGESTED">
-    cells[1].load_switch.control.has_net_name_suggestion<name = "cells[1]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[1].output_relay.input.has_net_name_suggestion<name = "cells[1]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[1].dmm_relay.input.has_net_name_suggestion<name = "cells[1]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[1].current_sense.output.has_net_name_suggestion<name = "cells[1]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[1].filter.power_out.hv.has_net_name_suggestion<name = "cells[1]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[1].buck.power_out.hv.has_net_name_suggestion<name = "cells[1]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[1].ldo.power_out.hv.has_net_name_suggestion<name = "cells[1]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[1].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[1]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[2]._power_5v.hv.has_net_name_suggestion<name = "cells[2]_5V_VCC", level = "SUGGESTED">
-    cells[2]._power_3v3.hv.has_net_name_suggestion<name = "cells[2]_3V3_VCC", level = "SUGGESTED">
-    cells[2]._iso_i2c.scl.has_net_name_suggestion<name = "cells[2]_I2C_SCL", level = "SUGGESTED">
-    cells[2]._iso_i2c.sda.has_net_name_suggestion<name = "cells[2]_I2C_SDA", level = "SUGGESTED">
-    cells[2].buck.enable.has_net_name_suggestion<name = "cells[2]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[2].ldo.enable.has_net_name_suggestion<name = "cells[2]_LDO_ENABLE", level = "SUGGESTED">
-    cells[2].load_switch.control.has_net_name_suggestion<name = "cells[2]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[2].output_relay.input.has_net_name_suggestion<name = "cells[2]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[2].dmm_relay.input.has_net_name_suggestion<name = "cells[2]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[2].current_sense.output.has_net_name_suggestion<name = "cells[2]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[2].filter.power_out.hv.has_net_name_suggestion<name = "cells[2]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[2].buck.power_out.hv.has_net_name_suggestion<name = "cells[2]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[2].ldo.power_out.hv.has_net_name_suggestion<name = "cells[2]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[2].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[2]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[3]._power_5v.hv.has_net_name_suggestion<name = "cells[3]_5V_VCC", level = "SUGGESTED">
-    cells[3]._power_3v3.hv.has_net_name_suggestion<name = "cells[3]_3V3_VCC", level = "SUGGESTED">
-    cells[3]._iso_i2c.scl.has_net_name_suggestion<name = "cells[3]_I2C_SCL", level = "SUGGESTED">
-    cells[3]._iso_i2c.sda.has_net_name_suggestion<name = "cells[3]_I2C_SDA", level = "SUGGESTED">
-    cells[3].buck.enable.has_net_name_suggestion<name = "cells[3]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[3].ldo.enable.has_net_name_suggestion<name = "cells[3]_LDO_ENABLE", level = "SUGGESTED">
-    cells[3].load_switch.control.has_net_name_suggestion<name = "cells[3]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[3].output_relay.input.has_net_name_suggestion<name = "cells[3]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[3].dmm_relay.input.has_net_name_suggestion<name = "cells[3]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[3].current_sense.output.has_net_name_suggestion<name = "cells[3]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[3].filter.power_out.hv.has_net_name_suggestion<name = "cells[3]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[3].buck.power_out.hv.has_net_name_suggestion<name = "cells[3]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[3].ldo.power_out.hv.has_net_name_suggestion<name = "cells[3]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[3].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[3]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[4]._power_5v.hv.has_net_name_suggestion<name = "cells[4]_5V_VCC", level = "SUGGESTED">
-    cells[4]._power_3v3.hv.has_net_name_suggestion<name = "cells[4]_3V3_VCC", level = "SUGGESTED">
-    cells[4]._iso_i2c.scl.has_net_name_suggestion<name = "cells[4]_I2C_SCL", level = "SUGGESTED">
-    cells[4]._iso_i2c.sda.has_net_name_suggestion<name = "cells[4]_I2C_SDA", level = "SUGGESTED">
-    cells[4].buck.enable.has_net_name_suggestion<name = "cells[4]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[4].ldo.enable.has_net_name_suggestion<name = "cells[4]_LDO_ENABLE", level = "SUGGESTED">
-    cells[4].load_switch.control.has_net_name_suggestion<name = "cells[4]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[4].output_relay.input.has_net_name_suggestion<name = "cells[4]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[4].dmm_relay.input.has_net_name_suggestion<name = "cells[4]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[4].current_sense.output.has_net_name_suggestion<name = "cells[4]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[4].filter.power_out.hv.has_net_name_suggestion<name = "cells[4]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[4].buck.power_out.hv.has_net_name_suggestion<name = "cells[4]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[4].ldo.power_out.hv.has_net_name_suggestion<name = "cells[4]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[4].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[4]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[5]._power_5v.hv.has_net_name_suggestion<name = "cells[5]_5V_VCC", level = "SUGGESTED">
-    cells[5]._power_3v3.hv.has_net_name_suggestion<name = "cells[5]_3V3_VCC", level = "SUGGESTED">
-    cells[5]._iso_i2c.scl.has_net_name_suggestion<name = "cells[5]_I2C_SCL", level = "SUGGESTED">
-    cells[5]._iso_i2c.sda.has_net_name_suggestion<name = "cells[5]_I2C_SDA", level = "SUGGESTED">
-    cells[5].buck.enable.has_net_name_suggestion<name = "cells[5]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[5].ldo.enable.has_net_name_suggestion<name = "cells[5]_LDO_ENABLE", level = "SUGGESTED">
-    cells[5].load_switch.control.has_net_name_suggestion<name = "cells[5]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[5].output_relay.input.has_net_name_suggestion<name = "cells[5]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[5].dmm_relay.input.has_net_name_suggestion<name = "cells[5]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[5].current_sense.output.has_net_name_suggestion<name = "cells[5]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[5].filter.power_out.hv.has_net_name_suggestion<name = "cells[5]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[5].buck.power_out.hv.has_net_name_suggestion<name = "cells[5]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[5].ldo.power_out.hv.has_net_name_suggestion<name = "cells[5]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[5].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[5]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[6]._power_5v.hv.has_net_name_suggestion<name = "cells[6]_5V_VCC", level = "SUGGESTED">
-    cells[6]._power_3v3.hv.has_net_name_suggestion<name = "cells[6]_3V3_VCC", level = "SUGGESTED">
-    cells[6]._iso_i2c.scl.has_net_name_suggestion<name = "cells[6]_I2C_SCL", level = "SUGGESTED">
-    cells[6]._iso_i2c.sda.has_net_name_suggestion<name = "cells[6]_I2C_SDA", level = "SUGGESTED">
-    cells[6].buck.enable.has_net_name_suggestion<name = "cells[6]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[6].ldo.enable.has_net_name_suggestion<name = "cells[6]_LDO_ENABLE", level = "SUGGESTED">
-    cells[6].load_switch.control.has_net_name_suggestion<name = "cells[6]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[6].output_relay.input.has_net_name_suggestion<name = "cells[6]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[6].dmm_relay.input.has_net_name_suggestion<name = "cells[6]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[6].current_sense.output.has_net_name_suggestion<name = "cells[6]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[6].filter.power_out.hv.has_net_name_suggestion<name = "cells[6]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[6].buck.power_out.hv.has_net_name_suggestion<name = "cells[6]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[6].ldo.power_out.hv.has_net_name_suggestion<name = "cells[6]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[6].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[6]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[7]._power_5v.hv.has_net_name_suggestion<name = "cells[7]_5V_VCC", level = "SUGGESTED">
-    cells[7]._power_3v3.hv.has_net_name_suggestion<name = "cells[7]_3V3_VCC", level = "SUGGESTED">
-    cells[7]._iso_i2c.scl.has_net_name_suggestion<name = "cells[7]_I2C_SCL", level = "SUGGESTED">
-    cells[7]._iso_i2c.sda.has_net_name_suggestion<name = "cells[7]_I2C_SDA", level = "SUGGESTED">
-    cells[7].buck.enable.has_net_name_suggestion<name = "cells[7]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[7].ldo.enable.has_net_name_suggestion<name = "cells[7]_LDO_ENABLE", level = "SUGGESTED">
-    cells[7].load_switch.control.has_net_name_suggestion<name = "cells[7]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[7].output_relay.input.has_net_name_suggestion<name = "cells[7]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[7].dmm_relay.input.has_net_name_suggestion<name = "cells[7]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[7].current_sense.output.has_net_name_suggestion<name = "cells[7]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[7].filter.power_out.hv.has_net_name_suggestion<name = "cells[7]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[7].buck.power_out.hv.has_net_name_suggestion<name = "cells[7]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[7].ldo.power_out.hv.has_net_name_suggestion<name = "cells[7]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[7].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[7]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[8]._power_5v.hv.has_net_name_suggestion<name = "cells[8]_5V_VCC", level = "SUGGESTED">
-    cells[8]._power_3v3.hv.has_net_name_suggestion<name = "cells[8]_3V3_VCC", level = "SUGGESTED">
-    cells[8]._iso_i2c.scl.has_net_name_suggestion<name = "cells[8]_I2C_SCL", level = "SUGGESTED">
-    cells[8]._iso_i2c.sda.has_net_name_suggestion<name = "cells[8]_I2C_SDA", level = "SUGGESTED">
-    cells[8].buck.enable.has_net_name_suggestion<name = "cells[8]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[8].ldo.enable.has_net_name_suggestion<name = "cells[8]_LDO_ENABLE", level = "SUGGESTED">
-    cells[8].load_switch.control.has_net_name_suggestion<name = "cells[8]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[8].output_relay.input.has_net_name_suggestion<name = "cells[8]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[8].dmm_relay.input.has_net_name_suggestion<name = "cells[8]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[8].current_sense.output.has_net_name_suggestion<name = "cells[8]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[8].filter.power_out.hv.has_net_name_suggestion<name = "cells[8]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[8].buck.power_out.hv.has_net_name_suggestion<name = "cells[8]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[8].ldo.power_out.hv.has_net_name_suggestion<name = "cells[8]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[8].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[8]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[9]._power_5v.hv.has_net_name_suggestion<name = "cells[9]_5V_VCC", level = "SUGGESTED">
-    cells[9]._power_3v3.hv.has_net_name_suggestion<name = "cells[9]_3V3_VCC", level = "SUGGESTED">
-    cells[9]._iso_i2c.scl.has_net_name_suggestion<name = "cells[9]_I2C_SCL", level = "SUGGESTED">
-    cells[9]._iso_i2c.sda.has_net_name_suggestion<name = "cells[9]_I2C_SDA", level = "SUGGESTED">
-    cells[9].buck.enable.has_net_name_suggestion<name = "cells[9]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[9].ldo.enable.has_net_name_suggestion<name = "cells[9]_LDO_ENABLE", level = "SUGGESTED">
-    cells[9].load_switch.control.has_net_name_suggestion<name = "cells[9]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[9].output_relay.input.has_net_name_suggestion<name = "cells[9]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[9].dmm_relay.input.has_net_name_suggestion<name = "cells[9]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[9].current_sense.output.has_net_name_suggestion<name = "cells[9]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[9].filter.power_out.hv.has_net_name_suggestion<name = "cells[9]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[9].buck.power_out.hv.has_net_name_suggestion<name = "cells[9]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[9].ldo.power_out.hv.has_net_name_suggestion<name = "cells[9]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[9].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[9]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[10]._power_5v.hv.has_net_name_suggestion<name = "cells[10]_5V_VCC", level = "SUGGESTED">
-    cells[10]._power_3v3.hv.has_net_name_suggestion<name = "cells[10]_3V3_VCC", level = "SUGGESTED">
-    cells[10]._iso_i2c.scl.has_net_name_suggestion<name = "cells[10]_I2C_SCL", level = "SUGGESTED">
-    cells[10]._iso_i2c.sda.has_net_name_suggestion<name = "cells[10]_I2C_SDA", level = "SUGGESTED">
-    cells[10].buck.enable.has_net_name_suggestion<name = "cells[10]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[10].ldo.enable.has_net_name_suggestion<name = "cells[10]_LDO_ENABLE", level = "SUGGESTED">
-    cells[10].load_switch.control.has_net_name_suggestion<name = "cells[10]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[10].output_relay.input.has_net_name_suggestion<name = "cells[10]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[10].dmm_relay.input.has_net_name_suggestion<name = "cells[10]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[10].current_sense.output.has_net_name_suggestion<name = "cells[10]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[10].filter.power_out.hv.has_net_name_suggestion<name = "cells[10]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[10].buck.power_out.hv.has_net_name_suggestion<name = "cells[10]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[10].ldo.power_out.hv.has_net_name_suggestion<name = "cells[10]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[10].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[10]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[11]._power_5v.hv.has_net_name_suggestion<name = "cells[11]_5V_VCC", level = "SUGGESTED">
-    cells[11]._power_3v3.hv.has_net_name_suggestion<name = "cells[11]_3V3_VCC", level = "SUGGESTED">
-    cells[11]._iso_i2c.scl.has_net_name_suggestion<name = "cells[11]_I2C_SCL", level = "SUGGESTED">
-    cells[11]._iso_i2c.sda.has_net_name_suggestion<name = "cells[11]_I2C_SDA", level = "SUGGESTED">
-    cells[11].buck.enable.has_net_name_suggestion<name = "cells[11]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[11].ldo.enable.has_net_name_suggestion<name = "cells[11]_LDO_ENABLE", level = "SUGGESTED">
-    cells[11].load_switch.control.has_net_name_suggestion<name = "cells[11]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[11].output_relay.input.has_net_name_suggestion<name = "cells[11]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[11].dmm_relay.input.has_net_name_suggestion<name = "cells[11]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[11].current_sense.output.has_net_name_suggestion<name = "cells[11]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[11].filter.power_out.hv.has_net_name_suggestion<name = "cells[11]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[11].buck.power_out.hv.has_net_name_suggestion<name = "cells[11]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[11].ldo.power_out.hv.has_net_name_suggestion<name = "cells[11]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[11].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[11]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[12]._power_5v.hv.has_net_name_suggestion<name = "cells[12]_5V_VCC", level = "SUGGESTED">
-    cells[12]._power_3v3.hv.has_net_name_suggestion<name = "cells[12]_3V3_VCC", level = "SUGGESTED">
-    cells[12]._iso_i2c.scl.has_net_name_suggestion<name = "cells[12]_I2C_SCL", level = "SUGGESTED">
-    cells[12]._iso_i2c.sda.has_net_name_suggestion<name = "cells[12]_I2C_SDA", level = "SUGGESTED">
-    cells[12].buck.enable.has_net_name_suggestion<name = "cells[12]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[12].ldo.enable.has_net_name_suggestion<name = "cells[12]_LDO_ENABLE", level = "SUGGESTED">
-    cells[12].load_switch.control.has_net_name_suggestion<name = "cells[12]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[12].output_relay.input.has_net_name_suggestion<name = "cells[12]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[12].dmm_relay.input.has_net_name_suggestion<name = "cells[12]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[12].current_sense.output.has_net_name_suggestion<name = "cells[12]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[12].filter.power_out.hv.has_net_name_suggestion<name = "cells[12]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[12].buck.power_out.hv.has_net_name_suggestion<name = "cells[12]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[12].ldo.power_out.hv.has_net_name_suggestion<name = "cells[12]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[12].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[12]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[13]._power_5v.hv.has_net_name_suggestion<name = "cells[13]_5V_VCC", level = "SUGGESTED">
-    cells[13]._power_3v3.hv.has_net_name_suggestion<name = "cells[13]_3V3_VCC", level = "SUGGESTED">
-    cells[13]._iso_i2c.scl.has_net_name_suggestion<name = "cells[13]_I2C_SCL", level = "SUGGESTED">
-    cells[13]._iso_i2c.sda.has_net_name_suggestion<name = "cells[13]_I2C_SDA", level = "SUGGESTED">
-    cells[13].buck.enable.has_net_name_suggestion<name = "cells[13]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[13].ldo.enable.has_net_name_suggestion<name = "cells[13]_LDO_ENABLE", level = "SUGGESTED">
-    cells[13].load_switch.control.has_net_name_suggestion<name = "cells[13]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[13].output_relay.input.has_net_name_suggestion<name = "cells[13]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[13].dmm_relay.input.has_net_name_suggestion<name = "cells[13]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[13].current_sense.output.has_net_name_suggestion<name = "cells[13]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[13].filter.power_out.hv.has_net_name_suggestion<name = "cells[13]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[13].buck.power_out.hv.has_net_name_suggestion<name = "cells[13]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[13].ldo.power_out.hv.has_net_name_suggestion<name = "cells[13]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[13].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[13]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[14]._power_5v.hv.has_net_name_suggestion<name = "cells[14]_5V_VCC", level = "SUGGESTED">
-    cells[14]._power_3v3.hv.has_net_name_suggestion<name = "cells[14]_3V3_VCC", level = "SUGGESTED">
-    cells[14]._iso_i2c.scl.has_net_name_suggestion<name = "cells[14]_I2C_SCL", level = "SUGGESTED">
-    cells[14]._iso_i2c.sda.has_net_name_suggestion<name = "cells[14]_I2C_SDA", level = "SUGGESTED">
-    cells[14].buck.enable.has_net_name_suggestion<name = "cells[14]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[14].ldo.enable.has_net_name_suggestion<name = "cells[14]_LDO_ENABLE", level = "SUGGESTED">
-    cells[14].load_switch.control.has_net_name_suggestion<name = "cells[14]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[14].output_relay.input.has_net_name_suggestion<name = "cells[14]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[14].dmm_relay.input.has_net_name_suggestion<name = "cells[14]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[14].current_sense.output.has_net_name_suggestion<name = "cells[14]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[14].filter.power_out.hv.has_net_name_suggestion<name = "cells[14]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[14].buck.power_out.hv.has_net_name_suggestion<name = "cells[14]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[14].ldo.power_out.hv.has_net_name_suggestion<name = "cells[14]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[14].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[14]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[15]._power_5v.hv.has_net_name_suggestion<name = "cells[15]_5V_VCC", level = "SUGGESTED">
-    cells[15]._power_3v3.hv.has_net_name_suggestion<name = "cells[15]_3V3_VCC", level = "SUGGESTED">
-    cells[15]._iso_i2c.scl.has_net_name_suggestion<name = "cells[15]_I2C_SCL", level = "SUGGESTED">
-    cells[15]._iso_i2c.sda.has_net_name_suggestion<name = "cells[15]_I2C_SDA", level = "SUGGESTED">
-    cells[15].buck.enable.has_net_name_suggestion<name = "cells[15]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[15].ldo.enable.has_net_name_suggestion<name = "cells[15]_LDO_ENABLE", level = "SUGGESTED">
-    cells[15].load_switch.control.has_net_name_suggestion<name = "cells[15]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[15].output_relay.input.has_net_name_suggestion<name = "cells[15]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[15].dmm_relay.input.has_net_name_suggestion<name = "cells[15]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[15].current_sense.output.has_net_name_suggestion<name = "cells[15]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[15].filter.power_out.hv.has_net_name_suggestion<name = "cells[15]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[15].buck.power_out.hv.has_net_name_suggestion<name = "cells[15]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[15].ldo.power_out.hv.has_net_name_suggestion<name = "cells[15]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[15].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[15]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
-
-    cells[16]._power_5v.hv.has_net_name_suggestion<name = "cells[16]_5V_VCC", level = "SUGGESTED">
-    cells[16]._power_3v3.hv.has_net_name_suggestion<name = "cells[16]_3V3_VCC", level = "SUGGESTED">
-    cells[16]._iso_i2c.scl.has_net_name_suggestion<name = "cells[16]_I2C_SCL", level = "SUGGESTED">
-    cells[16]._iso_i2c.sda.has_net_name_suggestion<name = "cells[16]_I2C_SDA", level = "SUGGESTED">
-    cells[16].buck.enable.has_net_name_suggestion<name = "cells[16]_BUCK_ENABLE", level = "SUGGESTED">
-    cells[16].ldo.enable.has_net_name_suggestion<name = "cells[16]_LDO_ENABLE", level = "SUGGESTED">
-    cells[16].load_switch.control.has_net_name_suggestion<name = "cells[16]_LOAD_SWITCH_CONTROL", level = "SUGGESTED">
-    cells[16].output_relay.input.has_net_name_suggestion<name = "cells[16]_OUTPUT_RELAY_CONTROL", level = "SUGGESTED">
-    cells[16].dmm_relay.input.has_net_name_suggestion<name = "cells[16]_DMM_RELAY_CONTROL", level = "SUGGESTED">
-    cells[16].current_sense.output.has_net_name_suggestion<name = "cells[16]_CURRENT_SENSE_OUTPUT", level = "SUGGESTED">
-    cells[16].filter.power_out.hv.has_net_name_suggestion<name = "cells[16]_FILTER_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[16].buck.power_out.hv.has_net_name_suggestion<name = "cells[16]_BUCK_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[16].ldo.power_out.hv.has_net_name_suggestion<name = "cells[16]_LDO_POWER_OUT_VCC", level = "SUGGESTED">
-    cells[16].current_sense.power_out.hv.has_net_name_suggestion<name = "cells[16]_CURRENT_SENSE_POWER_OUT_VCC", level = "SUGGESTED">
+    digital_thermistor._power_3v3.suggest_net_name = "THERMISTOR_POWER_3V3"
+    digital_thermistor._power_5v.suggest_net_name = "THERMISTOR_POWER_5V"
