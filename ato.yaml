@@ -5,57 +5,79 @@ builds:
     entry: elec/src/cell-sim.ato:CellSim
   cell:
     entry: elec/src/modules/cell.ato:Cell
-
 dependencies:
-  - type: registry
-    identifier: atopile/buttons
-  - type: registry
-    identifier: atopile/saleae-header
-  - type: registry
-    identifier: atopile/indicator-leds
-  - type: registry
-    identifier: atopile/xt-connectors
-  - type: registry
-    identifier: atopile/espressif-esp32-s3
-  - type: registry
-    identifier: atopile/usb-connectors
-  - type: registry
-    identifier: atopile/wiznet-w5500
-  - type: registry
-    identifier: atopile/opsco-sk6805-ec20
-  - type: registry
-    identifier: atopile/ti-iso1640x
-  - type: registry
-    identifier: atopile/microchip-mcp4725
-  - type: registry
-    identifier: atopile/ti-ads1115
-  - type: registry
-    identifier: atopile/microchip-mcp4728
-  - type: registry
-    identifier: atopile/ylptech-byyxx
-  - type: registry
-    identifier: atopile/banana-plugs
-  - type: registry
-    identifier: atopile/ti-cd74hc4067sm
-  - type: registry
-    identifier: atopile/ti-ina185a1
-  - type: registry
-    identifier: atopile/sparkfun-qwiic
-  - type: registry
-    identifier: atopile/ti-tca9548a
-  - type: registry
-    identifier: atopile/diodes-inc-74lvc1t45dw-7
-  - type: registry
-    identifier: atopile/programming-headers
-    # - type: registry
-    #   identifier: atopile/ti-lv2842x
-  - type: registry
-    identifier: atopile/ti-tca6408
-  #   identifier: atopile/relays
-  # - type: registry
-  - type: registry
-    identifier: atopile/st-ldk220
-  - type: registry
-    identifier: atopile/ti-tlv75901
-  - type: registry
-    identifier: atopile/ti-tps563201
+- type: registry
+  identifier: atopile/saleae-header
+  release: 0.3.0
+- type: registry
+  identifier: atopile/indicator-leds
+  release: 0.2.3
+- type: registry
+  identifier: atopile/xt-connectors
+  release: 0.2.1
+- type: registry
+  identifier: atopile/espressif-esp32-s3
+  release: 0.2.1
+- type: registry
+  identifier: atopile/usb-connectors
+  release: 0.4.1
+- type: registry
+  identifier: atopile/wiznet-w5500
+  release: 0.1.0
+- type: registry
+  identifier: atopile/opsco-sk6805-ec20
+  release: 0.4.0
+- type: registry
+  identifier: atopile/ti-iso1640x
+  release: 0.3.0
+- type: registry
+  identifier: atopile/microchip-mcp4725
+  release: 0.2.0
+- type: registry
+  identifier: atopile/ti-ads1115
+  release: 0.2.0
+- type: registry
+  identifier: atopile/microchip-mcp4728
+  release: 0.2.0
+- type: registry
+  identifier: atopile/ylptech-byyxx
+  release: 0.2.0
+- type: registry
+  identifier: atopile/banana-plugs
+  release: 0.1.1
+- type: registry
+  identifier: atopile/ti-cd74hc4067sm
+  release: 0.1.0
+- type: registry
+  identifier: atopile/ti-ina185a1
+  release: 0.1.0
+- type: registry
+  identifier: atopile/sparkfun-qwiic
+  release: 0.2.0
+- type: registry
+  identifier: atopile/ti-tca9548a
+  release: 0.2.0
+- type: registry
+  identifier: atopile/diodes-inc-74lvc1t45dw-7
+  release: 0.2.0
+- type: registry
+  identifier: atopile/programming-headers
+  release: 0.2.0
+- type: registry
+  identifier: atopile/ti-lv2842x
+  release: 0.2.3
+- type: registry
+  identifier: atopile/ti-tca6408
+  release: 0.2.0
+- type: registry
+  identifier: atopile/relays
+  release: 0.2.0
+- type: registry
+  identifier: atopile/st-ldk220
+  release: 0.2.3
+- type: registry
+  identifier: atopile/ti-tlv75901
+  release: 0.4.0
+- type: registry
+  identifier: atopile/ti-tps563201
+  release: 0.1.9

@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component TOSHIBA_CUS10S30_H3F_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C146335", date="2026-01-21T23:10:54.121348+00:00", checksum="598c5cfc261ca6fb0590d8f3951044c587b1ecce6cfa8159702377643191ca94">
+
+    trait is_atomic_part<manufacturer="TOSHIBA", partnumber="CUS10S30,H3F", footprint="SOD-323_L1.8-W1.3-LS2.5-RD.kicad_mod", symbol="CUS10S30,H3F.kicad_sym", model="2.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C146335", manufacturer="TOSHIBA", partno="CUS10S30,H3F">
+    trait has_designator_prefix<prefix="D">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_1810181811_TOSHIBA-CUS10S30-H3F_C146335.pdf">
+
+    # pins
+    signal A ~ pin 2
+    signal K ~ pin 1
