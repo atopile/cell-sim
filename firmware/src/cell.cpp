@@ -207,6 +207,42 @@ void Cell::calibrate()
     }
 }
 
+void Cell::prepareCalibration()
+{
+    // Ensure mux channel selected and outputs enabled for stable readings
+    setMuxChannel();
+    enable();
+    turnOnOutputRelay();
+}
+
+void Cell::setBuckDacRaw(uint16_t setpoint)
+{
+    setMuxChannel();
+    buck_dac.setVoltage(setpoint, false);
+}
+
+void Cell::setLdoDacRaw(uint16_t setpoint)
+{
+    setMuxChannel();
+    ldo_dac.setVoltage(setpoint, false);
+}
+
+void Cell::setBuckCalibrationPoint(int index, float measuredVoltage, uint16_t setpoint)
+{
+    if (index >= 0 && index < NUM_POINTS)
+    {
+        BUCK_SETPOINTS[index] = {measuredVoltage, static_cast<float>(setpoint)};
+    }
+}
+
+void Cell::setLdoCalibrationPoint(int index, float measuredVoltage, uint16_t setpoint)
+{
+    if (index >= 0 && index < NUM_POINTS)
+    {
+        LDO_SETPOINTS[index] = {measuredVoltage, static_cast<float>(setpoint)};
+    }
+}
+
 uint16_t Cell::calculateSetpoint(float voltage, bool useBuckCalibration)
 {
     // Use the appropriate calibration array; each element is {measured voltage, DAC setpoint}

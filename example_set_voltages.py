@@ -68,8 +68,8 @@ def main():
     cellsim = CellSim(port)
 
     # Test setting all voltages at once
-    print("Setting all voltages to 3.5V...")
-    cellsim.setAllVoltages(3.5)
+    print("Setting all voltages to 2V...")
+    cellsim.setAllVoltages(2)
     time.sleep(1)
 
     voltages = cellsim.getAllVoltages()
