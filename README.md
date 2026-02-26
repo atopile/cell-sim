@@ -39,6 +39,7 @@ You should see something like this:
 ## Manufacturing
 Board is intended to be manufactured with JLC, files are in the main directory of the repository.
 Note, the highlighted isolated regulator needs to be depopulated:
+
 <img width="758" height="372" alt="Screenshot 2026-02-26 at 3 23 36 PM" src="https://github.com/user-attachments/assets/a89a9241-7d18-4d6f-adbc-bf89ab977e0b" />
 
 
