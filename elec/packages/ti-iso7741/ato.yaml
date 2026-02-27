@@ -1,0 +1,13 @@
+requires-atopile: "^0.9.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: ti-iso7741.ato:TI_ISO7741
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []

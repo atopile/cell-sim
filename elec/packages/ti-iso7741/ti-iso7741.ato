@@ -1,0 +1,117 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# TI ISO7741 — 4-Channel Digital Isolator (3 forward + 1 reverse)
+# ===============================================================
+# 100 Mbps per channel, 5 kV reinforced isolation
+# Channel mapping for SPI:
+#   A (forward): SCLK  — INA (pin 3, side 1) -> OUTA (pin 14, side 2)
+#   B (forward): MOSI  — INB (pin 4, side 1) -> OUTB (pin 13, side 2)
+#   C (forward): CS    — INC (pin 5, side 1) -> OUTC (pin 12, side 2)
+#   D (reverse): MISO  — IND (pin 11, side 2) -> OUTD (pin 6, side 1)
+#
+# Supply: 2.25V to 5.5V per side (independent, galvanically isolated)
+# EN1/EN2: active-high enables, tied to VCC via pull-ups for always-on
+
+import SPI
+import ElectricPower
+import ElectricLogic
+import Resistor
+import Capacitor
+
+from "parts/Texas_Instruments_ISO7741DWR/Texas_Instruments_ISO7741DWR.ato" import Texas_Instruments_ISO7741DWR_package
+
+module TI_ISO7741:
+    """
+    TI ISO7741 4-channel digital isolator driver for SPI isolation.
+
+    External interfaces:
+    - power_side1: Side 1 power supply (MCU side, 2.25V to 5.5V)
+    - power_side2: Side 2 power supply (isolated side, 2.25V to 5.5V)
+    - spi_side1: SPI bus on side 1 (MCU side — SCLK/MOSI out, MISO in)
+    - spi_side2: SPI bus on side 2 (isolated side — SCLK/MOSI in, MISO out)
+    - cs_side1: Chip select input on side 1 (MCU drives)
+    - cs_side2: Chip select output on side 2 (to isolated device)
+    """
+
+    # --- IC instance ---
+    ic = new Texas_Instruments_ISO7741DWR_package
+
+    # --- Power interfaces (galvanically isolated) ---
+    power_side1 = new ElectricPower
+    power_side2 = new ElectricPower
+
+    power_side1.required = True
+    power_side2.required = True
+
+    # Power connections
+    power_side1.hv ~ ic.VCC1
+    power_side1.lv ~ ic.GND1
+    power_side2.hv ~ ic.VCC2
+    power_side2.lv ~ ic.GND2
+
+    # Power supply voltage assertions
+    assert power_side1.voltage within 2.25V to 5.5V
+    assert power_side2.voltage within 2.25V to 5.5V
+
+    # --- SPI interfaces ---
+    spi_side1 = new SPI
+    spi_side2 = new SPI
+
+    # Chip select (separate from SPI interface)
+    cs_side1 = new ElectricLogic
+    cs_side2 = new ElectricLogic
+
+    # --- Channel A (forward): SCLK ---
+    # Side 1 SCLK input -> Side 2 SCLK output
+    spi_side1.sclk.line ~ ic.INA
+    spi_side2.sclk.line ~ ic.OUTA
+
+    # --- Channel B (forward): MOSI ---
+    # Side 1 MOSI input -> Side 2 MOSI output
+    spi_side1.mosi.line ~ ic.INB
+    spi_side2.mosi.line ~ ic.OUTB
+
+    # --- Channel C (forward): CS ---
+    # Side 1 CS input -> Side 2 CS output
+    cs_side1.line ~ ic.INC
+    cs_side2.line ~ ic.OUTC
+
+    # --- Channel D (reverse): MISO ---
+    # Side 2 MISO input -> Side 1 MISO output
+    spi_side2.miso.line ~ ic.IND
+    spi_side1.miso.line ~ ic.OUTD
+
+    # --- Logic level references ---
+    spi_side1.sclk.reference ~ power_side1
+    spi_side1.mosi.reference ~ power_side1
+    spi_side1.miso.reference ~ power_side1
+    cs_side1.reference ~ power_side1
+
+    spi_side2.sclk.reference ~ power_side2
+    spi_side2.mosi.reference ~ power_side2
+    spi_side2.miso.reference ~ power_side2
+    cs_side2.reference ~ power_side2
+
+    # --- Enable pull-up resistors (active-high, always enabled) ---
+    r_en1 = new Resistor
+    r_en1.resistance = 10kohm +/- 5%
+    r_en1.package = "0402"
+
+    r_en2 = new Resistor
+    r_en2.resistance = 10kohm +/- 5%
+    r_en2.package = "0402"
+
+    power_side1.hv ~> r_en1 ~> ic.EN1
+    power_side2.hv ~> r_en2 ~> ic.EN2
+
+    # --- Decoupling capacitors (100nF per side, per datasheet) ---
+    decap_side1 = new Capacitor
+    decap_side1.capacitance = 100nF +/- 20%
+    decap_side1.package = "0402"
+
+    decap_side2 = new Capacitor
+    decap_side2.capacitance = 100nF +/- 20%
+    decap_side2.package = "0402"
+
+    power_side1.hv ~> decap_side1 ~> power_side1.lv
+    power_side2.hv ~> decap_side2 ~> power_side2.lv

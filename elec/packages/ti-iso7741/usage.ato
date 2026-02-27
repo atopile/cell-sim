@@ -1,0 +1,43 @@
+# Usage example: MCU SPI -> ISO7741 -> Isolated ADC
+
+import SPI
+import ElectricPower
+import ElectricLogic
+
+from "ti-iso7741.ato" import TI_ISO7741
+
+module Usage:
+    """
+    Example: Isolated SPI bus between MCU and ADC.
+    MCU on side 1 (3.3V), isolated ADC on side 2 (3.3V).
+    """
+
+    # --- Power rails ---
+    power_mcu = new ElectricPower
+    power_iso = new ElectricPower
+
+    assert power_mcu.voltage within 3.3V +/- 5%
+    assert power_iso.voltage within 3.3V +/- 5%
+
+    # --- Isolator ---
+    isolator = new TI_ISO7741
+
+    # Power connections
+    power_mcu ~ isolator.power_side1
+    power_iso ~ isolator.power_side2
+
+    # --- MCU-side SPI bus ---
+    spi_mcu = new SPI
+    spi_mcu ~ isolator.spi_side1
+
+    # MCU chip select output
+    cs_mcu = new ElectricLogic
+    cs_mcu ~ isolator.cs_side1
+
+    # --- Isolated-side SPI bus (to ADC) ---
+    spi_adc = new SPI
+    spi_adc ~ isolator.spi_side2
+
+    # Isolated chip select (to ADC)
+    cs_adc = new ElectricLogic
+    cs_adc ~ isolator.cs_side2
