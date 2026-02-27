@@ -1,0 +1,25 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_TPSM84209RKHR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2878926", date="2026-02-27T21:01:10.140024+00:00", checksum="85c4e6b742fe5908fd4df744fa6b6e05e070fb6deb6a3aa663de95ddd31e7e95">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="TPSM84209RKHR", footprint="QFN-9_L4.5-W4.0_TPSM84209RKHR.kicad_mod", symbol="TPSM84209RKHR.kicad_sym">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2878926", manufacturer="Texas Instruments", partno="TPSM84209RKHR">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal DNC ~ pin 6
+    DNC ~ pin 7
+    signal EN ~ pin 9
+    signal FB ~ pin 1
+    signal GND ~ pin 8
+    signal SW ~ pin 4
+    SW ~ pin 5
+    signal VIN ~ pin 2
+    signal VOUT ~ pin 3

@@ -1,0 +1,110 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+# TI TPSM84209 — 2.5A Synchronous Buck Module with Integrated Inductor
+# =====================================================================
+# D-CAP2 control mode, 4.5V to 28V input, 1.2V to 6V adjustable output.
+# Integrated inductor — no external inductor required.
+# Vref = 0.8V, output set by external feedback divider:
+#   Vout = Vref * (1 + R_top / R_bottom)
+#
+# Default configuration: 24V -> 5V at up to 2.5A
+#   R_top = 52.3kohm, R_bottom = 10kohm
+#   Vout = 0.8V * (1 + 52.3/10) = 0.8V * 6.23 = 4.984V ~ 5V
+#
+# EN pin: internal pulldown (default disabled), 100kohm pullup to VIN
+# DNC pins 6, 7: must be left unconnected (handled internally)
+
+import Resistor
+import Capacitor
+import ElectricPower
+import ElectricLogic
+
+from "parts/Texas_Instruments_TPSM84209RKHR/Texas_Instruments_TPSM84209RKHR.ato" import Texas_Instruments_TPSM84209RKHR_package
+
+module TI_TPSM84209:
+    """
+    TI TPSM84209 2.5A integrated buck module driver.
+
+    External interfaces:
+    - power_in: Input power supply (4.5V to 28V)
+    - power_out: Regulated output power (default 5V, adjustable via divider)
+    - enable: Active-high enable control (default: enabled via VIN pullup)
+
+    Default output: 5V (R_top=52.3k, R_bottom=10k feedback divider)
+    """
+
+    # --- IC instance ---
+    ic = new Texas_Instruments_TPSM84209RKHR_package
+
+    # --- Power interfaces ---
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+
+    power_in.required = True
+    power_out.required = True
+
+    # Voltage assertions
+    assert power_in.voltage within 4.5V to 28V
+    assert power_out.voltage within 1.2V to 6V
+
+    # --- Enable interface ---
+    enable = new ElectricLogic
+    enable.reference ~ power_in
+
+    # --- Power connections ---
+    power_in.hv ~ ic.VIN
+    power_in.lv ~ ic.GND
+    power_out.hv ~ ic.VOUT
+    power_out.lv ~ ic.GND
+
+    # --- Input decoupling capacitors ---
+    # Datasheet: 2x 10uF ceramic (0805) + 1x 100nF (0402)
+    cin_bulk = new Capacitor[2]
+    for cap in cin_bulk:
+        cap.capacitance = 10uF +/- 20%
+        cap.package = "0805"
+        power_in.hv ~> cap ~> power_in.lv
+
+    cin_hf = new Capacitor
+    cin_hf.capacitance = 100nF +/- 20%
+    cin_hf.package = "0402"
+    power_in.hv ~> cin_hf ~> power_in.lv
+
+    # --- Output decoupling capacitors ---
+    # Datasheet: 2x 22uF ceramic (0805) + 1x 100nF (0402)
+    cout_bulk = new Capacitor[2]
+    for cap in cout_bulk:
+        cap.capacitance = 22uF +/- 20%
+        cap.package = "0805"
+        power_out.hv ~> cap ~> power_out.lv
+
+    cout_hf = new Capacitor
+    cout_hf.capacitance = 100nF +/- 20%
+    cout_hf.package = "0402"
+    power_out.hv ~> cout_hf ~> power_out.lv
+
+    # --- Feedback voltage divider ---
+    # Vout = 0.8V * (1 + R_top / R_bottom)
+    # For 5V output: R_top = 52.3kohm, R_bottom = 10kohm
+    r_top = new Resistor
+    r_top.resistance = 52.3kohm +/- 1%
+    r_top.package = "0402"
+
+    r_bottom = new Resistor
+    r_bottom.resistance = 10kohm +/- 1%
+    r_bottom.package = "0402"
+
+    power_out.hv ~> r_top ~> ic.FB
+    ic.FB ~> r_bottom ~> power_out.lv
+
+    # --- Enable control ---
+    # EN has internal pulldown (disabled by default).
+    # 100kohm pullup to VIN enables the converter when no external control.
+    # External logic can override via the enable interface.
+    r_en = new Resistor
+    r_en.resistance = 100kohm +/- 5%
+    r_en.package = "0402"
+
+    power_in.hv ~> r_en ~> ic.EN
+    enable.line ~ ic.EN

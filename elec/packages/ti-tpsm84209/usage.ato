@@ -1,0 +1,26 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# TPSM84209 Usage Example — 24V to 5V Card-Level Power Conversion
+# ================================================================
+# Typical application: converting 24V backplane power to 5V for card logic.
+# The TPSM84209 provides up to 2.5A with integrated inductor.
+
+import ElectricPower
+from "ti-tpsm84209.ato" import TI_TPSM84209
+
+module Usage:
+    """
+    Example: 24V backplane input to 5V card-level rail using TPSM84209.
+    """
+
+    # Input rail from backplane (24V nominal)
+    power_24v = new ElectricPower
+    assert power_24v.voltage within 22V to 26V
+
+    # Output rail for card logic (5V regulated)
+    power_5v = new ElectricPower
+
+    # Buck converter
+    buck = new TI_TPSM84209
+    power_24v ~ buck.power_in
+    buck.power_out ~ power_5v
