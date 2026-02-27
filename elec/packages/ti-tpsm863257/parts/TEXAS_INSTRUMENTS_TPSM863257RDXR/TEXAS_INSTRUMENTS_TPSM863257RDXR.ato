@@ -1,0 +1,25 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component TEXAS_INSTRUMENTS_TPSM863257RDXR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C19190416", date="2026-02-27T21:00:23.049380+00:00", checksum="9ec60cf59f2d328571820bc13e237f571a0ef2964958ff98be85fef0d196f05d">
+
+    trait is_atomic_part<manufacturer="TEXAS INSTRUMENTS", partnumber="TPSM863257RDXR", footprint="QFN-7_L4.0-W3.3_TPSM863257RDXR.kicad_mod", symbol="TPSM863257RDXR.kicad_sym", model="QFN-7_L4.0-W3.3_TPSM863257RDXR.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C19190416", manufacturer="TEXAS INSTRUMENTS", partno="TPSM863257RDXR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2401121828_Texas-Instruments-TPSM863257RDXR_C19190416.pdf">
+
+    # pins
+    signal EN ~ pin 6
+    signal FB ~ pin 7
+    signal PG ~ pin 5
+    signal PGND ~ pin 4
+    signal SW ~ pin 2
+    signal VIN ~ pin 1
+    signal VOUT ~ pin 3

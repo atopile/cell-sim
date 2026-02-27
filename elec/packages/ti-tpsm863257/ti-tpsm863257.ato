@@ -1,0 +1,102 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+# TI TPSM863257 — 3A Synchronous Buck Module with Integrated Inductor
+# ====================================================================
+# D-CAP3 control mode, internally compensated, 1.2 MHz switching frequency.
+# Input: 3V to 17V, Output: 0.6V to 5.5V (set by feedback divider).
+# Integrated inductor — no external inductor needed.
+# Vref = 0.6V, Vout = Vref * (1 + R_top / R_bottom)
+# EN has internal pullup (always-on by default).
+# PG is open-drain, needs external pullup.
+
+from "parts/TEXAS_INSTRUMENTS_TPSM863257RDXR/TEXAS_INSTRUMENTS_TPSM863257RDXR.ato" import TEXAS_INSTRUMENTS_TPSM863257RDXR_package
+
+import Resistor
+import Capacitor
+import ElectricPower
+import ElectricLogic
+
+module TI_TPSM863257:
+    "3A synchronous buck module with integrated inductor. Default output ~5V."
+
+    # --- External Interfaces ---
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+    enable = new ElectricLogic
+    power_good = new ElectricLogic
+
+    # Input voltage assertion (3V to 17V per datasheet)
+    assert power_in.voltage within 3V to 17V
+
+    # Output voltage assertion (0.6V to 5.5V per datasheet)
+    assert power_out.voltage within 0.6V to 5.5V
+
+    # --- IC Instance ---
+    ic = new TEXAS_INSTRUMENTS_TPSM863257RDXR_package
+
+    # --- Power Connections ---
+    # Input power to VIN
+    power_in.hv ~ ic.VIN
+
+    # Output power from VOUT (integrated inductor output)
+    power_out.hv ~ ic.VOUT
+
+    # Ground connections
+    power_in.lv ~ ic.PGND
+    power_out.lv ~ ic.PGND
+
+    # --- Enable Pin ---
+    # EN has internal pullup; device is enabled by default.
+    # Drive low to disable.
+    enable.line ~ ic.EN
+    enable.reference ~ power_in
+
+    # --- Power Good Pin ---
+    # Open-drain output, active high when output is in regulation.
+    power_good.line ~ ic.PG
+    power_good.reference ~ power_out
+
+    # PG pullup resistor (100kohm to VOUT per datasheet recommendation)
+    r_pg_pullup = new Resistor
+    r_pg_pullup.resistance = 100kohm +/- 5%
+    r_pg_pullup.package = "0402"
+    power_out.hv ~> r_pg_pullup ~> ic.PG
+
+    # --- Feedback Divider ---
+    # Vout = Vref * (1 + R_top / R_bottom), Vref = 0.6V
+    # Default: 5V output -> R_top = 73.2kohm, R_bottom = 10kohm
+    #   Vout = 0.6 * (1 + 73.2/10) = 0.6 * 8.32 = 4.992V ~ 5V
+    # For 3.3V: R_top = 45.3kohm, R_bottom = 10kohm
+    r_top = new Resistor
+    r_top.resistance = 73.2kohm +/- 1%
+    r_top.package = "0402"
+
+    r_bottom = new Resistor
+    r_bottom.resistance = 10kohm +/- 1%
+    r_bottom.package = "0402"
+
+    # VOUT -> R_top -> FB -> R_bottom -> GND
+    power_out.hv ~> r_top ~> ic.FB
+    ic.FB ~> r_bottom ~> power_out.lv
+
+    # --- Input Capacitors ---
+    # 2x 10uF ceramic (0805) + 1x 100nF (0402) per datasheet
+    c_in_bulk = new Capacitor[2]
+    for cap in c_in_bulk:
+        cap.capacitance = 10uF +/- 20%
+        cap.package = "0805"
+        power_in.hv ~> cap ~> power_in.lv
+
+    c_in_decoup = new Capacitor
+    c_in_decoup.capacitance = 100nF +/- 20%
+    c_in_decoup.package = "0402"
+    power_in.hv ~> c_in_decoup ~> power_in.lv
+
+    # --- Output Capacitors ---
+    # 2x 22uF ceramic (0805) per datasheet recommendation
+    c_out = new Capacitor[2]
+    for cap in c_out:
+        cap.capacitance = 22uF +/- 20%
+        cap.package = "0805"
+        power_out.hv ~> cap ~> power_out.lv

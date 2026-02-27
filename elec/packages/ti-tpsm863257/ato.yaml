@@ -1,0 +1,13 @@
+requires-atopile: "^0.9.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: ti-tpsm863257.ato:TI_TPSM863257
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []

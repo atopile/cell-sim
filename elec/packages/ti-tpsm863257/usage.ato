@@ -1,0 +1,33 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# Usage Example: 24V to 5V Buck Converter
+# ========================================
+# TPSM863257 configured for 5V @ 3A output from a 24V input rail.
+# In the CellSim design this powers each cell's analog front-end.
+# A MCP4725 DAC modulates the feedback network to adjust Vout per-cell
+# (not shown here — connect DAC output to FB node via summing resistor).
+
+from "ti-tpsm863257.ato" import TI_TPSM863257
+
+import ElectricPower
+import ElectricLogic
+
+module Usage:
+    "Example: 24V to 5V cell power supply using TPSM863257"
+
+    # External interfaces
+    power_24v = new ElectricPower
+    power_5v = new ElectricPower
+    enable = new ElectricLogic
+    power_good = new ElectricLogic
+
+    # Buck converter instance (default 5V output)
+    buck = new TI_TPSM863257
+
+    # Connect power rails
+    power_24v ~ buck.power_in
+    power_5v ~ buck.power_out
+
+    # Connect control signals
+    enable ~ buck.enable
+    power_good ~ buck.power_good
