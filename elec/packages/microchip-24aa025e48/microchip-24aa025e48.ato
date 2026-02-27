@@ -1,0 +1,91 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+import Capacitor
+import ElectricPower
+import Electrical
+import I2C
+import Resistor
+
+from "parts/Microchip_Tech_24AA025E48T_I_OT/Microchip_Tech_24AA025E48T_I_OT.ato" import Microchip_Tech_24AA025E48T_I_OT_package
+
+module Microchip_24AA025E48:
+    """
+    Microchip 24AA025E48 2-Kbit I2C EEPROM with factory-programmed EUI-48.
+    Upper 128 bytes contain a unique 6-byte MAC address (read-only).
+    Lower 128 bytes are user-writable general-purpose EEPROM.
+
+    Key Specifications:
+    - Memory: 2 Kbit (256 bytes)
+    - MAC Address: Pre-programmed EUI-48 at 0xFA-0xFF (read-only)
+    - Interface: I2C, up to 400 kHz
+    - Supply Voltage: 1.7V to 5.5V
+    - Base I2C Address: 0x50 (7-bit), configurable via A0/A1 pins
+    - Package: SOT-23-6
+
+    External connections:
+    - power  - Supply voltage (1.7V to 5.5V)
+    - i2c    - I2C bus (SCL, SDA)
+    - addr0  - Address bit 0 (connect to power.hv or power.lv)
+    - addr1  - Address bit 1 (connect to power.hv or power.lv)
+    """
+    package = new Microchip_Tech_24AA025E48T_I_OT_package
+
+    # =========================================================================
+    # Power
+    # =========================================================================
+
+    power = new ElectricPower
+    """
+    Supply voltage (VCC/VSS). Must be 1.7V to 5.5V.
+    """
+    power.required = True
+    assert power.voltage within 1.7V to 5.5V
+    power.hv ~ package.VCC
+    power.lv ~ package.VSS
+
+    # VCC decoupling: 100nF ceramic (close to pin, per datasheet)
+    decoupling_cap = new Capacitor
+    decoupling_cap.capacitance = 100nF +/- 20%
+    decoupling_cap.package = "0402"
+    power.hv ~> decoupling_cap ~> power.lv
+
+    # =========================================================================
+    # I2C Interface
+    # =========================================================================
+
+    i2c = new I2C
+    """
+    I2C bus (SCL, SDA). Standard mode (100 kHz) and fast mode (400 kHz) supported.
+    Base address 0x50, configurable via addr0/addr1 pins.
+    External pull-ups required (typically on bus master side).
+    """
+    i2c.scl.line ~ package.SCL
+    i2c.sda.line ~ package.SDA
+    i2c.scl.reference ~ power
+    i2c.sda.reference ~ power
+
+    # I2C pull-up resistors (4.7kohm, 0402)
+    pullup_resistors = new Resistor[2]
+    for resistor in pullup_resistors:
+        resistor.resistance = 4.7kohm +/- 1%
+        resistor.package = "0402"
+    i2c.scl.line ~> pullup_resistors[0] ~> power.hv
+    i2c.sda.line ~> pullup_resistors[1] ~> power.hv
+
+    # =========================================================================
+    # Address Pins
+    # =========================================================================
+
+    # Address pins exposed as Electrical lines.
+    # Full 7-bit address: 1010_A1_A0 (base 0x50)
+    # Default: both tied to GND (address 0x50).
+    # Reconnect to power.hv for addresses 0x51, 0x52, 0x53.
+    addr0 = new Electrical
+    addr1 = new Electrical
+    addr0 ~ package.A0
+    addr1 ~ package.A1
+
+    # Default: both address pins tied to GND (address 0x50)
+    addr0 ~ power.lv
+    addr1 ~ power.lv

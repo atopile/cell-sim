@@ -1,0 +1,22 @@
+import ElectricPower
+import I2C
+
+from "microchip-24aa025e48.ato" import Microchip_24AA025E48
+
+module Usage:
+    """
+    Example: 24AA025E48 EEPROM at default address 0x50 (A0=GND, A1=GND).
+    Provides factory-unique EUI-48 MAC address for Ethernet identity.
+    """
+
+    # --- Power ---
+    power_3v3 = new ElectricPower
+    assert power_3v3.voltage within 3.3V +/- 5%
+
+    # --- I2C bus ---
+    i2c = new I2C
+
+    # --- EEPROM instance ---
+    eeprom = new Microchip_24AA025E48
+    power_3v3 ~ eeprom.power
+    i2c ~ eeprom.i2c

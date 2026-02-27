@@ -1,0 +1,24 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Microchip_Tech_24AA025E48T_I_OT_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C129895", date="2026-02-27T21:00:25.549467+00:00", checksum="e20319c0dab4c3c465b47426d3db194da5256f4f92d86936667d3ee3439376d6">
+
+    trait is_atomic_part<manufacturer="Microchip Tech", partnumber="24AA025E48T-I/OT", footprint="SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR.kicad_mod", symbol="24AA025E48T-I_OT.kicad_sym", model="SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C129895", manufacturer="Microchip Tech", partno="24AA025E48T-I/OT">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2410311238_Microchip-Tech-24AA025E48T-I-OT_C129895.pdf">
+
+    # pins
+    signal A0 ~ pin 5
+    signal A1 ~ pin 4
+    signal SCL ~ pin 1
+    signal SDA ~ pin 3
+    signal VCC ~ pin 6
+    signal VSS ~ pin 2

@@ -1,0 +1,13 @@
+requires-atopile: "^0.9.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: microchip-24aa025e48.ato:Microchip_24AA025E48
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []
