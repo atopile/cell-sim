@@ -1,0 +1,13 @@
+requires-atopile: "^0.9.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: high-side-switch.ato:HighSidePowerSwitch
+    example:
+        entry: high-side-switch.ato:Example
+
+dependencies: []

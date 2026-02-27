@@ -1,7 +1,4 @@
-# For PCBs designed using KiCad: https://www.kicad.org/
-# Format documentation: https://kicad.org/help/file-formats/
-
-# Temporary files
+# === KiCad ===
 *.000
 *.bak
 *.bck
@@ -17,34 +14,35 @@ _autosave-*
 *-save.kicad_pcb
 *.kicad_pcb.lck
 fp-info-cache
-
-# Netlist files (exported from Eeschema)
 *.net
-
-# Autorouter files (exported from Pcbnew)
 *.dsn
 *.ses
 
-# Exported BOM files
-*.xml
-*.csv
-
-build/
-.DS_Store
-
-# Virtual environment
-.venv/
-venv/
-
-# .ato directory
+# === atopile ===
 .ato/
+build/
+layouts/
 
-# IDEs
-.vscode/
+# === Zephyr / west ===
+firmware/build/
+firmware/card/build/
+firmware/card/twister-out*
+.west/
 
-
-# Python cache files
+# === Python ===
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+.venv/
+venv/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDEs ===
+.vscode/
+.idea/

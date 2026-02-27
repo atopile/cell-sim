@@ -1,0 +1,89 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# High-Side Power Switch
+# ======================
+# P-channel MOSFET with NPN gate driver for GPIO-controlled power switching.
+# Default state: OFF (gate pulled high via pull-up resistor).
+# Active-high enable: NPN pulls MOSFET gate low to turn on.
+#
+# Designed for 24V, 6A continuous (5.14A worst-case per slot).
+# P-FET: Si4435DDY or equivalent (-30V, -8.5A, Rds(on) 20mohm)
+# Power dissipation at 5A: I²R = 25 * 0.02 = 0.5W
+
+import Resistor
+import Capacitor
+
+# --- High-Side Power Switch Module ---
+
+module HighSidePowerSwitch:
+    "P-FET high-side switch with NPN gate driver. Active-high enable, default OFF."
+
+    # External interfaces
+    power_in = new ElectricPower      # 24V bus input
+    power_out = new ElectricPower     # Switched 24V output
+    enable = new ElectricLogic        # Active-high enable from GPIO expander
+
+    # --- P-Channel MOSFET (high-side switch) ---
+    # Source connected to power_in.hv (24V)
+    # Drain connected to power_out.hv (switched 24V)
+    # Gate controlled by NPN driver
+    #
+    # Gate-Source pull-up resistor (default OFF: gate pulled to source = VGS=0)
+    r_gs_pullup = new Resistor
+    r_gs_pullup.resistance = 10kohm +/- 5%
+    r_gs_pullup.package = "0402"
+
+    # --- NPN Gate Driver ---
+    # When enable is HIGH: NPN turns on, pulls MOSFET gate to GND -> VGS = -24V -> MOSFET ON
+    # When enable is LOW: NPN off, pull-up holds gate at source potential -> MOSFET OFF
+    #
+    # Base resistor (limits base current from 3.3V GPIO)
+    r_base = new Resistor
+    r_base.resistance = 10kohm +/- 5%
+    r_base.package = "0402"
+
+    # Base-emitter pull-down (ensures NPN stays off when GPIO is floating)
+    r_be_pulldown = new Resistor
+    r_be_pulldown.resistance = 100kohm +/- 5%
+    r_be_pulldown.package = "0402"
+
+    # Gate resistor (limits inrush current to gate capacitance, provides soft-start)
+    r_gate = new Resistor
+    r_gate.resistance = 100ohm +/- 5%
+    r_gate.package = "0402"
+
+    # Shared ground between input and output
+    power_in.lv ~ power_out.lv
+
+    # --- Connections ---
+    # P-FET gate-source pull-up: gate to source (power_in.hv)
+    # NPN collector to gate via gate resistor
+    # NPN base from enable via base resistor
+    # NPN emitter to GND
+    #
+    # NOTE: The P-FET and NPN transistor are discrete components that need
+    # explicit part selection. The connectivity is:
+    #   power_in.hv ---- r_gs_pullup ---- GATE ---- r_gate ---- NPN_collector
+    #                |                                           NPN_emitter ---- GND
+    #                |--- P-FET source                           NPN_base ---- r_base ---- enable.line
+    #                                                            NPN_base ---- r_be_pulldown ---- GND
+    #   power_out.hv --- P-FET drain
+    #
+    # TODO: Add P-FET and NPN component definitions when JLCPCB parts are selected
+    # P-FET: Si4435DDY (-30V, -8.5A, Rds(on) 20mohm, SOT-23/SO-8)
+    # NPN: 2N3904 or MMBT3904 (SOT-23)
+
+
+# --- Example Usage ---
+
+module Example:
+    "Example: High-side switch on a 24V bus controlled by a GPIO"
+
+    power_24v = new ElectricPower
+    power_24v_switched = new ElectricPower
+    enable = new ElectricLogic
+
+    sw = new HighSidePowerSwitch
+    sw.power_in ~ power_24v
+    sw.power_out ~ power_24v_switched
+    sw.enable ~ enable
