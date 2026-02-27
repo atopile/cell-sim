@@ -95,12 +95,15 @@ The software stack mirrors the proven Peak cellsim-48ch design (FastAPI REST ser
 | **Raspberry Pi CM5** | Main controller — FastAPI server, card orchestration, firmware updates |
 | **GbE Switch** | Cascaded RTL8305NB switches (proven in Hyperion) connecting CM5 ↔ all card slots |
 | **Meanwell PSU** | Off-the-shelf enclosed 24V supply (IEC C14 mains input on rear panel) |
-| **24V power bus** | Distributes 24V to each card slot via backplane connector |
+| **24V power bus** | Distributes 24V to each card slot via per-slot relay |
+| **Per-slot power relays** | 16× Omron G5Q-1A4 DC24 (SPST-NO, 10A/30VDC), individually software-controlled via MCP23017 + N-FET. E-stop button cuts coil supply to all relays simultaneously. |
+| **Per-slot current monitoring** | 7× INA3221 (3-ch each) behind TCA9548A mux — measures per-slot 24V current downstream of relay |
+| **Bus power monitor** | INA228 on main 24V bus — total system current + power |
 | **Fan controller** | PWM-driven fans, temperature-feedback closed loop |
 | **Temperature sensors** | On base board + reported by each card |
 | **Card slot connectors** | GPU-style edge connectors: Ethernet pairs + 24V + GND + slot ID bits + CAL traces |
 | **Calibration mux** | 16× DPDT relays (one per slot), 2× TCA6408 GPIO expanders on CM5 I2C, banana jacks for external DMM |
-| **E-Stop circuit** | Hardware relay on 24V bus, front panel button |
+| **E-Stop circuit** | Front panel NC mushroom-head button, series with relay coil supply — kills all 16 slot relays simultaneously |
 | **OLED display** | System status (IP, card count, temps, fan speed) |
 | **Uplink RJ45** | External network (front panel) |
 | **USB-C** | CM5 debug/console (front panel) |
@@ -853,18 +856,26 @@ AC Mains (110/240V)
   │     │
   │     ├── 24V Bus (on backplane, heavy copper)
   │     │     │
-  │     │     ├── Card Slot 0:  3.45A max  (8 cells + electronics)
-  │     │     ├── Card Slot 1:  3.45A max
-  │     │     ├── ...
-  │     │     └── Card Slot 15: 3.45A max
+  │     │     ├── INA228 shunt (total system current sense)
+  │     │     │     │
+  │     │     │     ├── Slot 0: G5Q relay (NO) → INA3221 shunt → Card connector (3.45A max)
+  │     │     │     ├── Slot 1: G5Q relay (NO) → INA3221 shunt → Card connector (3.45A max)
+  │     │     │     ├── ...
+  │     │     │     └── Slot 15: G5Q relay (NO) → INA3221 shunt → Card connector (3.45A max)
+  │     │     │
+  │     │     └── Relay coil supply bus (24V_COIL)
+  │     │           │
+  │     │           ├── E-Stop button (NC, series) ← kills all relay coils
+  │     │           │
+  │     │           ├── MCP23017 #1 → N-FET × 8 → Relay coils 0-7
+  │     │           └── MCP23017 #2 → N-FET × 8 → Relay coils 8-15
   │     │
-  │     └── Base Board 24V
+  │     └── Base Board 24V (always-on, not behind relays)
   │           │
   │           ├── Buck (24V → 5V) → CM5 (5V, ~2A)
   │           ├── Buck (24V → 5V) → GbE Switch ICs (×5 RTL8305NB)
   │           ├── LDO (5V → 3.3V) → OLED, temp sensors, misc I2C
-  │           ├── Fan drivers (24V PWM, 2–4× 120mm fans)
-  │           └── E-Stop relay coil (24V)
+  │           └── Fan drivers (24V PWM, 2–4× 120mm fans)
   │
   └── Fan power: 24V, ~0.5A per 120mm fan × 4 = 2A
 ```
@@ -898,6 +909,104 @@ AC Mains (110/240V)
 **Reality check:** All 128 cells at 5V/1A simultaneously is unlikely. A 50% duty-cycle assumption (half the cells active) brings 16 cards to ~680W, which a single RSP-1000-24 (1,000W) comfortably covers. For full 16-card worst-case, a single **RSP-1600-24** (1,600W) is sufficient.
 
 **For initial Phase 1–3 development (≤4 cards):** LRS-350-24 is sufficient.
+
+### 4.5a Per-Slot Power Switching & Monitoring
+
+Each card slot has individual power isolation via a relay, with per-slot current monitoring and a hardware E-stop that kills all slots simultaneously.
+
+#### 4.5a.1 Per-Slot Relay
+
+Each of the 16 slots has a dedicated **Omron G5Q-1A4 DC24** relay (SPST-NO, 10A @ 30VDC, LCSC C89311, $0.52):
+
+| Parameter | Value |
+|-----------|-------|
+| Contact form | SPST-NO (1 Form A) |
+| DC switching rating | 10A @ 30VDC (300W max) |
+| Per-slot load | 3.45A @ 24V worst case (83W) — 3× margin |
+| Coil voltage | 24VDC |
+| Coil power | 200mW (coil resistance 2.88 kΩ) |
+| Coil current | 8.3 mA per relay |
+| Contact material | Cadmium-free Ag alloy |
+| Mechanical life | 10M cycles |
+| Electrical life | 100K cycles (at rated load) |
+| Footprint | 20 × 10 mm (4-pin THT) |
+
+**Why relay instead of solid-state (BTS5215L, P-FET, etc.):**
+- Relay provides galvanic isolation when open — true card disconnect
+- E-stop works by simply cutting relay coil supply — no firmware involved, purely hardware safety
+- Zero on-resistance concerns (relay contacts < 100 mΩ vs. FET RDS(on))
+- Dual-purpose: replaces both the E-stop bus relay and per-slot FET switch
+
+#### 4.5a.2 Relay Drive Circuit
+
+```
+24V_BUS ─────────────────────────────────────────→ Relay Common (pin 1)
+                                                     Relay NO (pin 2) ─→ INA3221 shunt ─→ Slot connector
+
+24V_COIL ──[E-Stop NC]──┬──────────────────────────→ Relay coil + (pin 3)
+                         │
+                         │   Relay coil - (pin 4) ──→ N-FET drain
+                         │                            N-FET source → GND
+                         │                            N-FET gate ← MCP23017 GPIO (via 1k resistor)
+                         │                            Flyback diode (1N4148) across coil
+                         │
+                         └── (repeated ×16)
+```
+
+**Drive components per slot:**
+- 1× N-FET (IRLML0040 or similar, SOT-23, 200mW drive) — gate driven by MCP23017 GPIO
+- 1× Flyback diode (1N4148W, SOD-323) — protects N-FET from coil back-EMF
+- 1× 1kΩ gate resistor (0402)
+
+**GPIO expanders:**
+- 2× MCP23017 (16-bit I2C GPIO) on CM5 I2C bus — 8 relay drives each
+- MCP23017 #1 (addr 0x20): slots 0–7
+- MCP23017 #2 (addr 0x21): slots 8–15
+- Default power-on state: all outputs LOW → all relays open → all cards de-powered
+- Firmware sequence: discover card → close relay → wait for card boot → establish TCP
+
+**E-stop:**
+- NC mushroom-head button in series with 24V_COIL supply
+- Pressing E-stop breaks coil supply to all 16 relays → all relays open → all cards instantly lose 24V
+- Does NOT affect base board power (CM5, switches, fans stay running)
+- Total coil current: 16 × 8.3 mA = 133 mA (well within E-stop contact rating)
+
+#### 4.5a.3 Per-Slot Current Monitoring
+
+**INA3221** (3-channel current/power monitor, I2C) — 6× INA3221 monitors 16 slots (3 channels × 6 = 18 channels, 16 used):
+
+| Parameter | Value |
+|-----------|-------|
+| Shunt resistor | 10 mΩ (per slot, 0.1W at 3.45A, 1206 package) |
+| Full-scale current | 8.19A (±81.92 mV range, 10 mΩ shunt) |
+| Resolution | ~0.5 mA (13-bit ADC, 40 µV LSB) |
+| Position | Between relay NO contact and slot connector (downstream) |
+| Bus voltage measurement | Yes — monitors 24V at each slot |
+
+**INA3221 I2C addressing (6 devices):**
+- Behind TCA9548A mux on CM5 I2C bus (same mux used for other backplane I2C devices)
+- All INA3221 at address 0x40 (A0=GND), selected by mux channel
+
+**INA228** (main bus monitor):
+- Single device on 24V bus input (before relay distribution)
+- Monitors total system current + power
+- I2C address 0x45 on CM5 I2C bus
+
+#### 4.5a.4 Backplane I2C Bus (CM5)
+
+All backplane I2C devices share a single I2C bus on the CM5:
+
+| Device | Qty | Address | Muxed? | Function |
+|--------|-----|---------|--------|----------|
+| TCA9548A | 1 | 0x70 | — | I2C mux for INA3221 + other backplane devices |
+| MCP23017 #1 | 1 | 0x20 | No | Relay drive GPIO (slots 0–7) |
+| MCP23017 #2 | 1 | 0x21 | No | Relay drive GPIO (slots 8–15) |
+| INA228 | 1 | 0x45 | No | Main bus current monitor |
+| INA3221 ×6 | 6 | 0x40 | Yes (mux ch 0–5) | Per-slot current monitoring |
+| TCA6408 #1 | 1 | 0x20 | Yes (mux ch 6) | Calibration relay drive (slots 0–7) |
+| TCA6408 #2 | 1 | 0x21 | Yes (mux ch 7) | Calibration relay drive (slots 8–15) |
+| EMC2101 | 1 | 0x4C | No | Fan controller + base temp |
+| TMP117 | 1 | 0x48 | No | Base board temp sensor |
 
 ### 4.6 Thermal Budget & Cooling
 
@@ -971,7 +1080,7 @@ Typical 120mm fan: 40–100 CFM at moderate speed. **2× 120mm fans provide 80�
 | 5 | PSU sizing for 16-card configurations (reduced — ~8W/cell vs 15W) | P2 | Enclosure + mains wiring |
 | 6 | Select per-cell control rail LDO (LDK220 removed, need Vin ≥ 8V, 3.3V out) | P2 | BOM selection |
 | 7 | ~~Select card-level 3.3V regulator~~ | ~~P2~~ | **RESOLVED** — TLV75901 (same as per-cell LDO, 1A, 5V→3.3V) |
-| 6 | Per-slot 24V relay/FET for CM5-controlled card power cycling | P3 | Base board design |
+| ~~6~~ | ~~Per-slot 24V relay/FET for CM5-controlled card power cycling~~ | ~~P3~~ | **RESOLVED** — 16× Omron G5Q-1A4 DC24 relay, MCP23017 + N-FET drive, E-stop cuts coil supply |
 
 ### 4.9 Control Loop Margins Analysis
 
@@ -1344,7 +1453,7 @@ All connectors in the system, organized by function with current/voltage ratings
 | 11 | SWD TC2030 (pogo) | Card top | 1/card | 3.3V | <50 mA | 6 | In/Out | Available (`programming-headers`) |
 | 12 | Fan header (4-pin PWM) | Base board | 2–4 | 24V / 3.3V | 500 mA (fan) | 4 | Out | To create |
 | 13 | OLED header (I2C, 4-pin) | Base board | 1 | 3.3V | <50 mA | 4 | Out | Pin header |
-| 14 | E-Stop button | Front panel | 1 | 24V | <100 mA (relay coil) | 2 (NO/NC) | In | To create |
+| 14 | E-Stop button | Front panel | 1 | 24V | ~133 mA (16 relay coils) | 2 (NC) | In | To create |
 
 #### 5.6.2 Power Input Connectors
 
@@ -1555,8 +1664,8 @@ Not customer-facing. Used only during factory/service calibration with a Keysigh
 |-----------|-------|
 | Type | Panel-mount mushroom-head emergency stop button |
 | Contacts | NC (normally-closed), latching |
-| Circuit | Series with 24V bus relay coil — pressing breaks relay, kills 24V to all cards |
-| Current | <100 mA (relay coil drive) |
+| Circuit | Series with 24V_COIL supply bus — pressing breaks coil supply to all 16 per-slot relays, de-energizing them and opening all card power connections simultaneously |
+| Current | ~220 mA max (16 relay coils × 200mW ÷ 24V = 8.3mA each × 16 = 133mA, plus MCP23017/N-FET overhead) |
 | Voltage | 24V DC |
 | Mounting | Front panel, red mushroom-head, twist-to-release |
 
@@ -2219,6 +2328,9 @@ Card type detected by:
 - [x] **Power budget:** Detailed bottom-up analysis from cell → card → system, PSU sizing table (§4.3–4.5)
 - [x] **Card-level buck:** TPSM84209RKHR — integrated buck module (24V→5V, 2.5A), replaces TPS54560x
 - [x] **Card-level 3.3V LDO:** TLV75901 (same as per-cell output LDO) — BOM consolidation, 5V→3.3V, 1A rated
+- [x] **Per-slot power switching:** 16× Omron G5Q-1A4 DC24 relay (SPST-NO, 10A/30VDC) — replaces both E-stop bus relay and P-FET/high-side switch. Per-slot isolation + E-stop via coil supply cutoff (§4.5a)
+- [x] **Per-slot current monitoring:** 6× INA3221 (3-ch each) with 10 mΩ shunts, behind TCA9548A mux on CM5 I2C. Plus INA228 on main bus input.
+- [x] **Relay drive:** 2× MCP23017 (16-bit GPIO) + N-FET per relay. Default state: all relays open (cards de-powered). E-stop NC button in series with coil supply.
 
 ### 12.3 Still Open
 
@@ -2254,7 +2366,7 @@ Card type detected by:
 
 ### Phase 3: Base Board + Enclosure
 - CM5 + cascaded RTL8305NB switches
-- 24V power distribution, E-stop relay
+- 24V power distribution, per-slot relays (G5Q-1A4), MCP23017 drive, INA3221 current monitoring, E-stop
 - Fan controller (PWM + temp sensors)
 - Card slot connectors with slot ID resistors
 - IEC C14 inlet, front panel (RJ45, USB-C, OLED, E-stop)
