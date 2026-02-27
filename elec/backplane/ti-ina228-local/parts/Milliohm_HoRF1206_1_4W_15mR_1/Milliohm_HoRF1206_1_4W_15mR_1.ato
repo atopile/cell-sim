@@ -1,0 +1,18 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Milliohm_HoRF1206_1_4W_15mR_1_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2912705", date="2025-07-16T21:17:02.385815+00:00", checksum="6906ab0ffcacd08ff97eaf3514467b271825c02a4248bbd6f3dc2d9c3f3f5cd2">
+
+    trait is_atomic_part<manufacturer="Milliohm", partnumber="HoRF1206-1/4W-15mR-1%", footprint="R1206.kicad_mod", symbol="HORF1206-1_4W-15MR-1%.kicad_sym", model="R1206_L3.2-W1.6-H0.6.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2912705", manufacturer="Milliohm", partno="HoRF1206-1/4W-15mR-1%">
+    trait has_designator_prefix<prefix="R">
+
+    # pins
+    pin 2
+    pin 1

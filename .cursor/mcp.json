@@ -1,7 +1,7 @@
 {
     "mcpServers": {
         "atopile": {
-            "command": "/Users/narayanpowderly/Library/Application Support/Cursor/User/globalStorage/atopile.atopile/uv-bin/uv",
+            "command": "/home/np/.antigravity-server/data/User/globalStorage/atopile.atopile/uv-bin/uv",
             "args": [
                 "tool",
                 "run",

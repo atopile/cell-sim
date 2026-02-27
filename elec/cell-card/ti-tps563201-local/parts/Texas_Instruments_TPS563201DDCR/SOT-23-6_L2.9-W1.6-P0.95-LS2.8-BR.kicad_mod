@@ -1,0 +1,170 @@
+(footprint "Texas_Instruments_TPS563201DDCR:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR"
+    (layer "F.Cu")
+    (descr "")
+    (version 20241229)
+    (generator "faebryk")
+    (generator_version "v5")
+    (tedit "5DC5F6A4")
+    (property "Reference" "REF**"
+        (at 0 -4.95 0)
+        (layer "F.SilkS")
+        (hide no)
+        (uuid "ba4b4bec-986c-439d-8819-04d09b924f6b")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "Value" "SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR"
+        (at 0 4.95 0)
+        (layer "F.Fab")
+        (hide no)
+        (uuid "e934b9fc-ca6a-4136-a28a-c2e343177dc0")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "checksum" "91743f6621cc70a016bb7c61d0f485ca91aa517f6f3f2bfc6b7baa3a226806c3"
+        (at 0 0 0)
+        (layer "User.9")
+        (hide no)
+        (uuid "dbe8b107-0f6c-4382-a3d1-703f5cb7ef7c")
+        (effects
+            (font
+                (size 0.125 0.125)
+                (thickness 0.01875)
+            )
+            (hide yes)
+        )
+    )
+    (attr smd)
+    (fp_line
+        (start -0.9 -1.55)
+        (end 0.9 -1.55)
+        (stroke
+            (width 0.25)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "5b0bb9c5-01ec-4eeb-9156-1bec00fd1445")
+    )
+    (fp_line
+        (start -0.9 1.55)
+        (end 0.9 1.55)
+        (stroke
+            (width 0.25)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "e657b545-68b6-41f6-b00e-5e71fbcf4a08")
+    )
+    (fp_circle
+        (center 1.4 1.45)
+        (end 1.43 1.45)
+        (stroke
+            (width 0.06)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.Fab")
+        (uuid "ec083816-4957-4f56-85e0-564bd29a7670")
+    )
+    (fp_circle
+        (center 1.4 0.95)
+        (end 1.5 0.95)
+        (stroke
+            (width 0.2)
+            (type solid)
+        )
+        (fill no)
+        (layer "Cmts.User")
+        (uuid "0117a099-6d1e-4882-bda4-2b8aa9d66c5f")
+    )
+    (fp_circle
+        (center 1.4 1.65)
+        (end 1.53 1.65)
+        (stroke
+            (width 0.25)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.SilkS")
+        (uuid "fb22d7b2-0873-49bc-927e-06edc3a568f7")
+    )
+    (fp_text user "%R"
+        (at 0 0 0)
+        (layer "F.Fab")
+        (uuid "51202268-2f8a-4761-b9b6-d2dc61321579")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (fp_text user "${REFERENCE}"
+        (at 0 -4.95 0)
+        (layer "F.SilkS")
+        (uuid "ba4b4bec-986c-439d-8819-04d09b924f6b")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (pad "3" smd rect
+        (at 1.35 -0.95 0)
+        (size 1.1 0.6)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "b580493e-3b55-480f-9e5b-536604659d04")
+    )
+    (pad "2" smd rect
+        (at 1.35 0 0)
+        (size 1.1 0.6)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "464fac2c-b32b-4d3b-9324-df329a41a6c1")
+    )
+    (pad "1" smd rect
+        (at 1.35 0.95 0)
+        (size 1.1 0.6)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "b26751ed-b251-4559-a180-2c62a4772e70")
+    )
+    (pad "6" smd rect
+        (at -1.35 0.95 0)
+        (size 1.1 0.6)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "1e020275-3b8e-4783-8ebb-474fb1ad8a39")
+    )
+    (pad "5" smd rect
+        (at -1.35 0 0)
+        (size 1.1 0.6)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "2912c535-f142-4c6f-9a4d-4dc6f7b0dc8c")
+    )
+    (pad "4" smd rect
+        (at -1.35 -0.95 0)
+        (size 1.1 0.6)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "fa1287da-6ee7-48da-8716-586eb0dcc290")
+    )
+    (model "${KIPRJMOD}/../../parts/Texas_Instruments_TPS563201DDCR/SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step"
+        (offset
+            (xyz 0 0 0)
+        )
+        (scale
+            (xyz 1 1 1)
+        )
+        (rotate
+            (xyz 0 0 180)
+        )
+    )
+)

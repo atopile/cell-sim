@@ -1,0 +1,400 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+# Cell Module
+# ===========
+# Single isolated cell channel: isolated DC-DC -> buck -> LDO
+# -> current sense -> output relay -> Kelvin output.
+# Each cell has its own isolated ground domain, I2C isolator, and SPI isolator.
+#
+# This is a leaf module -- one per channel. CellBlock4 (below) groups 4 of
+# these behind a TCA9548A I2C mux, with shared SPI bus and MISO mux.
+
+import Electrical
+import ElectricPower
+import ElectricLogic
+import ElectricSignal
+import I2C
+import Resistor
+import Capacitor
+
+from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640QDWRQ1
+from "atopile/tdpower-tdk20x/tdpower-tdk20x.ato" import TDPOWER_TDK20_driver
+from "ti-tps563201-local/ti-tps563201.ato" import TI_TPS563201
+from "ti-tlv75901-local/ti-tlv75901.ato" import TI_TLV75901
+from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
+from "atopile/ti-tca6408/ti-tca6408.ato" import TI_TCA6408
+from "atopile/ti-ina185a1/ti-ina185a1.ato" import TI_INA185A1
+from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
+from "atopile/relays/relays.ato" import LogicLevelRelayDPDT1A3V
+from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
+from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
+
+
+# --- Stub Modules (replace with proper packages when available) ---
+
+module ADS131M04_stub:
+    # STUB: replace with proper package (LCSC C2862562) when available
+    "ADS131M04 24-bit 4ch simultaneous SPI ADC. Internal 1.2V ref, PGA gain=1."
+    power = new ElectricPower
+    spi_sclk = new ElectricLogic
+    spi_mosi = new ElectricLogic
+    spi_miso = new ElectricLogic
+    spi_cs = new ElectricLogic
+    ain = new ElectricSignal[4]
+    drdy = new ElectricLogic
+    assert power.voltage within 3.0V to 3.6V
+
+module ISO7741_stub:
+    # STUB: replace with proper package (LCSC C571196) when available
+    "ISO7741 4-ch digital isolator. 3 forward (A->B) + 1 reverse (B->A). 100Mbps, 5kV."
+    power_a = new ElectricPower
+    power_b = new ElectricPower
+    fwd_a = new ElectricLogic[3]
+    fwd_b = new ElectricLogic[3]
+    rev_a = new ElectricLogic
+    rev_b = new ElectricLogic
+    assert power_a.voltage within 3.0V to 5.5V
+    assert power_b.voltage within 3.0V to 5.5V
+
+module CD74HC4052_stub:
+    # STUB: replace with proper package when available
+    "CD74HC4052 dual 4:1 analog mux. We only use MUX1 for SPI MISO routing."
+    power = new ElectricPower
+    y = new Electrical
+    ch = new Electrical[4]
+    sel_a = new ElectricLogic
+    sel_b = new ElectricLogic
+    enable = new ElectricLogic
+    assert power.voltage within 2.0V to 6.0V
+
+
+# --- Interfaces ---
+
+interface KelvinOutput:
+    "4-wire Kelvin output: Force (current) + Sense (voltage)"
+    force = new Electrical
+    sense = new Electrical
+    gnd_force = new Electrical
+    gnd_sense = new Electrical
+
+
+# --- Single Cell Module ---
+
+module Cell:
+    "One isolated cell channel: 0-5V, 0-1A, Kelvin output, self-testable"
+
+    # === External Interfaces ===
+    i2c = new I2C
+    spi_sclk = new ElectricLogic
+    spi_mosi = new ElectricLogic
+    spi_cs = new ElectricLogic
+    spi_miso = new ElectricLogic
+    power_24v = new ElectricPower
+    power_3v3_mcu = new ElectricPower
+    output = new KelvinOutput
+
+    # === Internal Power Rails ===
+    _power_iso = new ElectricPower
+    _power_3v3_iso = new ElectricPower
+    _power_buck = new ElectricPower
+    _power_ldo = new ElectricPower
+
+    # ========================================
+    # 1. I2C Isolation
+    # ========================================
+    isolator = new TI_ISO1640QDWRQ1
+    i2c ~ isolator.i2cs[0]
+    isolator.power_rails[0] ~ power_3v3_mcu
+    isolator.power_rails[1] ~ _power_3v3_iso
+
+    _iso_i2c = new I2C
+    isolator.i2cs[1] ~ _iso_i2c
+
+    # ========================================
+    # 2. Isolated DC-DC (24V -> 8V)
+    # ========================================
+    iso_dcdc = new TDPOWER_TDK20_driver
+    power_24v ~ iso_dcdc.power_in
+    iso_dcdc.power_out ~ _power_iso
+    # TODO: need 24V->8V variant; current package is 24V->24V
+
+    # ========================================
+    # 3. Per-Cell 3.3V Control LDO (8V -> 3.3V)
+    # ========================================
+    ctrl_ldo = new LDK220M_R
+    _power_iso ~> ctrl_ldo ~> _power_3v3_iso
+    assert _power_3v3_iso.voltage within 3.2V to 3.4V
+
+    # Solver workaround: pin feedback divider resistors explicitly
+    # Vout=3.3V, Vref=1.185V
+    # r_top=18kohm, r_bottom = 18k * 1.185 / 2.115 ≈ 10kohm
+    # Actual Vout = 1.185 * (1 + 18k/10k) = 3.318V
+    # TODO: remove once atopile solver loop bug is fixed
+    ctrl_ldo.feedback_divider.chain.resistors[0].resistance = 18kohm +/- 1%
+    ctrl_ldo.feedback_divider.chain.resistors[0].package = "0402"
+    ctrl_ldo.feedback_divider.chain.resistors[1].resistance = 10kohm +/- 1%
+    ctrl_ldo.feedback_divider.chain.resistors[1].package = "0402"
+
+    # ========================================
+    # 4. SPI Isolation (per cell, ISO7741)
+    # ========================================
+    spi_iso = new ISO7741_stub
+    spi_iso.power_a ~ power_3v3_mcu
+    spi_iso.power_b ~ _power_3v3_iso
+    # Forward channels (MCU -> cell): SCLK, MOSI, CS
+    spi_iso.fwd_a[0].line ~ spi_sclk.line
+    spi_iso.fwd_a[1].line ~ spi_mosi.line
+    spi_iso.fwd_a[2].line ~ spi_cs.line
+    # Reverse channel (cell -> MCU): MISO
+    spi_iso.rev_a.line ~ spi_miso.line
+
+    # ========================================
+    # 5. Digital Buck (coarse regulation) + DAC
+    # ========================================
+    buck = new TI_TPS563201
+    _power_iso ~> buck ~> _power_buck
+    assert _power_buck.voltage within 5V +/- 10%
+
+    # Solver workaround: pin feedback divider r_bottom explicitly
+    # Vout=5V, Vref=0.768V, r_top=10kohm (set in package)
+    # r_bottom = r_top * Vref / (Vout - Vref) = 10k * 0.768 / 4.232 ≈ 1.8kohm
+    # Actual Vout = 0.768 * (1 + 10k/1.8k) = 5.03V
+    # TODO: remove once atopile solver loop bug is fixed
+    buck.feedback_divider.chain.resistors[1].resistance = 1.8kohm +/- 1%
+    buck.feedback_divider.chain.resistors[1].package = "0402"
+
+    buck_dac = new Microchip_MCP4725_driver
+    buck_dac.power ~ _power_3v3_iso
+    buck_dac.i2c ~ _iso_i2c
+
+    # DAC output -> control resistor -> buck feedback node
+    buck_ctrl_resistor = new Resistor
+    buck_ctrl_resistor.resistance = 24kohm +/- 2%
+    buck_ctrl_resistor.package = "0402"
+    buck_dac.output.line ~> buck_ctrl_resistor ~> buck.package.VFB
+
+    # ========================================
+    # 6. Digital LDO (fine regulation) + DAC
+    # ========================================
+    ldo = new TI_TLV75901
+    _power_buck ~> ldo ~> _power_ldo
+    assert _power_ldo.voltage within 4V +/- 10%
+
+    # Solver workaround: pin feedback divider resistors explicitly
+    # Vout=4V, Vref=0.55V
+    # r_top=47kohm, r_bottom = 47k * 0.55 / 3.45 ≈ 7.5kohm
+    # Actual Vout = 0.55 * (1 + 47k/7.5k) = 3.997V
+    # Total resistance = 54.5kohm (within 5k-150k range)
+    # TODO: remove once atopile solver loop bug is fixed
+    ldo.feedback_divider.chain.resistors[0].resistance = 47kohm +/- 1%
+    ldo.feedback_divider.chain.resistors[0].package = "0402"
+    ldo.feedback_divider.chain.resistors[1].resistance = 7.5kohm +/- 1%
+    ldo.feedback_divider.chain.resistors[1].package = "0402"
+
+    ldo_dac = new Microchip_MCP4725_driver
+    ldo_dac.power ~ _power_3v3_iso
+    ldo_dac.i2c ~ _iso_i2c
+
+    # DAC output -> control resistor -> LDO feedback node
+    ldo_ctrl_resistor = new Resistor
+    ldo_ctrl_resistor.resistance = 43kohm +/- 2%
+    ldo_ctrl_resistor.package = "0402"
+    ldo_dac.output.line ~> ldo_ctrl_resistor ~> ldo.package.FB
+
+    # ========================================
+    # 7. Current Sensor (shunt + INA185A1)
+    # ========================================
+    shunt = new Resistor
+    shunt.resistance = 0.050ohm +/- 1%
+    shunt.package = "0805"
+
+    current_sense = new TI_INA185A1
+    current_sense.power ~ _power_3v3_iso
+    current_sense.ref.line ~ _power_3v3_iso.lv
+
+    # Shunt in force path: LDO output -> shunt -> relay common
+    _power_ldo.hv ~> shunt ~> output_relay.relay.switch_no[0].common
+
+    # INA185 senses across shunt
+    current_sense.input.p.line ~ shunt.unnamed[0]
+    current_sense.input.n.line ~ shunt.unnamed[1]
+
+    # ========================================
+    # 8. Output Relay (DPDT Kelvin switching)
+    # ========================================
+    output_relay = new LogicLevelRelayDPDT1A3V
+    output_relay.coil_power ~ _power_3v3_iso
+
+    # Force path: shunt -> relay NO[0] -> output.force
+    output_relay.relay.switch_no[0].normally_open ~ output.force
+
+    # Sense path: output.sense -> relay NO[1] -> measurement point
+    output.sense ~ output_relay.relay.switch_no[1].normally_open
+    _sense_point = new Electrical
+    output_relay.relay.switch_no[1].common ~ _sense_point
+
+    # Ground connections
+    output.gnd_force ~ _power_iso.lv
+    output.gnd_sense ~ _power_iso.lv
+
+    # ========================================
+    # 9. ADC (ADS131M04) + Input Conditioning
+    # ========================================
+    adc = new ADS131M04_stub
+    adc.power ~ _power_3v3_iso
+
+    # Isolated SPI: ISO7741 -> ADC
+    spi_iso.fwd_b[0].line ~ adc.spi_sclk.line
+    spi_iso.fwd_b[1].line ~ adc.spi_mosi.line
+    spi_iso.fwd_b[2].line ~ adc.spi_cs.line
+    spi_iso.rev_b.line ~ adc.spi_miso.line
+
+    # --- Input conditioning: 4 channels ---
+    # Each channel: signal -> R_top -> R_bot -> GND (voltage divider)
+    #   divider midpoint -> R_filt -> (C_filt to GND) -> ADC input
+    adc_div_top = new Resistor[4]
+    adc_div_bot = new Resistor[4]
+    adc_filt_r = new Resistor[4]
+    adc_filt_c = new Capacitor[4]
+
+    for r in adc_div_top:
+        r.package = "0402"
+    for r in adc_div_bot:
+        r.package = "0402"
+    for r in adc_filt_r:
+        r.package = "0402"
+    for c in adc_filt_c:
+        c.package = "0402"
+
+    # CH0: Buck output (0-5.5V -> 0-1.1V, 1:5 divider)
+    adc_div_top[0].resistance = 20kohm +/- 1%
+    adc_div_bot[0].resistance = 5.1kohm +/- 1%
+    adc_filt_r[0].resistance = 2kohm +/- 5%
+    adc_filt_c[0].capacitance = 1.5nF +/- 10%
+    _power_buck.hv ~> adc_div_top[0] ~> adc_div_bot[0] ~> _power_3v3_iso.lv
+    adc_div_top[0].unnamed[1] ~> adc_filt_r[0] ~> adc_filt_c[0] ~> _power_3v3_iso.lv
+    adc_filt_r[0].unnamed[1] ~ adc.ain[0].line
+
+    # CH1: LDO output (0-5V -> 0-1V, 1:5 divider)
+    adc_div_top[1].resistance = 20kohm +/- 1%
+    adc_div_bot[1].resistance = 5.1kohm +/- 1%
+    adc_filt_r[1].resistance = 1kohm +/- 5%
+    adc_filt_c[1].capacitance = 1.5nF +/- 10%
+    _power_ldo.hv ~> adc_div_top[1] ~> adc_div_bot[1] ~> _power_3v3_iso.lv
+    adc_div_top[1].unnamed[1] ~> adc_filt_r[1] ~> adc_filt_c[1] ~> _power_3v3_iso.lv
+    adc_filt_r[1].unnamed[1] ~ adc.ain[1].line
+
+    # CH2: Current sense INA output (0-3.3V -> 0-1.32V, 2:5 divider)
+    adc_div_top[2].resistance = 15kohm +/- 1%
+    adc_div_bot[2].resistance = 10kohm +/- 1%
+    adc_filt_r[2].resistance = 1kohm +/- 5%
+    adc_filt_c[2].capacitance = 1.5nF +/- 10%
+    current_sense.output.line ~> adc_div_top[2] ~> adc_div_bot[2] ~> _power_3v3_iso.lv
+    adc_div_top[2].unnamed[1] ~> adc_filt_r[2] ~> adc_filt_c[2] ~> _power_3v3_iso.lv
+    adc_filt_r[2].unnamed[1] ~ adc.ain[2].line
+
+    # CH3: Sense line voltage (0-5V -> 0-1V, 1:5 divider)
+    adc_div_top[3].resistance = 20kohm +/- 1%
+    adc_div_bot[3].resistance = 5.1kohm +/- 1%
+    adc_filt_r[3].resistance = 1kohm +/- 5%
+    adc_filt_c[3].capacitance = 1.5nF +/- 10%
+    _sense_point ~> adc_div_top[3] ~> adc_div_bot[3] ~> _power_3v3_iso.lv
+    adc_div_top[3].unnamed[1] ~> adc_filt_r[3] ~> adc_filt_c[3] ~> _power_3v3_iso.lv
+    adc_filt_r[3].unnamed[1] ~ adc.ain[3].line
+
+    # ========================================
+    # 10. GPIO Expander (TCA6408)
+    # ========================================
+    gpio = new TI_TCA6408
+    gpio.power ~ _power_3v3_iso
+    gpio.i2c ~ _iso_i2c
+    # GPIO[2]: Buck enable
+    gpio.gpios[2].line ~ buck.enable.line
+    # GPIO[3]: LDO enable
+    gpio.gpios[3].line ~ ldo.enable.line
+    # GPIO[4]: Load switch (TODO: needs load switch circuit)
+    # GPIO[5]: Output relay control
+    gpio.gpios[5] ~ output_relay.enable
+    # GPIO[6]: External load switch (TODO)
+    # GPIO[7]: 2-wire/4-wire mode (TODO: needs second relay)
+
+    # ========================================
+    # 11. Temperature Sensor (TMP117)
+    # ========================================
+    temp = new TI_TMP117
+    temp.power ~ _power_3v3_iso
+    temp.i2c ~ _iso_i2c
+
+
+# --- Cell Block (4 cells on one I2C bus, shared SPI) ---
+
+module CellBlock4:
+    "4 isolated cells behind a TCA9548A I2C mux, with shared SPI bus + MISO mux"
+
+    # External interfaces
+    i2c = new I2C
+    spi_sclk = new ElectricLogic
+    spi_mosi = new ElectricLogic
+    spi_miso = new ElectricLogic
+    spi_cs = new ElectricLogic[4]
+    miso_sel = new ElectricLogic[2]
+    power_24v = new ElectricPower
+    power_3v3_mcu = new ElectricPower
+    outputs = new KelvinOutput[4]
+
+    # I2C mux: one bus from MCU -> 4 channels for 4 cells
+    mux = new TI_TCA9548A
+    mux.power ~ power_3v3_mcu
+    i2c ~ mux.i2c
+
+    # MISO mux: 4 isolated MISO outputs -> 1 MISO to MCU
+    miso_mux = new CD74HC4052_stub
+    miso_mux.power ~ power_3v3_mcu
+    miso_mux.y ~ spi_miso.line
+    miso_mux.sel_a ~ miso_sel[0]
+    miso_mux.sel_b ~ miso_sel[1]
+    miso_mux.enable.line ~ power_3v3_mcu.lv
+
+    # 4 cells
+    cells = new Cell[4]
+
+    # Cell 0
+    cells[0].i2c ~ mux.i2cs[0]
+    cells[0].power_24v ~ power_24v
+    cells[0].power_3v3_mcu ~ power_3v3_mcu
+    cells[0].spi_sclk.line ~ spi_sclk.line
+    cells[0].spi_mosi.line ~ spi_mosi.line
+    cells[0].spi_cs.line ~ spi_cs[0].line
+    cells[0].spi_miso.line ~ miso_mux.ch[0]
+    cells[0].output ~ outputs[0]
+
+    # Cell 1
+    cells[1].i2c ~ mux.i2cs[1]
+    cells[1].power_24v ~ power_24v
+    cells[1].power_3v3_mcu ~ power_3v3_mcu
+    cells[1].spi_sclk.line ~ spi_sclk.line
+    cells[1].spi_mosi.line ~ spi_mosi.line
+    cells[1].spi_cs.line ~ spi_cs[1].line
+    cells[1].spi_miso.line ~ miso_mux.ch[1]
+    cells[1].output ~ outputs[1]
+
+    # Cell 2
+    cells[2].i2c ~ mux.i2cs[2]
+    cells[2].power_24v ~ power_24v
+    cells[2].power_3v3_mcu ~ power_3v3_mcu
+    cells[2].spi_sclk.line ~ spi_sclk.line
+    cells[2].spi_mosi.line ~ spi_mosi.line
+    cells[2].spi_cs.line ~ spi_cs[2].line
+    cells[2].spi_miso.line ~ miso_mux.ch[2]
+    cells[2].output ~ outputs[2]
+
+    # Cell 3
+    cells[3].i2c ~ mux.i2cs[3]
+    cells[3].power_24v ~ power_24v
+    cells[3].power_3v3_mcu ~ power_3v3_mcu
+    cells[3].spi_sclk.line ~ spi_sclk.line
+    cells[3].spi_mosi.line ~ spi_mosi.line
+    cells[3].spi_cs.line ~ spi_cs[3].line
+    cells[3].spi_miso.line ~ miso_mux.ch[3]
+    cells[3].output ~ outputs[3]

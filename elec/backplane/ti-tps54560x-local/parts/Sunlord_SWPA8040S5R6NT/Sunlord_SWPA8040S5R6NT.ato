@@ -1,0 +1,19 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+import Inductor
+
+component Sunlord_SWPA8040S5R6NT from Inductor:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    # trait is_auto_generated<system="ato_part", source="easyeda:C96972", date="2025-07-28T19:24:04.759882+00:00", checksum="fb6b4be8dd146540ec1596ad1a7a1d498ca129d1cd31ea415e4e3f85240ac489">
+
+    trait is_atomic_part<manufacturer="Sunlord", partnumber="SWPA8040S5R6NT", footprint="IND-SMD_L8.0-W8.0_SWPA8040S.kicad_mod", symbol="SWPA8040S5R6NT.kicad_sym", model="IND-SMD_L8.0-W8.0-H4.2.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C96972", manufacturer="Sunlord", partno="SWPA8040S5R6NT">
+    trait has_designator_prefix<prefix="L">
+
+    # pins
+    unnamed[0] ~ pin 1
+    unnamed[1] ~ pin 2

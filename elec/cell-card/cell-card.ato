@@ -1,0 +1,37 @@
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+
+# Cell Card
+# =========
+# Complete 8-channel cell simulator card.
+# Composes a BaseCard (MCU, Ethernet, power) with 2x CellBlock4 (8 cells total).
+# This is a composition pattern — BaseCard is NOT inherited from.
+
+from "base-card.ato" import BaseCard
+from "cell.ato" import CellBlock4
+from "cell.ato" import KelvinOutput
+
+
+module CellCard:
+    "8-channel cell simulator card: BaseCard + 2x CellBlock4"
+
+    # === Compose base card (MCU, Ethernet, power, debug) ===
+    base = new BaseCard
+
+    # === Two cell blocks, 4 cells each, on separate I2C buses ===
+    block_a = new CellBlock4
+    block_b = new CellBlock4
+
+    # Connect I2C buses from base card to cell blocks
+    base.i2c_bus_1 ~ block_a.i2c
+    base.i2c_bus_2 ~ block_b.i2c
+
+    # Power distribution: 24V from backplane to both blocks
+    base.power_24v ~ block_a.power_24v
+    base.power_24v ~ block_b.power_24v
+
+    # === Cell output connector (rear panel, Kelvin) ===
+    # 8 Kelvin outputs: 4 from block_a + 4 from block_b
+    # TODO: define rear-panel connector component and connect
+    # outputs[0:3] ~ block_a.outputs[0:3]
+    # outputs[4:7] ~ block_b.outputs[0:3]

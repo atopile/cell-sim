@@ -1,0 +1,188 @@
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+
+# Base Card Module
+# ================
+# Common infrastructure shared by all card types (cell, thermistor, etc.)
+# Contains: STM32H723 MCU, LAN8742A Ethernet PHY, power regulation,
+# status LEDs, debug interfaces, backplane connector interface.
+#
+# Card-specific modules (CellBlock, ThermistorBlock) compose with this
+# module rather than inheriting from it.
+
+from "st-stm32h723-local/st-stm32h723.ato" import ST_STM32H723
+from "microchip-lan8742a-local/microchip-lan8742a.ato" import Microchip_LAN8742A
+from "ti-tps54560x-local/ti-tps54560x.ato" import TI_TPS54560
+from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
+from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
+from "atopile/programming-headers/programming-headers.ato" import TC2030_ARM_Cortex
+from "atopile/buttons/buttons.ato" import VerticalButton
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
+from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
+from "atopile/mounting-holes/mounting-holes.ato" import MountingHole_3_2_M3
+
+import Ethernet
+import UART_Base
+import Resistor
+import Capacitor
+
+
+# --- Interfaces ---
+
+interface BackplaneCard:
+    "Interface between card and backplane connector"
+    # Ethernet (PHY MDI pairs to backplane magnetics/RJ45)
+    ethernet = new Ethernet
+    # Power
+    power_24v = new ElectricPower
+    # Slot ID (active-low GPIOs, coded by backplane resistors)
+    slot_id_0 = new ElectricLogic
+    slot_id_1 = new ElectricLogic
+    slot_id_2 = new ElectricLogic
+    slot_id_3 = new ElectricLogic
+    slot_id_4 = new ElectricLogic
+    # Control
+    card_present = new ElectricLogic
+    reset = new ElectricLogic
+    # UART (for remote flashing and debug via CM5 slot mux)
+    uart = new UART_Base            # STM32 USART1 <-> backplane <-> CM5 (via mux)
+    # Boot mode control (active-high for STM32 ROM bootloader)
+    boot0 = new ElectricLogic       # Pulled low on card; mux drives high for bootloader
+
+
+# --- Base Card Module ---
+
+module BaseCard:
+    "Common card infrastructure: MCU, Ethernet, power, debug"
+
+    # === External interfaces ===
+    backplane = new BackplaneCard
+    power_24v = new ElectricPower
+    power_5v = new ElectricPower
+    power_3v3 = new ElectricPower
+
+    # I2C buses exposed for card-specific modules to use
+    i2c_bus_1 = new I2C
+    i2c_bus_2 = new I2C
+
+    # === MCU ===
+    micro = new ST_STM32H723
+
+    # === Ethernet PHY ===
+    phy = new Microchip_LAN8742A
+    phy.power_3v3 ~ power_3v3
+
+    # RMII connection: MCU <-> PHY (both use stdlib RMII interface)
+    micro.rmii ~ phy.rmii
+
+    # MDIO management bus: MCU <-> PHY
+    micro.mdio ~ phy.mdio
+
+    # Ethernet MDI pairs: PHY <-> backplane connector (via magnetics)
+    phy.ethernet ~ backplane.ethernet
+
+    # PHY reset
+    # TODO: phy._reset ~ micro.gpio_a[4]
+
+    # === Power regulation ===
+    # 24V from backplane
+    power_24v ~ backplane.power_24v
+
+    # 24V -> 5V buck
+    buck_5v = new TI_TPS54560
+    power_24v ~> buck_5v ~> power_5v
+    assert power_5v.voltage within 4.9V to 5.1V
+
+    # 5V -> 3.3V LDO
+    ldo_3v3 = new LDK220M_R
+    power_5v ~> ldo_3v3 ~> power_3v3
+    assert power_3v3.voltage within 3.2V to 3.4V
+
+    # MCU power
+    micro.power_3v3 ~ power_3v3
+
+    # === I2C buses (exposed for composition) ===
+    # Bus 1: cells 0-3 or thermistors 0-3
+    # TODO: connect i2c_bus_1 to micro.i2c[0] equivalent
+    # Bus 2: cells 4-7 or thermistors 4-7
+    # TODO: connect i2c_bus_2 to micro.i2c[1] equivalent
+
+    # === Slot ID pins ===
+    # 5 GPIO inputs read from backplane to determine slot position
+    # TODO: connect slot_id pins to micro GPIOs
+
+    # === UART to backplane (for remote flashing via CM5 slot mux) ===
+    # STM32 USART1 (PA9 TX, PA10 RX) <-> backplane UART (via slot mux to CM5)
+    micro.uart.base_uart ~ backplane.uart
+
+    # === BOOT0 (remote bootloader entry via backplane mux) ===
+    # Normally pulled low (normal boot). CM5 drives high through mux for STM32 ROM bootloader.
+    boot0_pulldown = new Resistor
+    boot0_pulldown.resistance = 10kohm +/- 5%
+    boot0_pulldown.package = "0402"
+    # TODO: connect boot0_pulldown between backplane.boot0.line and GND
+    # TODO: connect backplane.boot0.line to micro.boot0
+
+    # === NRST (remote reset via backplane mux) ===
+    # Normally pulled high (not in reset). CM5 drives low through mux to reset.
+    nrst_pullup = new Resistor
+    nrst_pullup.resistance = 10kohm +/- 5%
+    nrst_pullup.package = "0402"
+    nrst_cap = new Capacitor
+    nrst_cap.capacitance = 100nF +/- 20%
+    nrst_cap.package = "0402"
+    # TODO: connect nrst_pullup from NRST to 3.3V, nrst_cap from NRST to GND
+    # TODO: connect backplane.reset to micro NRST
+
+    # === Input voltage monitoring (24V bus health check) ===
+    # Resistor divider: 24V -> 100k -> ADC_IN -> 10k -> GND
+    # Ratio: 10k/(100k+10k) = 1/11 -> 24V reads as ~2.18V on ADC
+    r_vmon_high = new Resistor
+    r_vmon_high.resistance = 100kohm +/- 1%
+    r_vmon_high.package = "0402"
+    r_vmon_low = new Resistor
+    r_vmon_low.resistance = 10kohm +/- 1%
+    r_vmon_low.package = "0402"
+    # Filter capacitor on ADC input
+    c_vmon_filter = new Capacitor
+    c_vmon_filter.capacitance = 100nF +/- 20%
+    c_vmon_filter.package = "0402"
+    # TODO: connect divider: power_24v.hv -> r_vmon_high -> ADC_IN -> r_vmon_low -> GND
+    # TODO: connect c_vmon_filter from ADC_IN to GND
+    # TODO: connect ADC_IN to micro ADC3 pin
+
+    # === USB (DFU fallback) ===
+    usb = new USB2_0TypeCHorizontalConnector
+    micro.usb ~ usb.usb
+
+    # === Debug ===
+    swd = new TC2030_ARM_Cortex
+    micro.jtag ~ swd.jtag
+
+    # Reset button
+    reset_btn = new VerticalButton
+    # TODO: connect to micro NRST
+
+    # Boot button
+    boot_btn = new VerticalButton
+    # TODO: connect to micro BOOT0
+
+    # === Status LEDs ===
+    led_status_green = new LEDIndicatorGreen
+    led_status_red = new LEDIndicatorRed
+    led_status_green.power ~ power_3v3
+    led_status_red.power ~ power_3v3
+    # TODO: connect to micro GPIOs
+
+    # === Board temperature sensor ===
+    temp_sensor = new TI_TMP117
+    temp_sensor.power ~ power_3v3
+    temp_sensor.i2c ~ i2c_bus_1
+    # TODO: ideally on a separate i2c bus 3 (spare)
+
+    # === Mounting ===
+    mh1 = new MountingHole_3_2_M3
+    mh2 = new MountingHole_3_2_M3
+    mh3 = new MountingHole_3_2_M3
+    mh4 = new MountingHole_3_2_M3

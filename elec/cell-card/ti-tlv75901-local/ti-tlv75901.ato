@@ -1,0 +1,73 @@
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+#pragma experiment("MODULE_TEMPLATING")
+import Capacitor
+import ElectricPower
+import ElectricLogic
+import ElectricSignal
+import ResistorVoltageDivider
+import has_single_electric_reference
+
+from "regulators.ato" import AdjustableLDO
+from "parts/Texas_Instruments_TLV75901PDRVR/Texas_Instruments_TLV75901PDRVR.ato" import Texas_Instruments_TLV75901PDRVR_package
+
+module TI_TLV75901 from AdjustableLDO:
+    """
+    LDO regulator with adjustable output voltage
+    """
+    # --- Package ---
+    package = new Texas_Instruments_TLV75901PDRVR_package
+
+    # --- Parameters ---
+    dropout_voltage = 161mV to 1050mV
+    assert power_in.voltage within 1.5V to 6V
+    assert power_out.voltage within 0.55V to 5.5V
+    # assert power_out.voltage within power_in.voltage - dropout_voltage # TODO: fix
+    assert reference_voltage within 0.55V +/- 0.7%
+    assert power_out.max_current <= 1000mA
+
+    # --- External interfaces ---
+    enable = new ElectricLogic
+    enable.reference ~ power_in
+    assert enable.reference.voltage within 0V to 6V
+
+    # --- Internal interfaces ---
+    _enable = new ElectricLogic
+    _enable.reference ~ power_in
+
+    # --- Components ---
+    # Output decoupling capacitor
+    output_decoupling_capacitor = new Capacitor
+    output_decoupling_capacitor.capacitance = 1uF +/- 10%
+    output_decoupling_capacitor.package = "C0402"
+    power_out.hv ~> output_decoupling_capacitor ~> power_out.lv
+
+    # Input decoupling capacitor
+    input_decoupling_capacitor = new Capacitor
+    input_decoupling_capacitor.capacitance = 1uF +/- 10%
+    input_decoupling_capacitor.package = "C0402"
+    power_in.hv ~> input_decoupling_capacitor ~> power_in.lv
+
+    # --- Feedback Divider ---
+    # HACK: commented out to work around solver loop bug
+    # TODO: restore once atopile solver is fixed
+    # assert feedback_divider.total_resistance within 5kohm to 150kohm * (1 + (-0.01 to 0.01))
+    feedback_divider.chain.resistors[0].package = "0402"
+    feedback_divider.chain.resistors[1].package = "0402"
+
+    # --- Enable ---
+    # enable by default
+    _enable.line ~ power_in.hv
+
+    # --- Other connections ---
+    trait has_single_electric_reference<ground_only = True>
+
+    # --- Package Connections ---
+    power_in.hv ~ package.IN
+    power_in.lv ~ package.GND
+    power_out.hv ~ package.OUT
+    power_out.lv ~ package.EP
+    _enable.line ~ package.EN
+    feedback_divider.ref_out.hv ~ package.FB

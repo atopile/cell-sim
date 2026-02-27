@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component TI_TPS563201DDCR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C116592", date="2025-05-29T09:54:52.842600+00:00", checksum="9c13f27a00be20c6a0e1d7c094347a2de0de0182cc302f1841af257bbc889034">
+
+    trait is_atomic_part<manufacturer="TI", partnumber="TPS563201DDCR", footprint="SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR.kicad_mod", symbol="TPS563201DDCR.kicad_sym", model="SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C116592", manufacturer="TI", partno="TPS563201DDCR">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal EN ~ pin 5
+    signal GND ~ pin 1
+    signal SW ~ pin 2
+    signal VBST ~ pin 6
+    signal VFB ~ pin 4
+    signal VIN ~ pin 3

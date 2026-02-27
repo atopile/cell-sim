@@ -1,0 +1,49 @@
+requires-atopile: "^0.9.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    backplane:
+        entry: backplane.ato:Backplane
+
+dependencies:
+    # CM5
+    - atopile/rpi-cm5
+
+    # Ethernet switch (cascade for 20+ ports)
+    # BLOCKED: atopile/realtek-rtl8305nb depends on atopile/logos@0.1.4 which has broken manifest
+    # - atopile/realtek-rtl8305nb
+    - atopile/rj45-connectors
+
+    # Power
+    - atopile/ti-tps54560x
+    - atopile/st-ldk220
+    - atopile/relays
+
+    # Slot management (power switching, current monitoring, GPIO expanders)
+    - atopile/microchip-mcp23017
+    - atopile/ti-ina3221
+    - atopile/ti-ina228
+    - atopile/ti-tca9548a
+
+    # Slot mux (UART/NRST/BOOT0 routing to selected card)
+    - atopile/ti-cd74hc4067sm
+
+    # Fan control + thermal
+    - atopile/microchip-emc2101
+    - atopile/ti-tmp117
+
+    # UI
+    - atopile/indicator-leds
+    - atopile/buttons
+
+    # Connectors
+    - atopile/usb-connectors
+    - atopile/pin-headers
+    - atopile/mounting-holes
+
+    # Local packages
+    # TODO: add high-side-switch when file:// local deps are working
+    # - file:///home/np/projects/cell-sim/elec/packages/high-side-switch

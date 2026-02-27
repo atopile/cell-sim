@@ -1,0 +1,32 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+
+import ElectricPower
+import has_part_removed
+
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+
+module MCU:
+    """Host MCU providing power rail."""
+
+    trait has_part_removed
+
+    power = new ElectricPower
+    assert power.voltage is 3.3V +/- 5%
+
+    trait has_part_removed
+
+
+module Usage:
+    """Minimal example for the LDK220M-R LDO."""
+
+    some_input_power = new ElectricPower
+    assert some_input_power.voltage is 5V +/- 5%
+
+    # MCU & sensor
+    mcu = new MCU
+    ldo = new LDK220M_R
+
+    # Shared 3V3 rail
+    some_input_power ~> ldo ~> mcu.power

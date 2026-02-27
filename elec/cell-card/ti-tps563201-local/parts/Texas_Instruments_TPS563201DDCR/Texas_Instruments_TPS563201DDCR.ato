@@ -1,0 +1,24 @@
+#pragma experiment("TRAITS")
+import has_datasheet_defined
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_TPS563201DDCR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C116592", date="2025-07-28T19:00:29.555367+00:00", checksum="9542abceadc97180e0338de5cd3c0ed56df34fd27855eb5a745fa22b61e5f820">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="TPS563201DDCR", footprint="SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR.kicad_mod", symbol="TPS563201DDCR.kicad_sym", model="SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C116592", manufacturer="Texas Instruments", partno="TPS563201DDCR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet_defined<datasheet="https://lcsc.com/datasheet/lcsc_datasheet_2304241919_TI-TPS563201DDCR_C116592.pdf">
+
+    # pins
+    signal EN ~ pin 5
+    signal GND ~ pin 1
+    signal SW ~ pin 2
+    signal VBST ~ pin 6
+    signal VFB ~ pin 4
+    signal VIN ~ pin 3

@@ -1,0 +1,18 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component FOJAN_FRM121WFR050TM_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C7467249", date="2025-08-20T19:24:52.807078+00:00", checksum="9bd645095e9378f050a024839c4242df44349ed4bbadfe026967486552983eb1">
+
+    trait is_atomic_part<manufacturer="FOJAN", partnumber="FRM121WFR050TM", footprint="R1206.kicad_mod", symbol="FRM121WFR050TM.kicad_sym", model="R1206_L3.2-W1.6-H0.6.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C7467249", manufacturer="FOJAN", partno="FRM121WFR050TM">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    pin 2
+    pin 1

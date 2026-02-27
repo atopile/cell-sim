@@ -1,0 +1,23 @@
+#pragma experiment("TRAITS")
+import has_datasheet_defined
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component STMicroelectronics_LDK220M_R_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C443854", date="2025-07-21T17:36:54.789340+00:00", checksum="b7e9bafa14755c4c4bbae3461febf981ed630ca3e5a31414dbb3b924cfdbbcaa">
+
+    trait is_atomic_part<manufacturer="STMicroelectronics", partnumber="LDK220M-R", footprint="SOT-23-5_L3.0-W1.7-P0.95-LS2.8-BL.kicad_mod", symbol="LDK220M-R.kicad_sym", model="SOT-23-5_L2.9-W1.6-H1.1-LS2.8-P0.95.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C443854", manufacturer="STMicroelectronics", partno="LDK220M-R">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet_defined<datasheet="https://lcsc.com/datasheet/lcsc_datasheet_1912202032_ST-LDK220M-R_C443854.pdf">
+
+    # pins
+    signal ADJ_NC ~ pin 4
+    signal EN ~ pin 3
+    signal GND ~ pin 2
+    signal IN ~ pin 1
+    signal OUT ~ pin 5

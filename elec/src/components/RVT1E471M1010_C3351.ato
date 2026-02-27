@@ -1,9 +1,0 @@
-from "generics/capacitors.ato" import CapacitorElectrolytic
-
-component RVT1E471M1010_C3351 from CapacitorElectrolytic:
-    # component RVT1E471M1010_minus_C3351
-    footprint = "CAP-SMD_BD10.0-L10.3-W10.3-LS11.0-FD"
-    lcsc_id = "C3351"
-    mpn = "C3351"
-    anode ~ pin 1
-    cathode ~ pin 2

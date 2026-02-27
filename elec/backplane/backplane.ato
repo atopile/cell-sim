@@ -1,0 +1,427 @@
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+
+# Backplane
+# =========
+# Base board for the CellSim v2 rack-mount enclosure.
+# Contains: CM5 controller, cascaded GbE switch, power distribution,
+# fan controller, card slot connectors, front panel I/O.
+#
+# Autonomous bringup infrastructure:
+#   - Per-slot high-side power switches (20x, via MCP23017 GPIO)
+#   - Per-slot current monitoring (7x INA3221 behind TCA9548A)
+#   - Main bus monitoring (INA228, 24V V+I)
+#   - UART/NRST/BOOT0 mux (8x CD74HC4067SM, for remote flash + reset)
+#   - Card-present detection (MCP23017 GPIO inputs)
+#   - E-stop state readback
+#
+# Network architecture:
+#   - CM5 eth0 (native GbE) -> front panel RJ45 (uplink / WAN)
+#   - CM5 eth1 (RGMII via switch) -> internal card network (10.0.0.x)
+#   - Cards are NOT directly exposed to WAN; CM5 is the gateway
+#
+# I2C Address Map (CM5 I2C bus):
+#   0x20  MCP23017 #0  SLOT_POWER_EN[0:15]
+#   0x21  MCP23017 #1  SLOT_POWER_EN[16:19], MUX_SEL[0:4], E_STOP
+#   0x22  MCP23017 #2  CARD_PRESENT[0:15]
+#   0x45  INA228       Main 24V bus V+I
+#   0x48  TMP117       Board temperature
+#   0x4C  EMC2101      Fan controller
+#   0x70  TCA9548A     I2C mux for INA3221 address expansion
+#   0x40-0x43  INA3221 x4 (via TCA9548A ch0)  Slots 0-11 current
+#   0x40-0x42  INA3221 x3 (via TCA9548A ch1)  Slots 12-20 current
+
+from "atopile/rpi-cm5/rpi-cm5.ato" import RPI_CM5
+# BLOCKED: atopile/logos broken manifest blocks realtek-rtl8305nb
+# from "atopile/realtek-rtl8305nb/realtek-rtl8305nb.ato" import Realtek_RTL8305NB
+from "atopile/rj45-connectors/rj45-connectors.ato" import RJ45_Horizontal_SMD_Magnetics
+from "ti-tps54560x-local/ti-tps54560x.ato" import TI_TPS54560
+from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
+from "atopile/microchip-emc2101/microchip-emc2101.ato" import Microchip_EMC2101
+from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
+from "atopile/relays/relays.ato" import LogicLevelRelaySPDT3A5V
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
+from "atopile/buttons/buttons.ato" import VerticalButton
+from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
+from "atopile/mounting-holes/mounting-holes.ato" import MountingHole_3_2_M3
+
+# Slot management infrastructure
+from "atopile/microchip-mcp23017/microchip-mcp23017.ato" import Microchip_MCP23017
+from "atopile/ti-ina3221/ti-ina3221.ato" import TI_INA3221
+from "ti-ina228-local/ti-ina228.ato" import TI_INA228
+from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
+from "atopile/ti-cd74hc4067sm/ti-cd74hc4067sm.ato" import TI_CD74HC4067SM
+
+import UART_Base
+import Resistor
+
+
+# ============================================================================
+# Slot Manager
+# ============================================================================
+# Per-slot power switching, current monitoring, and card-present detection.
+# Controlled by CM5 over I2C.
+
+module SlotManager:
+    "Per-slot power control, current monitoring, and card detection for 20 slots"
+
+    # External interfaces
+    i2c = new I2C                      # CM5 I2C bus
+    power_24v_in = new ElectricPower   # 24V bus (post E-stop)
+    power_3v3 = new ElectricPower      # 3.3V for ICs
+
+    # Per-slot switched power outputs
+    power_slot = new ElectricPower[20]
+
+    # === GPIO Expanders (3x MCP23017) ===
+    # IC0 (0x20): Port A = SLOT_POWER_EN[0:7], Port B = SLOT_POWER_EN[8:15]
+    gpio_power_0_15 = new Microchip_MCP23017
+    gpio_power_0_15.power ~ power_3v3
+    gpio_power_0_15.i2c ~ i2c
+    # TODO: set address to 0x20 (A2=0, A1=0, A0=0)
+
+    # IC1 (0x21): Port A[0:3] = SLOT_POWER_EN[16:19]
+    #             Port A[4:7] = MUX_SEL[0:3]
+    #             Port B[0] = MUX_SEL[4] (bank select)
+    #             Port B[1] = E_STOP_STATE (input)
+    #             Port B[2:7] = spare
+    gpio_aux = new Microchip_MCP23017
+    gpio_aux.power ~ power_3v3
+    gpio_aux.i2c ~ i2c
+    # TODO: set address to 0x21 (A2=0, A1=0, A0=1)
+
+    # IC2 (0x22): Port A = CARD_PRESENT[0:7], Port B = CARD_PRESENT[8:15]
+    # Card-present for slots 16-19 detected via INA3221 current (no current = no card)
+    gpio_detect = new Microchip_MCP23017
+    gpio_detect.power ~ power_3v3
+    gpio_detect.i2c ~ i2c
+    # TODO: set address to 0x22 (A2=0, A1=1, A0=0)
+
+    # === High-Side Power Switches (20 slots) ===
+    # Each switch controlled by one MCP23017 GPIO output.
+    # Default state: OFF (power switches default off on boot).
+    #
+    # Switch enable GPIOs mapped to:
+    #   gpio_power_0_15 Port A[0:7] -> slots 0-7
+    #   gpio_power_0_15 Port B[0:7] -> slots 8-15
+    #   gpio_aux Port A[0:3] -> slots 16-19
+    #
+    # NOTE: HighSidePowerSwitch package instantiation and connections.
+    # Each switch takes power_24v_in and outputs to power_slot[n].
+    # Enable line connected to the corresponding MCP23017 GPIO.
+    # The P-FET + NPN driver circuit is defined in the high-side-switch package.
+    # TODO: instantiate 20x HighSidePowerSwitch and connect when package is finalized
+    #       with actual transistor component definitions
+
+    # === Per-Slot Current Monitoring ===
+    # 7x INA3221 (3 channels each = 21 channels for 20 slots + 1 spare)
+    # Addressed via TCA9548A I2C mux to avoid address conflicts:
+    #   TCA9548A ch0: INA3221 x4 at 0x40-0x43 (slots 0-11)
+    #   TCA9548A ch1: INA3221 x3 at 0x40-0x42 (slots 12-20)
+    i2c_mux = new TI_TCA9548A
+    i2c_mux.i2c ~ i2c
+    i2c_mux.power ~ power_3v3
+    # TODO: set address to 0x70
+
+    # Bank 0: slots 0-11 (4x INA3221, each on a separate TCA9548A channel)
+    ina_bank0 = new TI_INA3221[4]
+    for monitor in ina_bank0:
+        monitor.power ~ power_3v3
+    ina_bank0[0].i2c ~ i2c_mux.i2cs[0]
+    ina_bank0[1].i2c ~ i2c_mux.i2cs[1]
+    ina_bank0[2].i2c ~ i2c_mux.i2cs[2]
+    ina_bank0[3].i2c ~ i2c_mux.i2cs[3]
+    # TODO: set unique addresses (0x40, 0x41, 0x42, 0x43)
+    # TODO: connect shunt resistors between power switch output and card slot
+
+    # Bank 1: slots 12-20 (3x INA3221, each on a separate TCA9548A channel)
+    ina_bank1 = new TI_INA3221[3]
+    for monitor in ina_bank1:
+        monitor.power ~ power_3v3
+    ina_bank1[0].i2c ~ i2c_mux.i2cs[4]
+    ina_bank1[1].i2c ~ i2c_mux.i2cs[5]
+    ina_bank1[2].i2c ~ i2c_mux.i2cs[6]
+    # TODO: set unique addresses (0x40, 0x41, 0x42)
+    # TODO: connect shunt resistors
+
+
+# ============================================================================
+# Slot Mux
+# ============================================================================
+# Routes UART TX, UART RX, NRST, and BOOT0 signals from CM5 to a selected
+# card slot. Uses 8x CD74HC4067SM analog multiplexers (2 per signal: one for
+# slots 0-15, one for slots 16-19). Select lines shared from MCP23017.
+#
+# Only one card can be in bootloader/reset mode at a time (sequential bringup).
+
+module SlotMux:
+    "4-signal analog mux routing UART/NRST/BOOT0 from CM5 to selected card slot"
+
+    # External interfaces
+    power_3v3 = new ElectricPower
+
+    # CM5 side (common/host signals)
+    uart_host = new UART_Base           # CM5 UART (tx/rx bundled)
+    nrst_host = new ElectricLogic       # CM5 GPIO drives NRST low
+    boot0_host = new ElectricLogic      # CM5 GPIO drives BOOT0 high
+
+    # Select lines (from SlotManager MCP23017 IC1)
+    sel_0 = new ElectricLogic           # MUX_SEL[0] - shared to all 8 muxes
+    sel_1 = new ElectricLogic           # MUX_SEL[1]
+    sel_2 = new ElectricLogic           # MUX_SEL[2]
+    sel_3 = new ElectricLogic           # MUX_SEL[3]
+    bank_sel = new ElectricLogic        # MUX_SEL[4] - bank 0 (slots 0-15) vs bank 1 (slots 16-19)
+
+    # === Mux ICs ===
+    # 4 signals x 2 banks = 8 mux ICs
+    # Bank 0 (slots 0-15): mux_uart_tx_0, mux_uart_rx_0, mux_nrst_0, mux_boot0_0
+    # Bank 1 (slots 16-19): mux_uart_tx_1, mux_uart_rx_1, mux_nrst_1, mux_boot0_1
+
+    # UART TX muxes (CM5 TX -> selected card RX)
+    mux_uart_tx_0 = new TI_CD74HC4067SM
+    mux_uart_tx_1 = new TI_CD74HC4067SM
+    mux_uart_tx_0.power ~ power_3v3
+    mux_uart_tx_1.power ~ power_3v3
+
+    # UART RX muxes (selected card TX -> CM5 RX)
+    mux_uart_rx_0 = new TI_CD74HC4067SM
+    mux_uart_rx_1 = new TI_CD74HC4067SM
+    mux_uart_rx_0.power ~ power_3v3
+    mux_uart_rx_1.power ~ power_3v3
+
+    # NRST muxes (CM5 drives low to reset selected card)
+    mux_nrst_0 = new TI_CD74HC4067SM
+    mux_nrst_1 = new TI_CD74HC4067SM
+    mux_nrst_0.power ~ power_3v3
+    mux_nrst_1.power ~ power_3v3
+
+    # BOOT0 muxes (CM5 drives high for bootloader on selected card)
+    mux_boot0_0 = new TI_CD74HC4067SM
+    mux_boot0_1 = new TI_CD74HC4067SM
+    mux_boot0_0.power ~ power_3v3
+    mux_boot0_1.power ~ power_3v3
+
+    # === Select line connections ===
+    # All 8 muxes share the same 4 select lines
+    mux_uart_tx_0.selects[0] ~ sel_0
+    mux_uart_tx_0.selects[1] ~ sel_1
+    mux_uart_tx_0.selects[2] ~ sel_2
+    mux_uart_tx_0.selects[3] ~ sel_3
+
+    mux_uart_tx_1.selects[0] ~ sel_0
+    mux_uart_tx_1.selects[1] ~ sel_1
+    mux_uart_tx_1.selects[2] ~ sel_2
+    mux_uart_tx_1.selects[3] ~ sel_3
+
+    mux_uart_rx_0.selects[0] ~ sel_0
+    mux_uart_rx_0.selects[1] ~ sel_1
+    mux_uart_rx_0.selects[2] ~ sel_2
+    mux_uart_rx_0.selects[3] ~ sel_3
+
+    mux_uart_rx_1.selects[0] ~ sel_0
+    mux_uart_rx_1.selects[1] ~ sel_1
+    mux_uart_rx_1.selects[2] ~ sel_2
+    mux_uart_rx_1.selects[3] ~ sel_3
+
+    mux_nrst_0.selects[0] ~ sel_0
+    mux_nrst_0.selects[1] ~ sel_1
+    mux_nrst_0.selects[2] ~ sel_2
+    mux_nrst_0.selects[3] ~ sel_3
+
+    mux_nrst_1.selects[0] ~ sel_0
+    mux_nrst_1.selects[1] ~ sel_1
+    mux_nrst_1.selects[2] ~ sel_2
+    mux_nrst_1.selects[3] ~ sel_3
+
+    mux_boot0_0.selects[0] ~ sel_0
+    mux_boot0_0.selects[1] ~ sel_1
+    mux_boot0_0.selects[2] ~ sel_2
+    mux_boot0_0.selects[3] ~ sel_3
+
+    mux_boot0_1.selects[0] ~ sel_0
+    mux_boot0_1.selects[1] ~ sel_1
+    mux_boot0_1.selects[2] ~ sel_2
+    mux_boot0_1.selects[3] ~ sel_3
+
+    # Bank enable: bank_sel drives enable on bank 1 muxes
+    # Bank 0 muxes have enable pulled low (always enabled) by internal pulldown
+    # Bank 1 muxes use bank_sel as enable
+    mux_uart_tx_1.enable ~ bank_sel
+    mux_uart_rx_1.enable ~ bank_sel
+    mux_nrst_1.enable ~ bank_sel
+    mux_boot0_1.enable ~ bank_sel
+
+    # === Host side connections ===
+    # Connect CM5 UART to mux common pins
+    uart_host.tx.line ~ mux_uart_tx_0.common.line
+    uart_host.tx.line ~ mux_uart_tx_1.common.line
+    uart_host.rx.line ~ mux_uart_rx_0.common.line
+    uart_host.rx.line ~ mux_uart_rx_1.common.line
+    nrst_host.line ~ mux_nrst_0.common.line
+    nrst_host.line ~ mux_nrst_1.common.line
+    boot0_host.line ~ mux_boot0_0.common.line
+    boot0_host.line ~ mux_boot0_1.common.line
+
+    # Connect mux common references to power_3v3
+    mux_uart_tx_0.common.reference ~ power_3v3
+    mux_uart_tx_1.common.reference ~ power_3v3
+    mux_uart_rx_0.common.reference ~ power_3v3
+    mux_uart_rx_1.common.reference ~ power_3v3
+    mux_nrst_0.common.reference ~ power_3v3
+    mux_nrst_1.common.reference ~ power_3v3
+    mux_boot0_0.common.reference ~ power_3v3
+    mux_boot0_1.common.reference ~ power_3v3
+
+    # === Card side connections ===
+    # Each mux channel output goes to the corresponding backplane card connector.
+    # Channel 0 -> slot 0 (or slot 16), channel 1 -> slot 1 (or slot 17), etc.
+    # TODO: connect mux ios[0..15] to card slot connectors when slot connectors are defined
+
+
+# ============================================================================
+# Main Backplane Module
+# ============================================================================
+
+module Backplane:
+    "CellSim v2 backplane: CM5 + GbE switch + power + 20 card slots + bringup infrastructure"
+
+    # === Power rails ===
+    power_24v = new ElectricPower          # From Meanwell PSU (IEC C14 input)
+    power_24v_switched = new ElectricPower  # After E-stop relay
+    power_5v = new ElectricPower           # For CM5, switch, LEDs
+    power_3v3 = new ElectricPower          # For CM5, switch, I2C devices
+
+    # === CM5 I2C bus (shared by all management ICs) ===
+    cm5_i2c = new I2C
+
+    # === E-Stop ===
+    estop_relay = new LogicLevelRelaySPDT3A5V
+    # 24V through normally-open contact of relay to card slots
+    # When relay energized (e-stop OK): power flows
+    # When relay de-energized (e-stop pressed / power loss): power cut
+    bus_monitor.power_out.hv ~ estop_relay.relay.switch_no.common
+    estop_relay.relay.switch_no.normally_open ~ power_24v_switched.hv
+    power_24v.lv ~ power_24v_switched.lv
+    estop_relay.coil_power ~ power_5v
+    # TODO: E-stop button connector (front panel, screw terminal)
+
+    # === Main 24V Bus Monitor (INA228) ===
+    # Monitors total system current and voltage on the 24V bus
+    # Inline on 24V bus before E-stop: PSU -> INA228 -> E-stop -> cards
+    # Shunt: 5mohm for ~30A full-scale
+    bus_monitor = new TI_INA228
+    bus_monitor.power ~ power_3v3
+    bus_monitor.i2c ~ cm5_i2c
+    bus_monitor.power_in ~ power_24v
+    bus_monitor.power_out.lv ~ power_24v.lv
+    # TODO: set address to 0x45
+
+    # === Power regulation ===
+    # 24V -> 5V buck (for CM5, switch ICs, LEDs)
+    buck_5v = new TI_TPS54560
+    power_24v ~> buck_5v ~> power_5v
+    assert power_5v.voltage within 4.9V to 5.1V
+
+    # 5V -> 3.3V LDO (for switch ICs, I2C)
+    ldo_3v3 = new LDK220M_R
+    power_5v ~> ldo_3v3 ~> power_3v3
+    assert power_3v3.voltage within 3.2V to 3.4V
+
+    # === CM5 (main controller) ===
+    cm5 = new RPI_CM5
+    cm5.power_5v ~ power_5v
+    cm5.i2cs[0] ~ cm5_i2c
+    # TODO: connect CM5 USB to usb_cm5
+    # TODO: connect CM5 UART to slot_mux host side
+    # TODO: connect CM5 GPIO for NRST_DRIVE and BOOT0_DRIVE to slot_mux
+
+    # === Uplink RJ45 (front panel, WAN-facing) ===
+    uplink_rj45 = new RJ45_Horizontal_SMD_Magnetics
+    # TODO: connect to CM5 native GbE (eth0)
+
+    # === Internal GbE Switch (card network) ===
+    # BLOCKED: atopile/logos broken manifest blocks realtek-rtl8305nb
+    # Cascaded RTL8305NB switches for ~20 card ports
+    # Root switch: port 0 = CM5 RGMII, ports 1-4 = cascade to leaf switches
+    # Each leaf switch: port 0 = cascade uplink, ports 1-4 = card slots
+    # Total card slots: 4 leaves × 4 ports + root spare = 16-20 slots
+    # TODO: uncomment when atopile/logos manifest is fixed
+    # switch_root = new Realtek_RTL8305NB
+    # switch_a = new Realtek_RTL8305NB
+    # switch_b = new Realtek_RTL8305NB
+    # switch_c = new Realtek_RTL8305NB
+    # switch_d = new Realtek_RTL8305NB
+    # switch_root.power_3v3 ~ power_3v3
+    # switch_a.power_3v3 ~ power_3v3
+    # switch_b.power_3v3 ~ power_3v3
+    # switch_c.power_3v3 ~ power_3v3
+    # switch_d.power_3v3 ~ power_3v3
+
+    # === Slot Manager ===
+    # Per-slot power switching, current monitoring, card-present detection
+    slot_mgr = new SlotManager
+    slot_mgr.i2c ~ cm5_i2c
+    slot_mgr.power_24v_in ~ power_24v_switched
+    slot_mgr.power_3v3 ~ power_3v3
+
+    # === Slot Mux ===
+    # Routes UART/NRST/BOOT0 from CM5 to selected card for remote flash + reset
+    slot_mux = new SlotMux
+    slot_mux.power_3v3 ~ power_3v3
+    # Select lines driven by SlotManager MCP23017 IC1 (gpio_aux)
+    # TODO: connect slot_mux.sel_0..sel_3 to slot_mgr.gpio_aux port A[4:7]
+    # TODO: connect slot_mux.bank_sel to slot_mgr.gpio_aux port B[0]
+    # TODO: connect slot_mux.uart_host to CM5 UART
+    # TODO: connect slot_mux.nrst_host/boot0_host to CM5 GPIO
+
+    # === Card Slots (×20) ===
+    # Each slot connector provides:
+    #   - Ethernet TX/RX pairs (from GbE switch)
+    #   - Switched 24V power (from slot_mgr power_slot[n])
+    #   - UART TX/RX (from slot_mux)
+    #   - NRST (from slot_mux)
+    #   - BOOT0 (from slot_mux)
+    #   - Slot ID (5 bits, hardwired per slot via resistor network)
+    #   - Card-present (pull-up on backplane, pulled down by card)
+    # TODO: define card slot connector component and wire all 20 slots
+
+    # === Fan Controller ===
+    fan_ctrl = new Microchip_EMC2101
+    fan_ctrl.power ~ power_3v3
+    fan_ctrl.i2c ~ cm5_i2c
+    # Fan PWM output -> fan header connector
+    fan_pwm_out = new ElectricLogic
+    fan_ctrl.pwm_out ~ fan_pwm_out
+    # TODO: connect fan_pwm_out to fan header connector pin
+    # TODO: connect tachometer input
+
+    # === Base board temperature sensor ===
+    temp_board = new TI_TMP117
+    temp_board.power ~ power_3v3
+    temp_board.i2c ~ cm5_i2c
+
+    # === Front panel ===
+    # USB-C for CM5 debug/console
+    usb_cm5 = new USB2_0TypeCHorizontalConnector
+    # TODO: connect to CM5 USB
+
+    # Status LEDs
+    led_power = new LEDIndicatorGreen
+    led_fault = new LEDIndicatorRed
+    led_power.power ~ power_3v3
+    led_fault.power ~ power_3v3
+
+    # Reset button
+    reset_btn = new VerticalButton
+
+    # OLED display connector (I2C, 4-pin header)
+    # TODO: pin header for SSD1306 OLED, connect to cm5_i2c
+
+    # === Mounting ===
+    mh1 = new MountingHole_3_2_M3
+    mh2 = new MountingHole_3_2_M3
+    mh3 = new MountingHole_3_2_M3
+    mh4 = new MountingHole_3_2_M3
+    mh5 = new MountingHole_3_2_M3
+    mh6 = new MountingHole_3_2_M3

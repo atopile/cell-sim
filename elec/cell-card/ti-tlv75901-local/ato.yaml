@@ -1,0 +1,25 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  default:
+    entry: ti-tlv75901.ato:TI_TLV75901
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+
+package:
+  identifier: atopile/ti-tlv75901
+  repository: https://github.com/atopile/packages
+  version: 0.4.0
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: TI TLV75901 LDO 1A 1.5V to 6V input 0.55V to 5.5V output
+  license: MIT

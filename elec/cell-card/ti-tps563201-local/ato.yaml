@@ -1,0 +1,25 @@
+requires-atopile: ^0.12.4
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  default:
+    entry: ti-tps563201.ato:TI_TPS563201
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+
+package:
+  identifier: atopile/ti-tps563201
+  repository: https://github.com/atopile/packages
+  version: 0.1.9
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: Texas Instruments TPS563201 buck converter
+  license: MIT

@@ -1,0 +1,62 @@
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+
+# Thermistor Card
+# ===============
+# 8-channel thermistor emulation card.
+# Composes the same BaseCard (MCU, Ethernet, power) with thermistor
+# output circuitry instead of cell channels.
+# Same backplane connector, same form factor, different payload.
+
+from "base-card.ato" import BaseCard
+from "atopile/microchip-mcp4728/microchip-mcp4728.ato" import Microchip_MCP4728
+from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
+from "atopile/ti-ads1115/ti-ads1115.ato" import TI_ADS1115
+
+
+module ThermistorChannel:
+    "Single thermistor emulation output: DAC -> resistor -> connector"
+    # TODO: DAC output + protection + output resistor + connector pin
+    pass
+
+
+module ThermistorBlock:
+    "8 thermistor channels with DAC outputs and ADC self-test"
+
+    i2c = new I2C
+
+    # 2x MCP4728 (4ch each) = 8 DAC channels
+    dac_a = new Microchip_MCP4728
+    dac_b = new Microchip_MCP4728
+
+    # ADC for self-test (reads back DAC outputs)
+    # TODO: replace with ADS1219 when package exists
+    adc = new TI_ADS1115
+
+    # Connect DACs and ADC to I2C bus
+    dac_a.i2c ~ i2c
+    dac_b.i2c ~ i2c
+    adc.i2c ~ i2c
+
+    # Connect power (from parent via composition)
+    power = new ElectricPower
+    dac_a.power ~ power
+    dac_b.power ~ power
+    adc.power ~ power
+
+    # TODO: 8x output resistors + protection diodes -> connector
+
+
+module ThermistorCard:
+    "8-channel thermistor emulation card: BaseCard + ThermistorBlock"
+
+    # === Compose base card (MCU, Ethernet, power, debug) ===
+    base = new BaseCard
+
+    # === Thermistor block on I2C bus 1 ===
+    thermistors = new ThermistorBlock
+    base.i2c_bus_1 ~ thermistors.i2c
+    base.power_3v3 ~ thermistors.power
+
+    # === Output connector (rear panel) ===
+    # TODO: 8 thermistor outputs + GND pairs -> rear connector

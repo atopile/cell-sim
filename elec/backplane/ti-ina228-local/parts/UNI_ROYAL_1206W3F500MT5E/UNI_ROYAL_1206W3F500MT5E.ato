@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet_defined
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component UNI_ROYAL_1206W3F500MT5E_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C127691", date="2025-07-16T21:17:00.365594+00:00", checksum="f1d7df7c6e01e191540bf1071a5651ec65fd8637b9d5bfeb1953af3d5d40c5d1">
+
+    trait is_atomic_part<manufacturer="UNI-ROYAL", partnumber="1206W3F500MT5E", footprint="R1206.kicad_mod", symbol="1206W4F500MT5E.kicad_sym", model="R1206_L3.2-W1.6-H0.6.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C127691", manufacturer="UNI-ROYAL", partno="1206W3F500MT5E">
+    trait has_designator_prefix<prefix="R">
+    trait has_datasheet_defined<datasheet="https://lcsc.com/datasheet/lcsc_datasheet_2411221012_UNI-ROYAL-1206W3F500MT5E_C127691.pdf">
+
+    # pins
+    pin 2
+    pin 1

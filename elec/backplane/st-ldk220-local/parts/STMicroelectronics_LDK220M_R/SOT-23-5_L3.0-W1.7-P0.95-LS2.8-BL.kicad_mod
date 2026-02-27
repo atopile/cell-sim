@@ -1,0 +1,174 @@
+(footprint "STMicroelectronics_LDK220M_R:SOT-23-5_L3.0-W1.7-P0.95-LS2.8-BL"
+    (layer "F.Cu")
+    (descr "")
+    (version 20241229)
+    (generator "faebryk")
+    (generator_version "v5")
+    (tedit "5DC5F6A4")
+    (property "Reference" "REF**"
+        (at 0 -5.15 0)
+        (layer "F.SilkS")
+        (hide no)
+        (uuid "0a939298-e360-4324-8f2a-750a1ad462af")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "Value" "SOT-23-5_L3.0-W1.7-P0.95-LS2.8-BL"
+        (at 0 5.15 0)
+        (layer "F.Fab")
+        (hide no)
+        (uuid "1a48dc1b-e513-4770-9620-d6c2d9fe99f7")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "checksum" "3e131fd8a5e9b3aa726add8a6d31bcc1f841d2b3711232592711ba35f1eb51b6"
+        (at 0 0 0)
+        (layer "User.9")
+        (hide no)
+        (uuid "720cd712-2c28-43bf-8e38-de8240be74df")
+        (effects
+            (font
+                (size 0.125 0.125)
+                (thickness 0.01875)
+            )
+            (hide yes)
+        )
+    )
+    (attr smd)
+    (fp_line
+        (start -1.53 0.85)
+        (end -1.53 -0.85)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "509e5b52-f764-4e00-bac2-3b9ef7bf2708")
+    )
+    (fp_line
+        (start 1.53 0.85)
+        (end 1.53 -0.85)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "46cfd4c3-3080-49a8-be2b-45280362af81")
+    )
+    (fp_line
+        (start 0.48 -0.85)
+        (end -0.48 -0.85)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "45ac0e4c-af9c-4804-ac1a-ce1746193e47")
+    )
+    (fp_circle
+        (center -1.65 1.14)
+        (end -1.5 1.14)
+        (stroke
+            (width 0.3)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.SilkS")
+        (uuid "7eb25277-c2f1-4214-aa2c-1dcee290a966")
+    )
+    (fp_circle
+        (center -0.95 1.76)
+        (end -0.85 1.76)
+        (stroke
+            (width 0.2)
+            (type solid)
+        )
+        (fill no)
+        (layer "Cmts.User")
+        (uuid "f7bcff04-b4e2-4438-b2fa-80767c620642")
+    )
+    (fp_circle
+        (center -1.42 1.37)
+        (end -1.39 1.37)
+        (stroke
+            (width 0.06)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.Fab")
+        (uuid "f24e565f-7656-49bb-86d8-7ad517ff1a90")
+    )
+    (fp_text user "%R"
+        (at 0 0 0)
+        (layer "F.Fab")
+        (uuid "6d0d1af7-b3c2-4ae1-b12c-8dbde9afae10")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (fp_text user "${REFERENCE}"
+        (at 0 -5.15 0)
+        (layer "F.SilkS")
+        (uuid "0a939298-e360-4324-8f2a-750a1ad462af")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (pad "1" smd rect
+        (at -0.95 1.15 0)
+        (size 0.49 1.16)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "611a4055-cbec-4b78-bf35-2c5325cd756b")
+    )
+    (pad "2" smd rect
+        (at 0 1.15 0)
+        (size 0.49 1.16)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "eba7a9a4-1259-413d-a8b4-b19431a82bd3")
+    )
+    (pad "3" smd rect
+        (at 0.95 1.15 0)
+        (size 0.49 1.16)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "5592ca7a-f1f1-4036-8f25-e5ceac11424e")
+    )
+    (pad "4" smd rect
+        (at 0.95 -1.15 0)
+        (size 0.49 1.18)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "0ecbcf4a-27e4-47bd-89c0-9d237d5a0467")
+    )
+    (pad "5" smd rect
+        (at -0.95 -1.15 0)
+        (size 0.49 1.18)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "acc8e85f-abe3-41bc-9dc3-8e245d75efea")
+    )
+    (model "${KIPRJMOD}/../../parts/STMicroelectronics_LDK220M_R/SOT-23-5_L2.9-W1.6-H1.1-LS2.8-P0.95.step"
+        (offset
+            (xyz 0 0 0)
+        )
+        (scale
+            (xyz 1 1 1)
+        )
+        (rotate
+            (xyz 0 0 270)
+        )
+    )
+)

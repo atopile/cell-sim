@@ -1,0 +1,18 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Walter_Elec_STE1206M1W0R016F_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C201282", date="2025-08-20T19:24:53.453844+00:00", checksum="3025050a13ebf62e11e71efad7a8cb89a5b3657bf007ad269790ce66cf4a1ffe">
+
+    trait is_atomic_part<manufacturer="Walter Elec", partnumber="STE1206M1W0R016F", footprint="R1206.kicad_mod", symbol="STE1206M1W0R016F.kicad_sym", model="R1206_L3.2-W1.6-H0.6.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C201282", manufacturer="Walter Elec", partno="STE1206M1W0R016F">
+    trait has_designator_prefix<prefix="R">
+
+    # pins
+    pin 2
+    pin 1
