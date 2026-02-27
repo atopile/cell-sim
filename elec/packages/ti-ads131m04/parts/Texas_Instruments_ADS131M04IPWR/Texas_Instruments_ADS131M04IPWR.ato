@@ -1,0 +1,38 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_ADS131M04IPWR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2862562", date="2026-02-27T20:59:06.655759+00:00", checksum="24308c7f47144057107c5b84497f486997cf015ef486f460b0e24d568aa59318">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="ADS131M04IPWR", footprint="TSSOP-20_L6.5-W4.4-P0.65-LS6.4-BL.kicad_mod", symbol="ADS131M04IPWR.kicad_sym", model="TSSOP-20_L6.5-W4.4-H1.0-LS6.4-P0.65.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2862562", manufacturer="Texas Instruments", partno="ADS131M04IPWR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2302220800_Texas-Instruments-ADS131M04IPWR_C2862562.pdf">
+
+    # pins
+    signal AGND ~ pin 2
+    signal AIN0N ~ pin 4
+    signal AIN0P ~ pin 3
+    signal AIN1N ~ pin 5
+    signal AIN1P ~ pin 6
+    signal AIN2N ~ pin 8
+    signal AIN2P ~ pin 7
+    signal AIN3N ~ pin 9
+    signal AIN3P ~ pin 10
+    signal AVDD ~ pin 1
+    signal CAP ~ pin 18
+    signal CLKIN ~ pin 17
+    signal DGND ~ pin 19
+    signal DIN ~ pin 16
+    signal DOUT ~ pin 15
+    signal DVDD ~ pin 20
+    signal SCLK ~ pin 14
+    signal nCS ~ pin 12
+    signal nDRDY ~ pin 13
+    signal nSYNC_nRESET ~ pin 11

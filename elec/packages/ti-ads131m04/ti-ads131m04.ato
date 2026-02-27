@@ -1,0 +1,200 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+import ElectricPower
+import Electrical
+import ElectricLogic
+import SPI
+import Resistor
+import Capacitor
+import DifferentialPair
+
+from "parts/Texas_Instruments_ADS131M04IPWR/Texas_Instruments_ADS131M04IPWR.ato" import Texas_Instruments_ADS131M04IPWR_package
+
+module TI_ADS131M04:
+    """
+    Texas Instruments ADS131M04 4-Channel 24-Bit Simultaneous-Sampling Delta-Sigma ADC
+
+    High-precision 4-channel simultaneously-sampling delta-sigma ADC with SPI interface.
+    Intended for industrial sensor measurement, battery management, and power-quality
+    monitoring applications where multiple channels must be sampled at the same instant.
+
+    Key Specifications:
+    - ADC Resolution: 24-bit delta-sigma
+    - Channels: 4, simultaneously sampled
+    - Data Rate: Up to 32 kSPS per channel
+    - SPI Clock: Up to 25 MHz
+    - Internal Reference: 1.2V (PGA gain=1 gives +/-1.2V differential input range)
+    - Analog Supply (AVDD): 2.7V to 3.6V
+    - Digital Supply (DVDD): 1.8V to 3.6V (can be tied to AVDD)
+    - Internal Oscillator: 8.192 MHz (no external clock required)
+
+    External connections provided by this driver:
+    - power_analog   - Analog power supply (2.7V to 3.6V)
+    - power_digital  - Digital power supply (1.8V to 3.6V, can connect to power_analog)
+    - spi            - SPI bus (sclk, mosi, miso)
+    - cs             - SPI chip select (active low)
+    - drdy           - Data ready output (active low, directly from nDRDY pin)
+    - sync_reset     - Sync/Reset input (active low, tie high via pullup if unused)
+    - clkin          - External clock input (leave unconnected to use internal oscillator)
+    - input[0..3]    - 4 differential analog input pairs (DifferentialPair)
+    """
+
+    # --- Package ---
+    package = new Texas_Instruments_ADS131M04IPWR_package
+
+    # =========================================================================
+    # Power Rails
+    # =========================================================================
+
+    # Analog supply (2.7V to 3.6V)
+    power_analog = new ElectricPower
+    """
+    Analog power supply rail (AVDD/AGND).
+    Must be 2.7V to 3.6V. Provides power to the analog front-end and internal reference.
+    """
+    power_analog.required = True
+    assert power_analog.voltage within 2.7V to 3.6V
+    power_analog.hv ~ package.AVDD
+    power_analog.lv ~ package.AGND
+
+    # Digital supply (1.8V to 3.6V)
+    power_digital = new ElectricPower
+    """
+    Digital power supply rail (DVDD/DGND).
+    Must be 1.8V to 3.6V. Can be tied to power_analog if a single 3.3V rail is used.
+    Sets SPI I/O voltage levels.
+    """
+    power_digital.required = True
+    assert power_digital.voltage within 1.8V to 3.6V
+    power_digital.hv ~ package.DVDD
+    power_digital.lv ~ package.DGND
+
+    # Tie analog and digital grounds together (required by datasheet)
+    power_analog.lv ~ power_digital.lv
+
+    # =========================================================================
+    # SPI Interface
+    # =========================================================================
+
+    spi = new SPI
+    """
+    SPI bus (SCLK, MOSI/DIN, MISO/DOUT). Supports up to 25 MHz clock.
+    Does not include chip select; use the separate cs signal.
+    """
+    spi.sclk.line ~ package.SCLK
+    spi.mosi.line ~ package.DIN
+    spi.miso.line ~ package.DOUT
+    spi.sclk.reference ~ power_digital
+    spi.mosi.reference ~ power_digital
+    spi.miso.reference ~ power_digital
+
+    # Chip select (active low)
+    cs = new ElectricLogic
+    """
+    SPI chip select (active low). directly to nCS pin.
+    Must be driven low to communicate with the device.
+    """
+    cs.line ~ package.nCS
+    cs.reference ~ power_digital
+
+    # =========================================================================
+    # Control Signals
+    # =========================================================================
+
+    # Data ready (active low output)
+    drdy = new ElectricLogic
+    """
+    Data ready output (active low). Directly from nDRDY pin.
+    Pulses low when new conversion data is available.
+    """
+    drdy.line ~ package.nDRDY
+    drdy.reference ~ power_digital
+
+    # Sync/Reset (active low input)
+    sync_reset = new ElectricLogic
+    """
+    Sync/Reset input (active low). From nSYNC_nRESET pin.
+    Hold high for normal operation. Pulse low to synchronize or reset the device.
+    """
+    sync_reset.line ~ package.nSYNC_nRESET
+    sync_reset.reference ~ power_digital
+
+    # Sync/Reset pull-up resistor (default: held high for normal operation)
+    sync_reset_pullup = new Resistor
+    sync_reset_pullup.resistance = 10kohm +/- 5%
+    sync_reset_pullup.package = "0402"
+    sync_reset.line ~> sync_reset_pullup ~> power_digital.hv
+
+    # External clock input (optional, leave unconnected to use internal 8.192 MHz oscillator)
+    clkin = new Electrical
+    """
+    External clock input (CLKIN pin).
+    Leave unconnected to use the internal 8.192 MHz oscillator.
+    Connect an external clock source if precise frequency control is needed.
+    """
+    clkin ~ package.CLKIN
+
+    # =========================================================================
+    # Analog Inputs (4 differential channels)
+    # =========================================================================
+
+    input = new DifferentialPair[4]
+    """
+    Four differential analog input channels.
+    Input range: +/-1.2V differential (PGA gain = 1, internal 1.2V reference).
+    input[0] = AIN0P / AIN0N
+    input[1] = AIN1P / AIN1N
+    input[2] = AIN2P / AIN2N
+    input[3] = AIN3P / AIN3N
+    """
+
+    # Channel 0
+    input[0].p.line ~ package.AIN0P
+    input[0].n.line ~ package.AIN0N
+
+    # Channel 1
+    input[1].p.line ~ package.AIN1P
+    input[1].n.line ~ package.AIN1N
+
+    # Channel 2
+    input[2].p.line ~ package.AIN2P
+    input[2].n.line ~ package.AIN2N
+
+    # Channel 3
+    input[3].p.line ~ package.AIN3P
+    input[3].n.line ~ package.AIN3N
+
+    # =========================================================================
+    # Decoupling Capacitors
+    # =========================================================================
+
+    # AVDD decoupling: 100nF ceramic (close to pin)
+    avdd_decap_100n = new Capacitor
+    avdd_decap_100n.capacitance = 100nF +/- 20%
+    avdd_decap_100n.package = "0402"
+    power_analog.hv ~> avdd_decap_100n ~> power_analog.lv
+
+    # AVDD decoupling: 1uF ceramic (bulk)
+    avdd_decap_1u = new Capacitor
+    avdd_decap_1u.capacitance = 1uF +/- 20%
+    avdd_decap_1u.package = "0402"
+    power_analog.hv ~> avdd_decap_1u ~> power_analog.lv
+
+    # DVDD decoupling: 100nF ceramic (close to pin)
+    dvdd_decap = new Capacitor
+    dvdd_decap.capacitance = 100nF +/- 20%
+    dvdd_decap.package = "0402"
+    power_digital.hv ~> dvdd_decap ~> power_digital.lv
+
+    # =========================================================================
+    # Internal Reference Bypass (CAP pin)
+    # =========================================================================
+
+    # CAP pin: 1uF to AGND (bypasses internal 1.2V reference)
+    # This capacitor is critical for reference stability and noise performance.
+    # Place as close to CAP pin as possible.
+    cap_bypass = new Capacitor
+    cap_bypass.capacitance = 1uF +/- 20%
+    cap_bypass.package = "0402"
+    package.CAP ~> cap_bypass ~> power_analog.lv

@@ -1,0 +1,66 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+import ElectricPower
+import Electrical
+import SPI
+import ElectricLogic
+
+from "ti-ads131m04.ato" import TI_ADS131M04
+
+module Usage:
+    """
+    Example usage of the TI ADS131M04 4-channel 24-bit ADC driver.
+    Demonstrates a single-supply 3.3V configuration with SPI connection
+    and 4 differential analog inputs.
+    """
+
+    # --- Power ---
+    power_3v3 = new ElectricPower
+    assert power_3v3.voltage within 3.3V +/- 5%
+
+    # --- ADC instance ---
+    adc = new TI_ADS131M04
+
+    # Single 3.3V supply: tie both analog and digital power to the same rail
+    power_3v3 ~ adc.power_analog
+    power_3v3 ~ adc.power_digital
+
+    # --- SPI bus ---
+    spi = new SPI
+    spi.sclk.reference ~ power_3v3
+    spi.mosi.reference ~ power_3v3
+    spi.miso.reference ~ power_3v3
+
+    spi ~ adc.spi
+
+    # --- Chip select ---
+    cs = new ElectricLogic
+    cs.reference ~ power_3v3
+    cs ~ adc.cs
+
+    # --- Data ready ---
+    drdy = new ElectricLogic
+    drdy.reference ~ power_3v3
+    drdy ~ adc.drdy
+
+    # --- Analog inputs ---
+    # Connect differential voltage sources to each channel.
+    # Example: 4 external sensor outputs wired as differential pairs.
+    input_0_p = new Electrical
+    input_0_n = new Electrical
+    input_1_p = new Electrical
+    input_1_n = new Electrical
+    input_2_p = new Electrical
+    input_2_n = new Electrical
+    input_3_p = new Electrical
+    input_3_n = new Electrical
+
+    input_0_p ~ adc.input[0].p.line
+    input_0_n ~ adc.input[0].n.line
+    input_1_p ~ adc.input[1].p.line
+    input_1_n ~ adc.input[1].n.line
+    input_2_p ~ adc.input[2].p.line
+    input_2_n ~ adc.input[2].n.line
+    input_3_p ~ adc.input[3].p.line
+    input_3_n ~ adc.input[3].n.line
