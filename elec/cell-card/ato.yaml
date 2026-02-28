@@ -5,18 +5,16 @@ paths:
   layout: ./layouts
 
 builds:
-  test-solver:
-    entry: test-solver.ato:SolverTest
-  cell:
-    entry: cell.ato:Cell
-  thermistor:
-    entry: thermistor.ato:Thermistor
-  cell-card:
-    entry: cell-card.ato:CellCard
-  thermistor-card:
-    entry: thermistor-card.ato:ThermistorCard
-  base-card:
-    entry: base-card.ato:BaseCard
+    cell:
+        entry: cell.ato:Cell
+    thermistor:
+        entry: thermistor.ato:Thermistor
+    cell-card:
+        entry: cell-card.ato:CellCard
+    thermistor-card:
+        entry: thermistor-card.ato:ThermistorCard
+    base-card:
+        entry: base-card.ato:BaseCard
 
 dependencies:
     # MCU + Networking (proven in Hyperion)
