@@ -4,8 +4,14 @@
 # Cell Card
 # =========
 # Complete 8-channel cell simulator card.
-# Composes a BaseCard (MCU, Ethernet, power) with 2x CellBlock4 (8 cells total).
-# This is a composition pattern — BaseCard is NOT inherited from.
+# Composes a BaseCard (MCU, Ethernet, power, card-level isolation) with
+# 2x CellBlock4 (8 cells total).
+#
+# Architecture:
+#   - Single I2C bus: MCU I2C1 -> 2x TCA9548A (addr 0x70, 0x71), 4 cells each
+#   - Two SPI buses: SPI1 -> cells 0-3, SPI2 -> cells 4-7
+#   - Card-level isolation in BaseCard (24V->24V iso DC-DC, Eth transformer, UART isolator)
+#   - Per-cell isolation in Cell module (24V->12V iso DC-DC, I2C isolator, SPI isolator)
 
 from "base-card.ato" import BaseCard
 from "cell.ato" import CellBlock4
@@ -15,20 +21,49 @@ from "cell.ato" import KelvinOutput
 module CellCard:
     "8-channel cell simulator card: BaseCard + 2x CellBlock4"
 
-    # === Compose base card (MCU, Ethernet, power, debug) ===
+    # === Compose base card (MCU, Ethernet, power, debug, card-level isolation) ===
     base = new BaseCard
 
-    # === Two cell blocks, 4 cells each, on separate I2C buses ===
-    block_a = new CellBlock4
-    block_b = new CellBlock4
+    # === Two cell blocks, 4 cells each ===
+    block_a = new CellBlock4    # Cells 0-3 (SPI1)
+    block_b = new CellBlock4    # Cells 4-7 (SPI2)
 
-    # Connect I2C buses from base card to cell blocks
-    base.i2c_bus_1 ~ block_a.i2c
-    base.i2c_bus_2 ~ block_b.i2c
+    # === I2C: single bus, both blocks share it ===
+    # Each block has its own TCA9548A mux on the shared bus.
+    # Block A mux at default address 0x70, Block B mux at 0x71.
+    base.i2c_bus ~ block_a.i2c
+    base.i2c_bus ~ block_b.i2c
+    block_b.mux.i2c.address = 0x71
 
-    # Power distribution: 24V from backplane to both blocks
-    base.power_24v ~ block_a.power_24v
-    base.power_24v ~ block_b.power_24v
+    # === Power distribution: isolated 24V from base to both blocks ===
+    base.power_24v_iso ~ block_a.power_24v
+    base.power_24v_iso ~ block_b.power_24v
+
+    # MCU-side 3.3V for isolator non-isolated sides
+    base.power_3v3 ~ block_a.power_3v3_mcu
+    base.power_3v3 ~ block_b.power_3v3_mcu
+
+    # === SPI1: base MCU SPI1 -> block_a (cells 0-3) ===
+    base.spi_1_sclk ~ block_a.spi_sclk
+    base.spi_1_mosi ~ block_a.spi_mosi
+    base.spi_1_miso ~ block_a.spi_miso
+    base.spi_1_cs[0] ~ block_a.spi_cs[0]
+    base.spi_1_cs[1] ~ block_a.spi_cs[1]
+    base.spi_1_cs[2] ~ block_a.spi_cs[2]
+    base.spi_1_cs[3] ~ block_a.spi_cs[3]
+    base.spi_1_miso_sel[0] ~ block_a.miso_sel[0]
+    base.spi_1_miso_sel[1] ~ block_a.miso_sel[1]
+
+    # === SPI2: base MCU SPI2 -> block_b (cells 4-7) ===
+    base.spi_2_sclk ~ block_b.spi_sclk
+    base.spi_2_mosi ~ block_b.spi_mosi
+    base.spi_2_miso ~ block_b.spi_miso
+    base.spi_2_cs[0] ~ block_b.spi_cs[0]
+    base.spi_2_cs[1] ~ block_b.spi_cs[1]
+    base.spi_2_cs[2] ~ block_b.spi_cs[2]
+    base.spi_2_cs[3] ~ block_b.spi_cs[3]
+    base.spi_2_miso_sel[0] ~ block_b.miso_sel[0]
+    base.spi_2_miso_sel[1] ~ block_b.miso_sel[1]
 
     # === Cell output connector (rear panel, Kelvin) ===
     # 8 Kelvin outputs: 4 from block_a + 4 from block_b

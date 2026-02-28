@@ -87,6 +87,8 @@ module LogicLevelRelayBase:
     # Enable connection
     enable ~ coil_switch.enable
 
-    # Led connection + config
-    indicator_led.power ~ coil_power
+    # LED in parallel with relay coil — lights only when N-FET is on
+    # power.hv = coil supply, power.lv = N-FET drain (coil low side)
+    indicator_led.power.hv ~ coil_power.hv
+    indicator_led.power.lv ~ coil_switch._input
     indicator_led.current = 0.5mA +/- 10%

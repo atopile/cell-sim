@@ -7,6 +7,14 @@
 # Contains: STM32H723 MCU, LAN8742A Ethernet PHY, power regulation,
 # status LEDs, debug interfaces, backplane connector interface.
 #
+# Two-tier galvanic isolation:
+#   Tier 1 (this module): Backplane <-> Card MCU domain
+#     - Isolated 24V->24V DC-DC (TDK20)
+#     - Discrete Ethernet transformer
+#     - UART digital isolator
+#   Tier 2 (per-cell, in cell.ato): Card MCU domain <-> each cell
+#     - Per-cell isolated DC-DC, I2C isolator, SPI isolator
+#
 # Card-specific modules (CellBlock, ThermistorBlock) compose with this
 # module rather than inheriting from it.
 
@@ -14,6 +22,7 @@ from "st-stm32h723-local/st-stm32h723.ato" import ST_STM32H723
 from "microchip-lan8742a-local/microchip-lan8742a.ato" import Microchip_LAN8742A
 from "ti-tps54560x-local/ti-tps54560x.ato" import TI_TPS54560
 from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
+from "atopile/tdpower-tdk20x/tdpower-tdk20x.ato" import TDPOWER_TDK20_driver
 from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
 from "atopile/programming-headers/programming-headers.ato" import TC2030_ARM_Cortex
 from "atopile/buttons/buttons.ato" import VerticalButton
@@ -21,7 +30,13 @@ from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
 from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
 from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
 from "atopile/mounting-holes/mounting-holes.ato" import MountingHole_3_2_M3
+from "hx1198.ato" import HX1198_driver
+from "iso7721.ato" import ISO7721_UART_driver
 
+import Electrical
+import ElectricPower
+import ElectricLogic
+import I2C
 import Ethernet
 import UART_Base
 import Resistor
@@ -54,17 +69,28 @@ interface BackplaneCard:
 # --- Base Card Module ---
 
 module BaseCard:
-    "Common card infrastructure: MCU, Ethernet, power, debug"
+    "Common card infrastructure: MCU, Ethernet, power, debug. Card-level isolation from backplane."
 
     # === External interfaces ===
     backplane = new BackplaneCard
-    power_24v = new ElectricPower
+    power_24v_iso = new ElectricPower   # Isolated 24V for cell blocks
     power_5v = new ElectricPower
     power_3v3 = new ElectricPower
 
-    # I2C buses exposed for card-specific modules to use
-    i2c_bus_1 = new I2C
-    i2c_bus_2 = new I2C
+    # Single I2C bus exposed for card-specific modules
+    i2c_bus = new I2C
+
+    # SPI buses exposed for cell blocks (2 buses for 8 cells)
+    spi_1_sclk = new ElectricLogic
+    spi_1_mosi = new ElectricLogic
+    spi_1_miso = new ElectricLogic
+    spi_1_cs = new ElectricLogic[4]
+    spi_1_miso_sel = new ElectricLogic[2]
+    spi_2_sclk = new ElectricLogic
+    spi_2_mosi = new ElectricLogic
+    spi_2_miso = new ElectricLogic
+    spi_2_cs = new ElectricLogic[4]
+    spi_2_miso_sel = new ElectricLogic[2]
 
     # === MCU ===
     micro = new ST_STM32H723
@@ -79,19 +105,35 @@ module BaseCard:
     # MDIO management bus: MCU <-> PHY
     micro.mdio ~ phy.mdio
 
-    # Ethernet MDI pairs: PHY <-> backplane connector (via magnetics)
-    phy.ethernet ~ backplane.ethernet
+    # Ethernet isolation: PHY <-> transformer <-> backplane
+    eth_xfmr = new HX1198_driver
+    eth_xfmr.phy_power ~ power_3v3
+
+    # PHY MDI pairs -> transformer PHY side
+    phy.ethernet.pairs[1].p.line ~ eth_xfmr.phy_txp
+    phy.ethernet.pairs[1].n.line ~ eth_xfmr.phy_txn
+    phy.ethernet.pairs[0].p.line ~ eth_xfmr.phy_rxp
+    phy.ethernet.pairs[0].n.line ~ eth_xfmr.phy_rxn
+
+    # Transformer line side -> backplane Ethernet
+    eth_xfmr.line_txp ~ backplane.ethernet.pairs[1].p.line
+    eth_xfmr.line_txn ~ backplane.ethernet.pairs[1].n.line
+    eth_xfmr.line_rxp ~ backplane.ethernet.pairs[0].p.line
+    eth_xfmr.line_rxn ~ backplane.ethernet.pairs[0].n.line
 
     # PHY reset
     # TODO: phy._reset ~ micro.gpio_a[4]
 
-    # === Power regulation ===
-    # 24V from backplane
-    power_24v ~ backplane.power_24v
+    # === Card-Level Isolation: Power ===
+    # Backplane 24V -> Isolated DC-DC (24V->24V) -> card domain
+    iso_dcdc = new TDPOWER_TDK20_driver
+    backplane.power_24v ~ iso_dcdc.power_in
+    iso_dcdc.power_out ~ power_24v_iso
 
-    # 24V -> 5V buck
+    # === Power regulation (card-isolated domain) ===
+    # 24V_iso -> 5V buck
     buck_5v = new TI_TPS54560
-    power_24v ~> buck_5v ~> power_5v
+    power_24v_iso ~> buck_5v ~> power_5v
     assert power_5v.voltage within 4.9V to 5.1V
 
     # 5V -> 3.3V LDO
@@ -102,22 +144,20 @@ module BaseCard:
     # MCU power
     micro.power_3v3 ~ power_3v3
 
-    # === I2C buses (exposed for composition) ===
-    # Bus 1: cells 0-3 or thermistors 0-3
-    # TODO: connect i2c_bus_1 to micro.i2c[0] equivalent
-    # Bus 2: cells 4-7 or thermistors 4-7
-    # TODO: connect i2c_bus_2 to micro.i2c[1] equivalent
+    # === Card-Level Isolation: UART ===
+    uart_iso = new ISO7721_UART_driver
+    # Backplane side power: 3.3V from backplane (provided via connector)
+    # TODO: backplane must supply 3.3V for isolator side 2 (or add small LDO from 24V pre-isolation)
+    uart_iso.power_bp ~ backplane.power_24v  # FIXME: needs backplane-side 3.3V, not 24V
+    uart_iso.power_card ~ power_3v3
+    # Backplane side UART
+    uart_iso.uart_bp ~ backplane.uart
+    # Card side (MCU USART1)
+    micro.uart.base_uart ~ uart_iso.uart_card
 
-    # === Slot ID pins ===
-    # 5 GPIO inputs read from backplane to determine slot position
-    # TODO: connect slot_id pins to micro GPIOs
-
-    # === UART to backplane (for remote flashing via CM5 slot mux) ===
-    # STM32 USART1 (PA9 TX, PA10 RX) <-> backplane UART (via slot mux to CM5)
-    micro.uart.base_uart ~ backplane.uart
-
-    # === BOOT0 (remote bootloader entry via backplane mux) ===
-    # Normally pulled low (normal boot). CM5 drives high through mux for STM32 ROM bootloader.
+    # === Card-Level Isolation: BOOT0 ===
+    # BOOT0 comes from backplane through UART isolator or separate isolator
+    # For now, BOOT0 is directly from backplane (TODO: add isolator channel)
     boot0_pulldown = new Resistor
     boot0_pulldown.resistance = 10kohm +/- 5%
     boot0_pulldown.package = "0402"
@@ -125,7 +165,6 @@ module BaseCard:
     # TODO: connect backplane.boot0.line to micro.boot0
 
     # === NRST (remote reset via backplane mux) ===
-    # Normally pulled high (not in reset). CM5 drives low through mux to reset.
     nrst_pullup = new Resistor
     nrst_pullup.resistance = 10kohm +/- 5%
     nrst_pullup.package = "0402"
@@ -135,20 +174,29 @@ module BaseCard:
     # TODO: connect nrst_pullup from NRST to 3.3V, nrst_cap from NRST to GND
     # TODO: connect backplane.reset to micro NRST
 
+    # === I2C bus (single bus, exposed for composition) ===
+    # MCU I2C1 -> exposed as i2c_bus -> CellCard connects TCA9548A(s)
+    # TODO: connect i2c_bus to micro.i2c[0] equivalent
+
+    # === SPI buses (exposed for composition) ===
+    # MCU SPI1 -> cells 0-3 (via CellBlock4)
+    # MCU SPI2 -> cells 4-7 (via CellBlock4)
+    # TODO: connect spi_1_* to micro.spi[0] pins
+    # TODO: connect spi_2_* to micro.spi[1] pins
+    # TODO: connect miso_sel GPIOs to micro GPIO pins
+
     # === Input voltage monitoring (24V bus health check) ===
-    # Resistor divider: 24V -> 100k -> ADC_IN -> 10k -> GND
-    # Ratio: 10k/(100k+10k) = 1/11 -> 24V reads as ~2.18V on ADC
+    # Resistor divider: 24V_iso -> 100k -> ADC_IN -> 10k -> GND
     r_vmon_high = new Resistor
     r_vmon_high.resistance = 100kohm +/- 1%
     r_vmon_high.package = "0402"
     r_vmon_low = new Resistor
     r_vmon_low.resistance = 10kohm +/- 1%
     r_vmon_low.package = "0402"
-    # Filter capacitor on ADC input
     c_vmon_filter = new Capacitor
     c_vmon_filter.capacitance = 100nF +/- 20%
     c_vmon_filter.package = "0402"
-    # TODO: connect divider: power_24v.hv -> r_vmon_high -> ADC_IN -> r_vmon_low -> GND
+    # TODO: connect divider: power_24v_iso.hv -> r_vmon_high -> ADC_IN -> r_vmon_low -> GND
     # TODO: connect c_vmon_filter from ADC_IN to GND
     # TODO: connect ADC_IN to micro ADC3 pin
 
@@ -178,8 +226,7 @@ module BaseCard:
     # === Board temperature sensor ===
     temp_sensor = new TI_TMP117
     temp_sensor.power ~ power_3v3
-    temp_sensor.i2c ~ i2c_bus_1
-    # TODO: ideally on a separate i2c bus 3 (spare)
+    temp_sensor.i2c ~ i2c_bus
 
     # === Mounting ===
     mh1 = new MountingHole_3_2_M3

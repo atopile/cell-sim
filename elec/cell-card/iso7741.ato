@@ -1,0 +1,83 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# ISO7741 — Quad-channel digital isolator
+# 3 forward (VCC1→VCC2) + 1 reverse (VCC2→VCC1), 100 Mbps, 5 kVRMS
+
+import ElectricPower
+import ElectricLogic
+import Capacitor
+
+from "parts/Texas_Instruments_ISO7741DWR/Texas_Instruments_ISO7741DWR.ato" import Texas_Instruments_ISO7741DWR_package
+
+
+module ISO7741_driver:
+    """
+    Texas Instruments ISO7741 — 4-ch reinforced digital isolator.
+    - Channels A, B, C: forward direction (VCC1 side → VCC2 side)
+    - Channel D: reverse direction (VCC2 side → VCC1 side)
+    - Default-high outputs, 100 Mbps, 5 kVRMS isolation
+    - SOIC-16 wide-body package
+    """
+
+    # --- External interfaces ---
+    power_a = new ElectricPower
+    "Side 1 power (2.25V to 5.5V). Non-isolated / MCU side."
+    power_a.required = True
+    assert power_a.voltage within 2.25V to 5.5V
+
+    power_b = new ElectricPower
+    "Side 2 power (2.25V to 5.5V). Isolated / cell side."
+    power_b.required = True
+    assert power_b.voltage within 2.25V to 5.5V
+
+    # Forward channels: input on side A, output on side B
+    fwd_in_a = new ElectricLogic
+    fwd_in_b = new ElectricLogic
+    fwd_in_c = new ElectricLogic
+    fwd_out_a = new ElectricLogic
+    fwd_out_b = new ElectricLogic
+    fwd_out_c = new ElectricLogic
+
+    # Reverse channel: input on side B, output on side A
+    rev_in_d = new ElectricLogic
+    rev_out_d = new ElectricLogic
+
+    # --- Package ---
+    package = new Texas_Instruments_ISO7741DWR_package
+
+    # --- Power connections ---
+    power_a.hv ~ package.VCC1
+    power_a.lv ~ package.GND1
+    power_b.hv ~ package.VCC2
+    power_b.lv ~ package.GND2
+
+    # --- Enable pins (active high, tie to VCC for always-on) ---
+    package.EN1 ~ power_a.hv
+    package.EN2 ~ power_b.hv
+
+    # --- Forward channels (Side A input → Side B output) ---
+    # Channel A
+    fwd_in_a.line ~ package.INA
+    fwd_out_a.line ~ package.OUTA
+    # Channel B
+    fwd_in_b.line ~ package.INB
+    fwd_out_b.line ~ package.OUTB
+    # Channel C
+    fwd_in_c.line ~ package.INC
+    fwd_out_c.line ~ package.OUTC
+
+    # --- Reverse channel (Side B input → Side A output) ---
+    # Channel D
+    rev_in_d.line ~ package.IND
+    rev_out_d.line ~ package.OUTD
+
+    # --- Decoupling capacitors ---
+    decap_a = new Capacitor
+    decap_a.capacitance = 100nF +/- 20%
+    decap_a.package = "0402"
+    power_a.hv ~> decap_a ~> power_a.lv
+
+    decap_b = new Capacitor
+    decap_b.capacitance = 100nF +/- 20%
+    decap_b.package = "0402"
+    power_b.hv ~> decap_b ~> power_b.lv

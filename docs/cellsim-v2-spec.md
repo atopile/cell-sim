@@ -1,6 +1,6 @@
 # CellSim v2 — Specification & Architecture
 
-**Status:** DRAFT v6
+**Status:** DRAFT v7
 **Date:** 2026-02-27
 **Branch:** `feature/cellsim-v2`
 
@@ -110,53 +110,88 @@ The software stack mirrors the proven Peak cellsim-48ch design (FastAPI REST ser
 
 ### 2.3 Cell Card (8-Channel)
 
-Each card is a self-contained PCB that plugs into the backplane like a GPU:
+Each card is a self-contained PCB that plugs into the backplane like a GPU. The card has **two tiers of galvanic isolation**:
+
+1. **Card-level isolation (backplane ↔ card MCU domain):** An isolated 24V→24V DC-DC converter, a discrete Ethernet transformer, and a UART digital isolator create a fully isolated card domain. This allows stacking multiple cards for high-voltage configurations (up to ~1 kV theoretical).
+
+2. **Per-cell isolation (card MCU domain ↔ each cell):** Each of the 8 cells has its own isolated DC-DC, I2C isolator, and SPI isolator. Cells stack in series (emulating an 8S battery), so cell 0's ground might be at 0 V while cell 7's ground is at ~40 V relative to the card domain.
 
 ```
                          CARD (plugs vertically into backplane)
 ┌───────────────────────────────────────────────────────────────────┐
 │                                                                   │
-│  ┌───────────┐   ┌────────────┐                                   │
-│  │ STM32H723 │───│ LAN8742A   │                                   │
-│  │           │   │ (100M PHY) │                                   │
-│  │           │   └────────────┘                                   │
-│  │           │                                                    │
-│  │  I2C1 ────┼──→ TCA9548A ──→ Cells 0-3 (via ISO1640, DACs+GPIO)│
-│  │  I2C2 ────┼──→ TCA9548A ──→ Cells 4-7 (via ISO1640, DACs+GPIO)│
-│  │  SPI1 ────┼──→ ISO7741 ×4 → Cells 0-3 ADC (ADS131M04)       │
-│  │  SPI2 ────┼──→ ISO7741 ×4 → Cells 4-7 ADC (ADS131M04)       │
-│  │           │                                                    │
-│  │  ADC  ────┼──→ Input voltage sense, board temperature          │
-│  │  GPIO ────┼──→ Slot ID pins (active-low from backplane)        │
-│  │  SWD  ────┼──→ Debug header (optional)                         │
-│  │  USB  ────┼──→ USB-C (DFU fallback)                            │
-│  └───────────┘                                                    │
-│       │                                                           │
-│       │  ┌──────────────────────────────────────────────────┐     │
-│       │  │  8× Isolated Cell Channels                       │     │
-│       │  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐               │     │
-│       │  │  │ C0  │ │ C1  │ │ C2  │ │ C3  │ (I2C1 + SPI1) │     │
-│       │  │  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘               │     │
-│       │  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐               │     │
-│       │  │  │ C4  │ │ C5  │ │ C6  │ │ C7  │ (I2C2 + SPI2) │     │
-│       │  │  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘               │     │
-│       │  └─────┼───────┼───────┼───────┼────────────────┘     │
-│       │        │       │       │       │                      │
-│  ═════╪════════╪═══════╪═══════╪═══════╪══════════════════    │
-│  EDGE CONNECTOR (to backplane)                                │
-│  [Eth TX+/-] [Eth RX+/-] [24V×4] [GND×4] [ID0-3] [RST]      │
-│                                                                   │
+│  BACKPLANE SIDE (non-isolated)                                    │
+│  ═══════════════════════════════════════════════════════════      │
+│  EDGE CONNECTOR (to backplane)                                    │
+│  [Eth TX+/-] [Eth RX+/-] [24V×4] [GND×4] [ID0-3] [UART] [RST]  │
+│  ═══════════════════════════════════════════════════════════      │
+│       │            │            │                                  │
+│       │     ┌──────┴──────┐    │                                  │
+│       │     │ Eth Xfmr    │    │  ◄── Discrete Ethernet           │
+│       │     │ (magnetics) │    │      transformer (galvanic iso)  │
+│       │     └──────┬──────┘    │                                  │
+│       │            │     ┌─────┴──────┐                           │
+│       │            │     │ ISO DC-DC  │ ◄── 24V→24V isolated      │
+│       │            │     │ (24V→24V)  │     (e.g. TDK20-24S24WH) │
+│       │            │     └─────┬──────┘                           │
+│       │            │           │                                  │
+│  ┌────┴────┐       │    ┌──────┴──────┐                           │
+│  │ UART    │       │    │ 24V_iso     │                           │
+│  │ Isolator│       │    │    │        │                           │
+│  └────┬────┘       │    │ TPSM84209  │ ◄── 24V→3.3V/5V buck      │
+│       │            │    │ (24V→3.3V) │     for card electronics   │
+│  ═════╪════════════╪════╪════════════╪════════════════════════    │
+│  CARD ISOLATED DOMAIN  │            │                             │
+│       │            │    │  3.3V_card │                             │
+│  ┌────┴────────────┴────┴────────────┴─────────┐                  │
+│  │ STM32H723 + LAN8742A PHY                    │                  │
+│  │                                              │                  │
+│  │  I2C1 ────→ TCA9548A ──→ Cells 0-7          │                  │
+│  │              (8 channels, ISO1640 per cell)  │                  │
+│  │                                              │                  │
+│  │  SPI1 ────→ ISO7741 ×4 → Cells 0-3 ADC      │                  │
+│  │  SPI2 ────→ ISO7741 ×4 → Cells 4-7 ADC      │                  │
+│  │                                              │                  │
+│  │  ADC  ────→ Input voltage sense, board temp  │                  │
+│  │  GPIO ────→ Slot ID pins (from backplane)    │                  │
+│  │  SWD  ────→ Debug header (optional)          │                  │
+│  │  USB  ────→ USB-C (DFU fallback)             │                  │
+│  └──────────────────────────────────────────────┘                  │
+│       │                                                            │
+│       │  ┌──────────────────────────────────────────────────┐      │
+│       │  │  8× Isolated Cell Channels                       │      │
+│       │  │  (each powered from 24V_iso via per-cell         │      │
+│       │  │   isolated DC-DC, stacked in series like 8S)     │      │
+│       │  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐               │      │
+│       │  │  │ C0  │ │ C1  │ │ C2  │ │ C3  │ (I2C1 + SPI1) │      │
+│       │  │  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘               │      │
+│       │  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐               │      │
+│       │  │  │ C4  │ │ C5  │ │ C6  │ │ C7  │ (I2C1 + SPI2) │      │
+│       │  │  └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘               │      │
+│       │  └─────┼───────┼───────┼───────┼────────────────┘      │
+│       │        │       │       │       │                       │
 │  REAR CONNECTOR (to DUT)                                          │
 │  [F0 S0] [F1 S1] [F2 S2] [F3 S3] [F4 S4] [F5 S5] [F6 S6]      │
 │  [F7 S7] [GND_K] [GND_K_S]                                       │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
+**Card-level isolation components:**
+
+| Component | Function | Notes |
+|-----------|----------|-------|
+| **Isolated DC-DC (24V→24V)** | Galvanic isolation between backplane and card domain | e.g. TDPOWER TDK20-24S24WH (20W), proven in Peak 48ch design |
+| **Discrete Ethernet transformer** | Isolates Ethernet PHY from backplane | Ethernet passes through backplane (not a separate RJ45 on the card) |
+| **UART digital isolator** | Isolates UART for card programming/debug | Backplane routes UART to CM5 via slot mux for remote flash |
+| **TPSM84209 buck** | 24V_iso → 3.3V (or 5V→3.3V) for MCU domain | 4.5–28V in, 2.5A, integrated inductor |
+
 ### 2.4 Multi-Bus Architecture (I2C + SPI)
 
-The STM32H723 uses **I2C for control** (DACs, GPIO) and **SPI for high-speed ADC** (ADS131M04):
+The STM32H723 uses **I2C for control** (DACs, GPIO, temp) and **SPI for high-speed ADC** (ADS131M04):
 
 **I2C bus (400 kHz Fast Mode) — control path:**
+
+A single TCA9548A I2C mux provides 8 channels — one per cell. Each cell's I2C devices (DACs, GPIO expander, temp sensor) sit behind an ISO1640 isolator on the corresponding mux channel.
 
 | Operation | Time per cell | Notes |
 |-----------|---------------|-------|
@@ -165,8 +200,7 @@ The STM32H723 uses **I2C for control** (DACs, GPIO) and **SPI for high-speed ADC
 | MCP4725 DAC write × 2 | ~200 µs | Buck + LDO setpoints |
 | TCA6408 GPIO write | ~50 µs | Relay/enable states |
 | **Per-cell I2C total** | **~300 µs** | ADC no longer on I2C |
-| **4 cells sequential** | **~1.2 ms** | Per I2C bus |
-| **2 buses in parallel** | **~1.2 ms** | 8 cells total |
+| **8 cells sequential** | **~2.4 ms** | Single I2C bus |
 
 **SPI bus (up to 25 MHz) — measurement path:**
 
@@ -180,22 +214,21 @@ The STM32H723 uses **I2C for control** (DACs, GPIO) and **SPI for high-speed ADC
 
 | Path | Time | Rate |
 |------|------|------|
-| I2C control (DAC + GPIO) | ~1.2 ms | ~830 Hz (2 parallel buses) |
-| SPI measurement (ADC) | ~80 µs | **~12 kHz** (sequential scan, all 8 cells) |
+| I2C control (DAC + GPIO) | ~2.4 ms | ~415 Hz (single bus, 8 cells sequential) |
+| SPI measurement (ADC) | ~80 µs | **~12 kHz** (sequential scan, all 8 cells, 2 SPI buses) |
 | Overhead + Ethernet | ~1 ms | Packet assembly, send |
-| **Total (control + measure)** | **~2.3 ms** | **~430 Hz full loop** |
+| **Total (control + measure)** | **~3.5 ms** | **~285 Hz full loop** |
 | **Measurement only** | **~1.1 ms** | **~900 Hz** (read all 8 cells) |
 
-**Note:** At 32 kSPS/channel, the ADS131M04 produces data faster than the I2C control path can update DACs. The practical architecture is: ADC runs continuously at up to 32 kSPS, firmware reads at 1–10 kHz, DAC updates only when setpoint changes (event-driven, not every cycle).
+**Note:** At 32 kSPS/channel, the ADS131M04 produces data faster than the I2C control path can update DACs. The practical architecture is: ADC runs continuously at up to 32 kSPS, firmware reads at 1–10 kHz, DAC updates only when setpoint changes (event-driven, not every cycle). See §4.9.9 for SPI DAC upgrade path that eliminates the I2C bottleneck.
 
 **Bus assignment:**
-- **I2C1:** TCA9548A #1 → Cells 0, 1, 2, 3 (each behind ISO1640) — DACs + GPIO
-- **I2C2:** TCA9548A #2 → Cells 4, 5, 6, 7 (each behind ISO1640) — DACs + GPIO
+- **I2C1:** TCA9548A → Cells 0–7 (each behind ISO1640, mux channels 0–7) — DACs + GPIO + temp
 - **SPI1:** Cells 0–3 ADC (each behind ISO7741) — via MISO mux (CD74HC4052)
 - **SPI2:** Cells 4–7 ADC (each behind ISO7741) — via MISO mux (CD74HC4052)
-- **I2C3:** (spare — on-card temp sensor, future expansion)
+- **I2C3:** (spare — on-card EEPROM, card-level temp sensor)
 
-DMA-driven I2C and SPI transfers on the STM32H7 allow all buses to run truly in parallel with minimal CPU intervention.
+DMA-driven I2C and SPI transfers on the STM32H7 allow SPI buses to run in parallel with minimal CPU intervention. The single I2C bus handles the slow-changing control path (DAC setpoints only update when voltage target changes, not every cycle).
 
 **SPI bus architecture per 4-cell group:**
 ```
@@ -217,40 +250,53 @@ The I2C bus is limited by the slowest components:
 - MCP4725 DAC: 3.4 MHz ✓
 - TCA6408 GPIO: **400 kHz max** (upgrade to NXP PCAL6408A for 1 MHz if needed)
 
-**Practical I2C limit: 400 kHz.** Sufficient for control path — full 8-cell DAC/GPIO scan takes ~1.2 ms on 2 parallel buses.
+**Practical I2C limit: 400 kHz.** Sufficient for control path — the I2C path only handles slow-changing setpoints (DAC writes) and GPIO state changes, not high-speed measurement. The full 8-cell sequential scan takes ~2.4 ms, but in practice DAC updates are event-driven (only when setpoint changes), making the I2C bus lightly loaded.
+
+**Why single I2C bus (changed from 2× I2C):** The TCA9548A has 8 channels, sufficient for all 8 cells. Two I2C buses provided only ~2× speedup for the control path (which is already not the bottleneck — SPI ADC measurement is the fast path). A single I2C bus simplifies routing, reduces MCU pin usage, and eliminates one TCA9548A. If higher control rates are needed, the SPI DAC upgrade path (§4.9.9) is the correct solution.
 
 ### 2.5 Per-Cell Architecture
 
-Same proven isolated supply → buck → LDO topology from the 48ch design, uprated for 5 V / 1 A:
+Same proven isolated supply → buck → LDO topology from the 48ch design, uprated for 5 V / 1 A. Each cell is powered from the card's isolated 24V rail (24V_iso), NOT directly from the backplane:
 
 ```
-24V (from backplane)
+24V_iso (from card-level isolated DC-DC)
   │
-  ├── Isolated DC-DC (24V → 8V, ~8W) ── [ISOLATED DOMAIN per cell]
-  │                                            │
-  │         ┌──── I2C Isolator (ISO1640) ──────┤ (DACs + GPIO)
-  │         ├──── SPI Isolator (ISO7741) ─────┤ (ADC)
-  │         │                                  │
-  │    (MCU side)                         (Cell side)
-  │                                            │
-  │                                     Digital Buck
-  │                                     (DAC-controlled)
-  │                                            │
-  │                                     Digital LDO
-  │                                     (DAC-controlled)
-  │                                            │
-  │                                    Current Sensor
-  │                                     (INA185 + shunt)
-  │                                            │
-  │                                     Output Relay (DPDT)
-  │                                         │      │
-  │                                      FORCE    SENSE
-  │                                         │      │
-  │                                    Kelvin output connector
+  ├── Per-cell Isolated DC-DC (24V → 12V, 3W) ── [CELL DOMAIN, floating]
+  │   YLPTEC B2412S-3WR2 (C5369517)                    │
+  │                                                      │
+  │         ┌──── I2C Isolator (ISO1640) ────────────────┤ (DACs + GPIO + temp)
+  │         ├──── SPI Isolator (ISO7741) ───────────────┤ (ADC)
+  │         │                                            │
+  │    (Card MCU domain)                          (Cell domain)
+  │                                                      │
+  │                                          ┌───────────┴───────────┐
+  │                                          │  3.3V LDO (LDK220)   │
+  │                                          │  12V → 3.3V          │
+  │                                          │  (control rail)      │
+  │                                          └───────────┬───────────┘
+  │                                                      │
+  │                                               Digital Buck
+  │                                               (TPS563201, DAC-controlled)
+  │                                               12V → ~5.5V variable
+  │                                                      │
+  │                                               Digital LDO
+  │                                               (TLV75901, DAC-controlled)
+  │                                               Buck out → 0–5V
+  │                                                      │
+  │                                              Current Sensor
+  │                                               (INA185 + 50mΩ shunt)
+  │                                                      │
+  │                                               Output Relay (DPDT)
+  │                                                   │      │
+  │                                                FORCE    SENSE
+  │                                                   │      │
+  │                                              Kelvin output connector
   │
-  │                                     [Temp Sensor]
-  │                                     (on isolated side)
+  │                                               [Temp Sensor (TMP117)]
+  │                                               (on cell isolated side)
 ```
+
+**All cells float.** Even cell 0 is isolated — cells stack in series to emulate an 8S battery pack. Cell 0 GND at ~0 V, cell 7 GND at up to ~40 V relative to the card domain.
 
 **Per-cell I2C devices (on isolated side, behind ISO1640 + TCA9548A mux channel):**
 
@@ -330,32 +376,58 @@ Each cell dissipates up to ~3.3W worst-case (5V/1A output). An 8-channel card at
 
 ### 2.8 Isolation Architecture
 
-**Why per-cell I2C isolators are required within a card:**
+**Two-tier galvanic isolation:**
 
-Cells in a BMS stack in series. Cell 0 sits at 0 V, Cell 7 at up to ~40 V (8 × 5 V). Each cell's isolated DC-DC creates its own ground domain. The I2C bus from the MCU must cross into each cell's isolated domain via ISO1640, and the SPI bus via ISO7741.
+The CellSim v2 card uses two independent tiers of galvanic isolation:
+
+**Tier 1 — Card-level isolation (backplane ↔ card MCU domain):**
+- Isolated 24V→24V DC-DC converter creates isolated 24V rail for the entire card
+- Discrete Ethernet transformer isolates the PHY from backplane differential pairs
+- UART digital isolator isolates debug/flash UART from backplane
+- Purpose: allows multiple cards to be stacked for high-voltage configurations. Each card's MCU domain floats independently of the backplane ground.
+
+**Tier 2 — Per-cell isolation (card MCU domain ↔ each cell):**
+- Per-cell isolated DC-DC (24V→12V) creates individual floating ground domains
+- ISO1640 I2C isolator per cell (DACs, GPIO, temp sensor)
+- ISO7741 SPI isolator per cell (ADS131M04 ADC)
+- Purpose: cells stack in series emulating an 8S battery. Cell 0 GND at ~0V, cell 7 GND at ~40V relative to the card domain. ALL cells must float, including cell 0.
 
 ```
-                    MCU Ground Domain
-┌─────────────────────────────────────────────────────┐
-│  STM32H723                                          │
-│    │                                                │
-│    ├── I2C1 → TCA9548A #1                           │
-│    │              │                                 │
-│    │     ┌────────┼────────┬────────┐               │
-│    │     │ Ch0    │ Ch1    │ Ch2   Ch3              │
-│    │   ISO1640 ISO1640  ISO1640 ISO1640  ◄── 1.5kV │
-│    │     │        │        │       │                │
-│    │  Cell 0   Cell 1   Cell 2  Cell 3              │
-│    │  (GND₀)  (GND₁)  (GND₂)  (GND₃)              │
-│    │                                                │
-│    ├── I2C2 → TCA9548A #2                           │
-│    │     │        │        │       │                │
-│    │  Cell 4   Cell 5   Cell 6  Cell 7              │
-│    │  (GND₄)  (GND₅)  (GND₆)  (GND₇)              │
-│    │                                                │
-│    └── Ethernet → LAN8742A → [magnetics] → backplane│
-└─────────────────────────────────────────────────────┘
+Backplane Ground Domain
+┌───────────────────────────────────────────────────────────┐
+│  24V bus                                                   │
+│  Ethernet (differential pairs)                            │
+│  UART (TX/RX)                                             │
+│  Slot ID, Reset                                           │
+└──────────┬──────────┬──────────┬──────────────────────────┘
+           │          │          │
+    [ISO DC-DC]  [Eth Xfmr]  [UART Iso]  ◄── Tier 1: Card isolation
+           │          │          │
+┌──────────┴──────────┴──────────┴──────────────────────────┐
+│  Card MCU Ground Domain (24V_iso)                          │
+│  STM32H723 + LAN8742A + TPSM84209 buck                   │
+│    │                                                       │
+│    ├── I2C1 → TCA9548A (8 channels)                        │
+│    │              │                                        │
+│    │     ┌────────┼────────┬────────┬──── ... ──┐          │
+│    │     │ Ch0    │ Ch1    │ Ch2         Ch7     │          │
+│    │   ISO1640 ISO1640  ISO1640       ISO1640    │ ◄── Tier 2 │
+│    │     │        │        │             │       │          │
+│    │  Cell 0   Cell 1   Cell 2  ...   Cell 7    │          │
+│    │  (GND₀)  (GND₁)  (GND₂)       (GND₇)     │          │
+│    │     ↕ ~0V    ↕ ~5V    ↕ ~10V      ↕ ~35V   │  (series stack) │
+│    │                                             │          │
+│    ├── SPI1 → ISO7741 ×4 → Cells 0–3 ADC        │          │
+│    ├── SPI2 → ISO7741 ×4 → Cells 4–7 ADC        │          │
+│    │                                             │          │
+│    └── Ethernet → LAN8742A → [xfmr] → backplane │          │
+└──────────────────────────────────────────────────┘
 ```
+
+**Voltage ratings:**
+- Tier 1 (card isolation): 1.5 kV minimum (DC-DC + Ethernet transformer)
+- Tier 2 (per-cell isolation): 1.5 kV minimum (ISO1640 + ISO7741 + per-cell DC-DC)
+- Combined: theoretical maximum ~1 kV across a full stack of cards
 
 ---
 
@@ -390,7 +462,7 @@ Uses the `atopile/st-stm32h723` package (proven in Hyperion project).
 |---------|---------|
 | 480 MHz Cortex-M7 | 100 Hz control loop with DMA I2C — massive headroom |
 | Built-in Ethernet MAC | RMII to LAN8742A, same as Hyperion |
-| 4× I2C peripherals | 2 buses for cells (parallel), 2 spare |
+| 4× I2C peripherals | 1 bus for cells (TCA9548A 8ch mux), 1 for EEPROM, 2 spare |
 | Hardware FPU + DSP | Real-time calibration interpolation |
 | USB OTG | DFU firmware update fallback |
 | 12-bit internal ADC | Input voltage, board temperature |
@@ -435,9 +507,8 @@ The STM32's UID is tied to the MCU die. If the MCU is replaced during rework, al
 | Function | Pins | Notes |
 |----------|------|-------|
 | Ethernet RMII | 9 | REF_CLK, MDIO, MDC, CRS_DV, RXD0/1, TX_EN, TXD0/1 |
-| I2C1 (cells 0-3) | 2 | SCL, SDA → TCA9548A #1 (DACs + GPIO) |
-| I2C2 (cells 4-7) | 2 | SCL, SDA → TCA9548A #2 (DACs + GPIO) |
-| I2C3 (card identity + temp) | 2 | 24AA025E48 EEPROM (0x50), card temp sensor |
+| I2C1 (all 8 cells) | 2 | SCL, SDA → TCA9548A (8ch mux, DACs + GPIO + temp) |
+| I2C3 (card identity) | 2 | 24AA025E48 EEPROM (0x50), card-level temp sensor |
 | SPI1 (cells 0-3 ADC) | 3 | SCLK, MOSI, MISO → 4× ISO7741 (ADS131M04) |
 | SPI1 CS lines | 4 | CS0..CS3 → each ISO7741 forward ch C |
 | SPI1 MISO mux select | 2 | CD74HC4052 address bits (select return ch) |
@@ -445,14 +516,14 @@ The STM32's UID is tied to the MCU die. If the MCU is replaced during rework, al
 | SPI2 CS lines | 4 | CS4..CS7 → each ISO7741 forward ch C |
 | SPI2 MISO mux select | 2 | CD74HC4052 address bits (select return ch) |
 | USB OTG FS | 2 | DFU fallback |
-| UART (debug) | 2 | TX, RX |
+| UART (debug/flash) | 2 | TX, RX (isolated via UART isolator to backplane) |
 | SWD | 2 | SWDIO, SWCLK |
 | Internal ADC inputs | 2 | Input voltage divider, temp |
 | HSE crystal | 2 | 25 MHz (shared with PHY) |
 | Slot ID inputs | 4 | Active-low from backplane (2⁴ = 16 slots) |
 | Boot/Reset | 3 | BOOT0, NRST, user button |
-| GPIO (spare) | ~4 | Status LED, etc. |
-| **Total** | **~53** | Well within 100-pin budget |
+| GPIO (spare) | ~6 | Status LED, etc. (2 freed from I2C2 removal) |
+| **Total** | **~51** | Well within 100-pin budget |
 
 ---
 
@@ -464,7 +535,7 @@ The power architecture is specified bottom-up: cell output requirements drive pe
 
 | Parameter | v1 (proven) | v2 (target) | Notes |
 |-----------|-------------|-------------|-------|
-| Output voltage | 0–4.5 V | **0–5 V** | +11%, TPSM863257 buck max 5.5V |
+| Output voltage | 0–4.5 V | **0–5 V** | +11%, TPS563201 buck max ~5.5V |
 | Output current | 500 mA | **1 A** | +100%, drives thermal + component changes |
 | Output power (max) | 2.25 W | **5 W** | Per-cell delivered to DUT |
 | Voltage resolution | ~1 mV | < 1 mV | 12-bit DAC over range |
@@ -472,122 +543,122 @@ The power architecture is specified bottom-up: cell output requirements drive pe
 
 ### 4.2 Per-Cell Power Path (Isolated Domain)
 
-Same proven topology as v1/Peak — isolated supply → digital buck → digital LDO — but uprated for 5 V / 1 A:
+Same proven topology as v1/Peak — isolated supply → digital buck → digital LDO — but uprated for 5 V / 1 A. Each cell is powered from the card's isolated 24V rail (24V_iso, output of card-level isolated DC-DC):
 
 ```
-24V (from backplane via card)
+24V_iso (from card-level isolated DC-DC)
   │
-  ├── Isolated DC-DC (24V → 8V, ~8W) ── [ISOLATED DOMAIN]
-  │                                            │
-  │         ┌──── I2C Isolator (ISO1640) ──────┤ (DACs + GPIO)
-  │         ├──── SPI Isolator (ISO7741) ─────┤ (ADS131M04 ADC)
-  │         │                                  │
-  │    (MCU side)                         (Cell side)
-  │                                            │
-  │                                     ┌──────┴──────┐
-  │                                     │  3.3V LDO   │ 8V → 3.3V (control rail)
-  │                                     │  (TBD)      │ powers: DACs, ADC, GPIO exp.
-  │                                     └──────┬──────┘
-  │                                            │
-  │                                     Digital Buck (TPSM863257RDXR)
-  │                                     MCP4725 DAC → feedback network
-  │                                     8V → 5.5V (variable, tracks LDO setpoint + margin)
-  │                                     Integrated inductor, 3A, 1.2 MHz
-  │                                            │
-  │                                     Digital LDO (TLV75901)
-  │                                     MCP4725 DAC → feedback network
-  │                                     Buck out → 0–5V output (fine regulation)
-  │                                     Output cap: 10µF ceramic (0805)
-  │                                            │
-  │                                    Current Sensor
-  │                                     INA185A2 (50× gain) + shunt resistor
-  │                                            │
-  │                                     Output Relay (DPDT, HFD4/5)
-  │                                         │      │
-  │                                      FORCE    SENSE
-  │                                    (Kelvin output connector)
+  ├── Per-cell Isolated DC-DC (24V → 12V, 3W) ── [CELL DOMAIN, floating]
+  │   YLPTEC B2412S-3WR2 (C5369517, $1.95)             │
+  │                                                      │
+  │         ┌──── I2C Isolator (ISO1640) ────────────────┤ (DACs + GPIO + temp)
+  │         ├──── SPI Isolator (ISO7741) ───────────────┤ (ADS131M04 ADC)
+  │         │                                            │
+  │    (Card MCU domain)                          (Cell domain)
+  │                                                      │
+  │                                               ┌──────┴──────┐
+  │                                               │  3.3V LDO   │ 12V → 3.3V (control rail)
+  │                                               │  (LDK220)   │ powers: DACs, ADC, GPIO exp.
+  │                                               └──────┬──────┘
+  │                                                      │
+  │                                               Digital Buck (TPS563201DDCR)
+  │                                               MCP4725 DAC → feedback network
+  │                                               12V → ~5.5V (variable, tracks LDO + margin)
+  │                                               External inductor, 3A, 500 kHz
+  │                                                      │
+  │                                               Digital LDO (TLV75901)
+  │                                               MCP4725 DAC → feedback network
+  │                                               Buck out → 0–5V output (fine regulation)
+  │                                               Output cap: 10µF ceramic (0805)
+  │                                                      │
+  │                                              Current Sensor
+  │                                               INA185A2 (50× gain) + 50mΩ shunt
+  │                                                      │
+  │                                               Output Relay (DPDT, HFD4/5)
+  │                                                   │      │
+  │                                                FORCE    SENSE
+  │                                              (Kelvin output connector)
 ```
 
-#### 4.2.1 Stage 1: Isolated DC-DC Converter
+#### 4.2.1 Stage 1: Per-Cell Isolated DC-DC Converter
 
-Provides galvanic isolation per cell (cells stack in series at different potentials up to ~48 V total).
+Provides galvanic isolation per cell (cells stack in series at different potentials up to ~40 V total for 8S). Each cell's isolated DC-DC is powered from the card's isolated 24V rail (24V_iso), creating a second tier of isolation.
 
-| Parameter | v1 (B1205S-2WR2) | v2 (required) | Gap |
-|-----------|-------------------|----------------|-----|
-| Input voltage | 10.8–13.2 V | **18–36 V (24V nom.)** | **Wrong input range** |
-| Output voltage | 5 V ±10% | **8 V ±10%** | Need higher output |
-| Output current | 400 mA (2 W) | **1 A (~8 W)** | **4× undersized** |
-| Isolation | 1.5 kV | 1.5 kV min | OK |
-| Efficiency | ~80% | ≥80% | — |
+| Parameter | v1 (B1205S-2WR2) | v2 (YLPTEC B2412S-3WR2) | Notes |
+|-----------|-------------------|--------------------------|-------|
+| Input voltage | 10.8–13.2 V | **21.6–26.4 V (24V nom.)** | Matches 24V_iso rail |
+| Output voltage | 5 V ±10% | **12 V ±10% (11.4–12.6V)** | Headroom for buck + control LDO |
+| Output current | 400 mA (2 W) | **250 mA (3 W)** | Sufficient — see power budget below |
+| Isolation | 1.5 kV | 1.5 kV | OK |
+| Efficiency | ~80% | ~80% | — |
+| LCSC | C2992386 | **C5369517** | $1.95 (325 stock) |
+| Package | SIP-6 THT | **SIP-4 THT** | PWRM-TH_BXXXXS-3WR2 |
+| Atopile package | `atopile/ylptech-byyxx` | `atopile/ylptech-byyxx` | YLPTEC_B2412S_3WR2 module |
 
-**v1 baseline (from codebase):** B1205S-2WR2, LCSC C2992386, through-hole PWRM package, 2.2 µF input cap, 10 µF output cap. Only 2 W — adequate for 500 mA cells powered from 12 V.
-
-**v2 requirement:** Need 24V-input, 8V-output, ~8W isolated module. The 8 V output provides headroom for the TPSM863257 buck (3–17 V Vin) and the buck in turn provides headroom for the LDO to reach 5 V output.
-
-**Why 8 V output (not 5 V):**
+**Why 12 V output (not 8 V or 5 V):**
 - LDO needs 5 V + 0.225 V dropout = 5.225 V minimum input
-- Buck needs headroom above LDO input: target 5.5 V max output from buck
-- Buck needs Vin > Vout + dropout: 8V >> 5.5V, comfortable margin
-- 8 V also provides the 3.3V per-cell control rail with comfortable headroom
+- Buck (TPS563201) needs Vin > Vout + dropout: 12V >> 5.5V, comfortable margin
+- 12 V provides the 3.3V per-cell control rail with comfortable headroom (via LDK220)
+- 12 V is a standard voltage with readily available isolated DC-DC modules
+- The slightly higher voltage vs 8V means lower current for the same power, reducing losses
 
-**Candidates to evaluate:**
-- `atopile/ylptech-byyxx` — used in Peak 48ch, check if 24V→8V variant exists
-- `atopile/tdpower-tdk20x` — 20W class, check for 24V input model
-- MORNSUN B2408S series or similar (24V→8V, 10–15W class, JLCPCB)
-- CUI PDS1-S24-S8 or similar
+**Why 3 W is sufficient:**
+- Buck at worst case (5V/1A output, 90% eff.): 5.5W input from 12V = 0.46A
+- Control rail: ~55 mW (negligible)
+- Total per-cell load from 12V rail: ~0.52A × 12V = **~6.2W**
+- At 80% efficiency from 24V: 6.2W / 0.80 = **7.7W from 24V_iso** → 0.32A from 24V
+- **BUT** the B2412S-3WR2 is only rated 3W (250mA @ 12V). This limits maximum continuous cell output to approximately:
+  - 3W at 12V = 250mA → buck input power limited to 3W
+  - At 90% buck efficiency: ~2.7W available at buck output
+  - At 5V output: 2.7W / 5V = **~540 mA continuous**
+  - **For full 1A operation**, need a higher-power variant or parallel units. See open items.
 
-**Power dissipation:** At 80% efficiency, 8W output → 10W input → **2W waste heat per cell**.
+**Decoupling:**
+- Input: 2.2 µF ceramic (0805) — per YLPTEC datasheet
+- Output: 10 µF ceramic (0805)
 
-**STATUS: P0 BLOCKER — component selection required before PCB design.**
+**Power dissipation at 3W max output:** (3W / 0.80) - 3W = **0.75W waste heat per cell** — manageable.
+
+**STATUS: RESOLVED (component selected). OPEN: 3W may limit max cell current to ~540mA — evaluate if 1A continuous is truly required or if typical 300mA operation is sufficient. For 1A, consider YLPTEC B2405S-2WR3 (2W, 24V→5V) + higher-power buck, or find a 24V→12V 5W+ part.**
 
 #### 4.2.2 Stage 2: Digital Buck Converter
 
-Coarse voltage regulation. DAC-controlled via MCP4725 modulating the TPSM863257RDXR feedback network. The TPSM863257 is an integrated buck module with on-package inductor, eliminating the external inductor and bootstrap cap.
+Coarse voltage regulation. DAC-controlled via MCP4725 modulating the TPS563201 feedback network. Same proven part from v1, now operating from a 12V input rail (from per-cell isolated DC-DC).
 
 | Parameter | v1 value | v2 value | Status |
 |-----------|----------|----------|--------|
-| IC | TPS563201DDCR | **TPSM863257RDXR** | **Upgrade** |
-| Input voltage | 4.5–17 V (from 5V iso) | 3–17 V (from 8V iso) | OK (8V within range) |
-| Output voltage | 0.768–7 V | **0.6–5.5 V** | Max cell output ~5V |
+| IC | TPS563201DDCR | **TPS563201DDCR** | **Reuse** |
+| Input voltage | 4.5–17 V (from 5V iso) | 4.5–17 V (from 12V iso) | OK (12V within range) |
+| Output voltage | 0.768–7 V | **0.768–5.5 V** | Max cell output ~5V |
 | Output current | 3 A rated | 3 A rated | OK (1A load = 33% utilization) |
-| Vref | 0.768 V | 0.6 V | — |
-| Efficiency | ~90% | ~92% (typical) | Improved — integrated inductor |
-| Switching freq | 500 kHz | **1.2 MHz** | Higher freq → smaller output caps |
-| LCSC | C116592 | **C19190416** | $0.87 |
-| Package | SOT-23-6 | **HR-QFN (3×3.5 mm)** | Integrated inductor — no external L |
+| Vref | 0.768 V | 0.768 V | — |
+| Efficiency | ~90% | ~90% | Same part |
+| Switching freq | 500 kHz | 500 kHz | — |
+| LCSC | C116592 | C116592 | ~$0.35 |
+| Package | SOT-23-6 | SOT-23-6 | External inductor required |
 
-**v1 feedback network (from codebase):**
+**Feedback network (from v1 codebase, proven):**
 - R_top: 37 kΩ ±2%, R_bottom: 10 kΩ ±2%, Ctrl_resistor: 24 kΩ ±2%
 - DAC A0 tied to VIN → address 0x61
-- Vout = Vref × (1 + R_top/R_bottom) adjusted by DAC injection
-- v1 configured for 0–5 V output range
+- Vout = Vref × (1 + R_top/R_bottom) adjusted by DAC current injection
+- Configured for 0–5 V output range (proven in v1)
 
-**v2 feedback network change:**
-- Must support 0–5.5 V output (to give LDO dropout headroom)
-- Vref = 0.6V (vs 0.768V for TPS563201) — recalculate R_top/R_bottom
-- Recalculate for 5.5V max with 3.3V DAC control range
-- **Action:** SPICE simulation of new divider values
-
-**Supporting components (simplified vs v1):**
+**Supporting components:**
 - Input caps: 10 µF + 10 µF (0805) + 100 nF (0402)
-- Output caps: 2× 22 µF (0805) — per TPSM863257 datasheet recommendation
-- ~~Bootstrap cap~~: Not needed (integrated)
-- ~~External inductor~~: Not needed (integrated in package)
+- Output caps: 2× 22 µF (0805)
+- Bootstrap cap: 100 nF (0402)
+- External inductor: 4.7 µH (e.g. Wurth WE-LQS 4040, 3A rated)
 - Enable: 10 kΩ pull-up (0402), controlled via TCA6408 GPIO P2
 
 **Buck operating point at worst case (5V/1A cell output):**
-- Input: 8 V, Output: 5.5 V, Load: 1 A
-- Pin = 5.5 V × 1 A / 0.92 = 6.0 W
-- **Loss: 0.5 W** (at 92% efficiency)
-- Vin/Vout ratio = 1.45 → efficient operating point
+- Input: 12 V, Output: 5.5 V, Load: 1 A
+- Pin = 5.5 V × 1 A / 0.90 = 6.1 W
+- **Loss: 0.6 W** (at 90% efficiency)
+- Vin/Vout ratio = 2.18 → good operating point
 
-**Key advantages over TPS563201:**
-- Integrated inductor eliminates external L (BOM + PCB area savings)
-- Higher switching frequency (1.2 MHz) allows smaller output caps
-- Better efficiency at the 8V→5.5V operating point
-- Same 3A current rating with better thermal performance
+**Note on TPSM863257 upgrade path:** The TPSM863257RDXR (integrated inductor, 1.2 MHz, 3–17V input) was considered as an upgrade but is deferred to Phase 2. The TPS563201 is proven in v1 and the 12V input rail is well within its 4.5–17V range. The main advantage of TPSM863257 (integrated inductor) saves one component but adds $0.50/cell and requires feedback network recalculation for the 0.6V Vref.
 
-**STATUS: Upgrade. Feedback network recalculation needed for 0.6V Vref and 5.5V max.**
+**STATUS: RESOLVED. Reusing v1 part (TPS563201) with proven feedback network. 12V input is comfortable within 4.5–17V range.**
 
 #### 4.2.3 Stage 3: Digital LDO (Fine Regulation)
 
@@ -612,12 +683,12 @@ Provides low-noise, precise output regulation. DAC-controlled via MCP4725 modula
 
 **v2 status — RESOLVED (P1 blocker cleared):**
 
-With the TPSM863257 buck capping at 5.5V output, the TLV75901 (max Vin = 6V) now operates within its rated input range. The LDO can output 0–5V with comfortable margin:
+With the TPS563201 buck capping at 5.5V output, the TLV75901 (max Vin = 6V) now operates within its rated input range. The LDO can output 0–5V with comfortable margin:
 
 1. **Input voltage:** Buck max output = 5.5V, well within TLV75901 max Vin of 6V. ✓
 2. **Output voltage:** 0–5V is within the TLV75901's 0.55–5.5V adjustable range. ✓
 3. **Thermal dissipation at 1A:** With buck tracking, max LDO dropout ≈ 0.5V → P = 0.5W. WSON-6 Θ_JA ≈ 60°C/W → 30°C rise. Acceptable. ✓
-4. **Output capacitance:** 10 µF ceramic (0805). The LDO's PSRR (>60 dB at 1.2 MHz buck switching frequency) handles ripple rejection without an LC filter. ✓
+4. **Output capacitance:** 10 µF ceramic (0805). The LDO's PSRR (>60 dB at 500 kHz buck switching frequency) handles ripple rejection without an LC filter. ✓
 
 **Buck-tracks-LDO control strategy (essential for v2):**
 The firmware must set the buck output to Vout_target + ~0.5V headroom. This keeps LDO dropout loss manageable across the full range:
@@ -631,7 +702,7 @@ The firmware must set the buck output to Vout_target + ~0.5V headroom. This keep
 
 This approach caps LDO dissipation at ~1W across the range.
 
-**STATUS: RESOLVED. TLV75901 works as-is with TPSM863257 buck (max 5.5V input to LDO). Feedback network unchanged from v1 (already supports 0–5V). Only output cap upgrade needed (1µF → 10µF).**
+**STATUS: RESOLVED. TLV75901 works as-is with TPS563201 buck (max 5.5V input to LDO). Feedback network unchanged from v1 (already supports 0–5V). Only output cap upgrade needed (1µF → 10µF).**
 
 #### 4.2.4 Stage 4: Current Sensor
 
@@ -662,7 +733,7 @@ This approach caps LDO dissipation at ~1W across the range.
 | Driver | IRLML0040 N-FET | Same | OK |
 | Control | TCA6408 GPIO P5 | Same | — |
 
-**v2 note:** Relay coil power comes from the isolated domain. With 8V isolated output, add a 5V regulator per cell or use the 8V rail with appropriate relay selection. Alternatively, the relay coil can be powered from the 3.3V control rail via a higher-resistance coil variant.
+**v2 note:** Relay coil power comes from the cell's isolated domain. With 12V isolated output, add a 5V regulator per cell or use the 12V rail with appropriate relay selection. Alternatively, the relay coil can be powered from the 3.3V control rail via a higher-resistance coil variant (3V coil relay).
 
 **STATUS: OK. Verify relay coil supply in isolated domain.**
 
@@ -693,11 +764,11 @@ Each cell's isolated domain also requires a 3.3V rail for the I2C/SPI devices (D
 
 | Parameter | v1 value | v2 value | Status |
 |-----------|----------|----------|--------|
-| IC | LDK220M-R | **TBD** (3.3V LDO, Vin ≥ 8V) | **LDK220 removed** |
-| Input | 5V (from B1205S) | **8V** (from new iso DC-DC) | Need Vin ≥ 8V rated LDO |
+| IC | LDK220M-R | **LDK220M-R** | **Reuse** (Vin max 13.2V, 12V input OK) |
+| Input | 5V (from B1205S) | **12V** (from YLPTEC B2412S-3WR2) | 12V within LDK220 Vin range |
 | Output | 3.3V ±5% | 3.3V ±5% | — |
 | Current | 200 mA max | ≥50 mA | Sufficient for I2C/SPI devices |
-| Dropout | ~225 mV | TBD | 8V→3.3V = 4.7V headroom, no concern |
+| Dropout | ~225 mV | ~225 mV | 12V→3.3V = 8.7V headroom, no concern |
 
 **Loads on 3.3V control rail:**
 - ISO1640 isolated side: ~3 mA
@@ -705,19 +776,13 @@ Each cell's isolated domain also requires a 3.3V rail for the I2C/SPI devices (D
 - ADS131M04 ADC: ~1 mA (3.3 mW @ 3.3V)
 - 2× MCP4725 DAC: ~0.4 mA each
 - TCA6408 GPIO: ~0.1 mA
+- TMP117 temp sensor: ~0.1 mA
 - I2C pull-ups (2× 2 kΩ): ~3.3 mA
-- **Total: ~11.7 mA** — well within typical small LDO budget
+- **Total: ~11.8 mA** — well within LDK220's 200 mA budget
 
-**Control LDO dissipation at 8V input:** (8V - 3.3V) × 11.7 mA = **55 mW** — negligible.
+**Control LDO dissipation at 12V input:** (12V - 3.3V) × 11.8 mA = **103 mW** — acceptable, slightly higher than v1 due to 12V input vs 5V. Well within SOT-23-5 thermal limits.
 
-**Requirements for replacement LDO:**
-- Vin max ≥ 10V (8V input with margin)
-- Vout = 3.3V ±5%
-- Iout ≥ 50 mA (11.7 mA load + margin)
-- Package: SOT-23-5 or smaller
-- Candidates: AMS1117-3.3 (SOT-223, Vin to 15V), TLV75533 (SOT-23-5, Vin to 16V, 500mA)
-
-**STATUS: P2 — LDK220 removed, replacement TBD. Low-risk (any common 3.3V LDO with Vin ≥ 8V works).**
+**STATUS: RESOLVED. LDK220M-R reused — Vin max of 13.2V accommodates the 12V ±10% input from the isolated DC-DC (11.4–12.6V). The `st-ldk220-local/` package is already integrated in cell-card.**
 
 #### 4.2.8 ADC Input Conditioning
 
@@ -733,14 +798,14 @@ Each ADS131M04 channel requires analog input conditioning to map the cell-domain
 
 | CH | Signal | Source Range | Divider | ADC Input Range | Headroom | Anti-Alias f_c | Notes |
 |----|--------|-------------|---------|-----------------|----------|---------------|-------|
-| 0 | Buck output voltage | 0–5.5V | 1:5 | 0–1.10V | 8% | ~50 kHz | 1.2 MHz buck ripple — tighter filter |
+| 0 | Buck output voltage | 0–5.5V | 1:5 | 0–1.10V | 8% | ~50 kHz | 500 kHz buck ripple — tighter filter |
 | 1 | LDO output voltage | 0–5.0V | 1:5 | 0–1.00V | 17% | ~100 kHz | Clean LDO output |
 | 2 | Current sense (INA185 out) | 0–2.5V | 2:5 | 0–1.00V | 17% | ~100 kHz | INA185A2: 50× gain, 50 mΩ shunt; INA BW ~350 kHz pre-filters |
 | 3 | Kelvin sense voltage | 0–5.0V | 1:5 | 0–1.00V | 17% | ~100 kHz | 4-wire sense line, high-Z input |
 
 **Anti-aliasing filter:**
 - **Topology:** Series R_filter + shunt C_filter to AGND, between divider output and ADC input pin
-- **CH0 cutoff ~50 kHz:** Buck switching at 1.2 MHz → ~28 dB rejection at switching frequency
+- **CH0 cutoff ~50 kHz:** Buck switching at 500 kHz → ~20 dB rejection at switching frequency
 - **CH1/2/3 cutoff ~100 kHz:** Clean signals, 10× above control bandwidth (10 kHz)
 - **Capacitor dielectric:** C0G/NP0 mandatory (no voltage-dependent capacitance)
 - **Source impedance target:** 2–5 kΩ total (divider Thévenin ∥ R_filter) — low enough for ADC settling, high enough for ESD protection
@@ -762,86 +827,100 @@ Each ADS131M04 channel requires analog input conditioning to map the cell-domain
 
 ### 4.3 Per-Cell Power Budget Summary
 
-**Worst case: 5V output, 1A load (5W delivered to DUT)**
+**Note:** Per-cell isolated DC-DC (B2412S-3WR2) is rated 3W (250mA @ 12V). This limits continuous operation — see §4.2.1 for details. The budget below shows the realistic operating envelope.
+
+**Maximum continuous (limited by 3W iso DC-DC): ~5V output, ~540mA load**
 
 | Stage | Input | Output | Loss | Efficiency |
 |-------|-------|--------|------|------------|
-| Isolated DC-DC (80% eff.) | 24V × 0.42A = **10.0W** | 8V × 1.0A = 8.0W | **2.0W** | 80% |
-| Digital Buck (92% eff.) | 8V × 0.75A = 6.0W | 5.5V × 1A = 5.5W | **0.5W** | 92% |
-| Digital LDO (tracking buck) | 5.5V × 1A = 5.5W | 5.0V × 1A = 5.0W | **0.5W** | 91% |
-| Current Sensor (50mΩ) | 5.0W | 5.0W | **0.05W** | 99.9% |
-| Output Relay | 5.0W | 5.0W | **~0.05W** | ~100% |
-| 3.3V control rail (TBD LDO) | 0.09W | 0.039W | **0.055W** | — |
+| Isolated DC-DC (80% eff.) | 24V_iso × 0.16A = **3.75W** | 12V × 0.25A = 3.0W | **0.75W** | 80% |
+| Digital Buck (90% eff.) | 12V × 0.25A = 3.0W | 5.5V × 0.49A = 2.7W | **0.3W** | 90% |
+| Digital LDO (tracking buck) | 5.5V × 0.49A = 2.7W | 5.0V × 0.49A = 2.45W | **0.25W** | 91% |
+| Current Sensor (50mΩ) | 2.45W | 2.45W | **0.012W** | 99.5% |
+| Output Relay | 2.45W | 2.45W | **~0.02W** | ~100% |
+| 3.3V control rail (LDK220) | 0.14W | 0.039W | **0.103W** | — |
 | Relay coil | — | — | **~0.1W** | — |
-| **TOTAL per cell** | **10.0W from 24V** | **5.0W to DUT** | **3.2W waste** | **50% end-to-end** |
+| **TOTAL per cell** | **3.75W from 24V_iso** | **2.45W to DUT** | **1.5W waste** | **65% end-to-end** |
 
-**Per-cell 24V input current:** 10.0W ÷ 24V = **0.42A per cell** (worst case)
+**Per-cell 24V_iso current:** 3.75W ÷ 24V = **0.16A per cell** (at max continuous)
 
 **Typical operating point (3.7V / 300mA = 1.1W):**
 
 | Stage | Input | Output | Loss | Efficiency |
 |-------|-------|--------|------|------------|
-| Isolated DC-DC (80% eff.) | 24V × 0.19A = **4.5W** | 8V × 0.45A = 3.6W | **0.9W** | 80% |
-| Digital Buck (92% eff.) | 8V × 0.51A = 4.1W | 4.2V × 0.3A = 1.26W | **0.1W** | 97% |
+| Isolated DC-DC (80% eff.) | 24V_iso × 0.08A = **1.88W** | 12V × 0.13A = 1.5W | **0.38W** | 80% |
+| Digital Buck (90% eff.) | 12V × 0.13A = 1.5W | 4.2V × 0.3A = 1.26W | **0.14W** | 90% |
 | Digital LDO (tracking) | 4.2V × 0.3A = 1.26W | 3.7V × 0.3A = 1.1W | **0.15W** | 88% |
 | Other | — | — | **~0.25W** | — |
-| **TOTAL per cell** | **4.5W from 24V** | **1.1W to DUT** | **1.4W waste** | **24% e2e** |
+| **TOTAL per cell** | **1.88W from 24V_iso** | **1.1W to DUT** | **0.92W waste** | **59% e2e** |
 
 ### 4.4 Per-Card Power Budget
 
-Each card has 8 cells plus card-level electronics.
+Each card has 8 cells plus card-level electronics. The card receives 24V from the backplane, passes it through a card-level isolated DC-DC (24V→24V), then distributes 24V_iso to both the card MCU domain (via TPSM84209 buck) and the 8 per-cell isolated DC-DCs.
 
 #### 4.4.1 Card Electronics Rail
 
 ```
 24V (from backplane)
   │
-  └──→ TPSM84209 Buck Module (24V → 5V, 2.5A) ──→ TLV75901 LDO (5V → 3.3V, 1A)
-            Integrated inductor                          └── STM32H723, LAN8742A, muxes,
-            4.5–28V in, 1.2–6V out                           TCA9548A ×2, ISO1640/ISO7741 non-iso ×8
+  └──→ Isolated DC-DC (24V → 24V, 20W) ──→ 24V_iso
+            e.g. TDPOWER TDK20-24S24WH              │
+            (card-level galvanic isolation)           │
+                                                      ├──→ TPSM84209 Buck (24V → 3.3V, 2.5A)
+                                                      │         └── STM32H723, LAN8742A, mux,
+                                                      │             TCA9548A, ISO1640/ISO7741 non-iso ×8
+                                                      │
+                                                      └──→ 8× Per-cell isolated DC-DC (24V → 12V, 3W)
+                                                                └── Per-cell power chain (see §4.3)
 ```
 
 | Component | Supply | Current Draw | Notes |
 |-----------|--------|-------------|-------|
 | STM32H723 (active, I2C + SPI DMA + Ethernet) | 3.3V | ~150 mA | Worst-case with all peripherals |
 | LAN8742A PHY | 3.3V | ~80 mA | Active link |
-| 2× TCA9548A I2C mux | 3.3V | ~2 mA | Negligible |
+| 1× TCA9548A I2C mux | 3.3V | ~1 mA | Single mux, 8 channels |
 | 8× ISO1640 non-isolated side | 3.3V | ~24 mA | 3 mA each |
 | 8× ISO7741 non-isolated side | 3.3V | ~24 mA | 3 mA each (SPI isolator) |
 | 2× CD74HC4052 MISO mux | 3.3V | ~1 mA | SPI MISO multiplexers |
 | Misc (pull-ups, indicators) | 3.3V | ~10 mA | — |
-| **3.3V total** | 3.3V | **~291 mA** | Via TLV75901 LDO from 5V |
-| **5V total** | 5V | **~310 mA** | 291mA (→LDO) + margin |
+| **3.3V total** | 3.3V | **~290 mA** | Via TPSM84209 direct to 3.3V |
 
 **Card-level buck (TPSM84209RKHR):**
-- Input: 24V, Output: 5V @ 0.31A
-- Power: 5V × 0.31A = 1.55W output, ~1.72W input (at 90% eff.)
+- Input: 24V_iso, Output: 3.3V @ 0.29A (direct, no intermediate 5V stage needed)
+- Power: 3.3V × 0.29A = 0.96W output, ~1.07W input (at 90% eff.)
 - Integrated inductor, 4.5–28V in, 1.2–6V out, 2.5A rated
-- **Card electronics loss: ~0.17W**
+- **Card electronics loss: ~0.11W** (better efficiency than 24V→5V→3.3V two-stage)
 
-**Card-level 3.3V LDO (TLV75901):**
-- Input: 5V (from TPSM84209), Output: 3.3V @ 0.29A
-- Dissipation: (5V - 3.3V) × 0.29A = **0.49W**
-- Same part as per-cell output chain LDO — BOM consolidation
+**Card-level isolated DC-DC (24V→24V):**
+- e.g. TDPOWER TDK20-24S24WH (20W, proven in Peak 48ch)
+- Input: 24V (backplane), Output: 24V_iso
+- At 90% efficiency: 20W output capacity, 22.2W input
+- Powers: TPSM84209 (1.07W) + 8× per-cell DC-DCs (8 × 3.75W = 30W max)
+- **Note:** 20W TDK20 limits total card power. At typical loads (~15W total) this is adequate. For full 8× max continuous, may need higher-power variant.
 
 **Note:** Per-cell SK6805 LEDs removed. Card status can be reported via Ethernet to CM5 OLED/dashboard.
 
-#### 4.4.2 Card Total (Worst Case: 8 cells at 5V/1A)
+#### 4.4.2 Card Total
+
+**Max continuous (limited by 3W per-cell iso DC-DC: 8 cells at ~5V/540mA)**
 
 | Load | 24V Current | Power | Waste Heat |
 |------|-------------|-------|------------|
-| 8× cell isolated supplies | 8 × 0.42A = **3.3A** | 80W | **25.6W** |
-| Card electronics buck | 0.07A | 1.72W | 0.17W |
-| Card 3.3V LDO | (from 5V) | — | 0.49W |
-| **Card total (worst case)** | **3.37A** | **81.7W** | **26.3W** |
+| 8× cell isolated supplies | 8 × 0.16A = **1.25A** | 30W | **6.0W** |
+| Card-level iso DC-DC (90% eff.) | — | — | **3.3W** |
+| Card electronics (TPSM84209) | 0.04A | 1.07W | 0.11W |
+| **Card total (max continuous)** | **~1.4A** | **~34W** | **~9.4W** |
+
+**Typical (8 cells at 3.7V/300mA)**
 
 | Load | 24V Current | Power | Waste Heat |
 |------|-------------|-------|------------|
-| 8× cell typical (3.7V/300mA) | 8 × 0.19A = **1.5A** | 36W | **11.2W** |
-| Card electronics | 0.07A | 1.72W | 0.66W |
-| **Card total (typical)** | **1.57A** | **37.7W** | **11.9W** |
+| 8× cell (3.7V/300mA) | 8 × 0.08A = **0.63A** | 15W | **3.0W** |
+| Card-level iso DC-DC (90% eff.) | — | — | **1.7W** |
+| Card electronics | 0.04A | 1.07W | 0.11W |
+| **Card total (typical)** | **~0.7A** | **~18W** | **~4.8W** |
 
-**Backplane current per slot:** 3.45A worst-case → **4× power pins at 1.5A each** provides ample margin.
+**Backplane current per slot:** ~1.4A max continuous → **4× power pins at 1.5A each** provides ample margin.
 
 ### 4.5 System Power Budget
 
@@ -858,10 +937,11 @@ AC Mains (110/240V)
   │     │     │
   │     │     ├── INA228 shunt (total system current sense)
   │     │     │     │
-  │     │     │     ├── Slot 0: G5Q relay (NO) → INA3221 shunt → Card connector (3.45A max)
-  │     │     │     ├── Slot 1: G5Q relay (NO) → INA3221 shunt → Card connector (3.45A max)
+  │     │     │     ├── Slot 0: G5Q relay (NO) → INA3221 shunt → Card connector (~1.4A max)
+  │     │     │     │         Card: 24V → [ISO DC-DC 24V→24V] → 24V_iso → TPSM84209 + 8× cells
+  │     │     │     ├── Slot 1: G5Q relay (NO) → INA3221 shunt → Card connector (~1.4A max)
   │     │     │     ├── ...
-  │     │     │     └── Slot 15: G5Q relay (NO) → INA3221 shunt → Card connector (3.45A max)
+  │     │     │     └── Slot 15: G5Q relay (NO) → INA3221 shunt → Card connector (~1.4A max)
   │     │     │
   │     │     └── Relay coil supply bus (24V_COIL)
   │     │           │
@@ -884,11 +964,13 @@ AC Mains (110/240V)
 
 | Configuration | Cards | 24V Current | PSU Input Power | Waste Heat |
 |---------------|-------|-------------|-----------------|------------|
-| **Min (1 card, typical load)** | 1 | 1.65A + 1.5A base = 3.2A | 76W | 12W |
-| **Small (4 cards, typical)** | 4 | 6.6A + 1.5A base = 8.1A | 194W | 48W |
-| **Medium (10 cards, typical)** | 10 | 16.5A + 1.5A base = 18.0A | 432W | 120W |
-| **Full (16 cards, typical)** | 16 | 26.4A + 1.5A base = 27.9A | 670W | 195W |
-| **Full (16 cards, WORST CASE)** | 16 | 55.2A + 1.5A base = 56.7A | 1,361W | 358W |
+| **Min (1 card, typical load)** | 1 | 0.7A + 1.5A base = 2.2A | 53W | 5W |
+| **Small (4 cards, typical)** | 4 | 2.8A + 1.5A base = 4.3A | 103W | 19W |
+| **Medium (10 cards, typical)** | 10 | 7.0A + 1.5A base = 8.5A | 204W | 48W |
+| **Full (16 cards, typical)** | 16 | 11.2A + 1.5A base = 12.7A | 305W | 77W |
+| **Full (16 cards, MAX CONTINUOUS)** | 16 | 22.4A + 1.5A base = 23.9A | 574W | 150W |
+
+**Note:** Max continuous is limited by the 3W per-cell isolated DC-DC (~540mA per cell, not 1A). System power is significantly reduced vs previous estimates due to lower per-cell power draw.
 
 **Base board load estimate:**
 - CM5: ~5W (5V @ 1A)
@@ -901,14 +983,14 @@ AC Mains (110/240V)
 
 | Scenario | Min PSU Rating | Recommendation |
 |----------|---------------|----------------|
-| ≤4 cards (32 cells), typical | 194W | **Meanwell LRS-350-24** (350W, 14.6A) |
-| ≤10 cards (80 cells), typical | 432W | **Meanwell LRS-600-24** (600W, 25A) |
-| 16 cards, typical | 670W | **Meanwell RSP-1000-24** (1,000W, 40A) |
-| 16 cards, worst case | 1,361W | **Meanwell RSP-1600-24** (1,600W, 66.7A) |
+| ≤4 cards (32 cells), typical | 103W | **Meanwell LRS-150-24** (150W, 6.5A) |
+| ≤10 cards (80 cells), typical | 204W | **Meanwell LRS-350-24** (350W, 14.6A) |
+| 16 cards, typical | 305W | **Meanwell LRS-350-24** (350W, 14.6A) |
+| 16 cards, max continuous | 574W | **Meanwell LRS-600-24** (600W, 25A) |
 
-**Reality check:** All 128 cells at 5V/1A simultaneously is unlikely. A 50% duty-cycle assumption (half the cells active) brings 16 cards to ~680W, which a single RSP-1000-24 (1,000W) comfortably covers. For full 16-card worst-case, a single **RSP-1600-24** (1,600W) is sufficient.
+**Reality check:** The 3W per-cell isolated DC-DC significantly reduces system power. Even 16 cards at max continuous only draws ~574W, easily handled by a single LRS-600-24. System power requirements are roughly halved compared to the original 8W/cell estimate.
 
-**For initial Phase 1–3 development (≤4 cards):** LRS-350-24 is sufficient.
+**For initial Phase 1–3 development (≤4 cards):** LRS-150-24 is sufficient.
 
 ### 4.5a Per-Slot Power Switching & Monitoring
 
@@ -1012,22 +1094,24 @@ All backplane I2C devices share a single I2C bus on the CM5:
 
 #### 4.6.1 Heat Sources by Level
 
-| Level | Source | Worst Case | Typical |
-|-------|--------|------------|---------|
-| Per cell | Isolated DC-DC | 2.0W | 0.9W |
-| Per cell | Buck regulator (TPSM863257) | 0.5W | 0.1W |
-| Per cell | LDO regulator (TLV75901) | 0.5W | 0.15W |
-| Per cell | Other (relay, shunt, ctrl rail) | 0.21W | 0.15W |
-| **Per cell total** | | **3.2W** | **1.3W** |
-| **Per card (8 cells + electronics)** | | **26.3W** | **11.9W** |
+| Level | Source | Max Continuous | Typical |
+|-------|--------|---------------|---------|
+| Per cell | Isolated DC-DC (B2412S-3WR2) | 0.75W | 0.38W |
+| Per cell | Buck regulator (TPS563201) | 0.3W | 0.14W |
+| Per cell | LDO regulator (TLV75901) | 0.25W | 0.15W |
+| Per cell | Other (relay, shunt, ctrl rail) | 0.22W | 0.15W |
+| **Per cell total** | | **1.5W** | **0.92W** |
+| Per card | Card-level iso DC-DC (24V→24V) | 3.3W | 1.7W |
+| **Per card (8 cells + card electronics)** | | **~15.4W** | **~9.6W** |
 | Base board | CM5 + switches + fans | ~10W | ~10W |
-| **System (16 cards)** | | **431W** | **194W** |
+| **System (16 cards)** | | **257W** | **164W** |
 
 #### 4.6.2 Critical Thermal Points
 
-1. **Isolated DC-DC module** — hottest component per cell (2W in ~1cm² package). Needs adequate PCB copper pour and airflow across card surface.
-2. **LDO (TLV75901 in WSON-6)** — 0.5W in 2×2mm package. Θ_JA ≈ 60°C/W → 30°C rise. Acceptable with airflow.
-3. **Card-level: 8 isolated DC-DCs in close proximity** — 16W waste in a ~200×120mm card area. Board thermal relief + forced air mandatory.
+1. **Card-level isolated DC-DC (24V→24V)** — hottest single component on card (~3.3W waste at max continuous). Needs adequate PCB copper pour and airflow.
+2. **Per-cell isolated DC-DC (B2412S-3WR2)** — 0.75W in SIP-4 package. Through-hole mounting provides good thermal path.
+3. **LDO (TLV75901 in WSON-6)** — 0.25W in 2×2mm package. Θ_JA ≈ 60°C/W → 15°C rise. Comfortable.
+4. **Card-level: 8 per-cell DC-DCs + card DC-DC in close proximity** — ~9.3W waste in a ~200×120mm card area. Board thermal relief + forced air mandatory.
 
 #### 4.6.3 Cooling Strategy
 
@@ -1042,10 +1126,10 @@ All backplane I2C devices share a single I2C bus on the CM5:
 
 | Configuration | Waste Heat | CFM Required (ΔT=20°C) | Fans Needed |
 |---------------|-----------|------------------------|-------------|
-| 4 cards typical | 48W | 1.4 CFM | 1× 120mm (low speed) |
-| 10 cards typical | 120W | 3.4 CFM | 1× 120mm (medium) |
-| 16 cards typical | 195W | 5.5 CFM | 2× 120mm (medium) |
-| 16 cards worst | 445W | 12.6 CFM | 2× 120mm (medium-high) |
+| 4 cards typical | 38W | 1.1 CFM | 1× 120mm (low speed) |
+| 10 cards typical | 96W | 2.7 CFM | 1× 120mm (low-medium) |
+| 16 cards typical | 164W | 4.7 CFM | 1× 120mm (medium) |
+| 16 cards max continuous | 257W | 7.3 CFM | 2× 120mm (low-medium) |
 
 Formula: CFM = P_waste / (1.76 × ΔT), where 1.76 = air heat capacity factor in CFM·°C/W.
 
@@ -1055,13 +1139,13 @@ Typical 120mm fan: 40–100 CFM at moderate speed. **2× 120mm fans provide 80�
 
 | Component | v1 Part | v2 Part | Change Required | Priority |
 |-----------|---------|---------|-----------------|----------|
-| Isolated DC-DC | B1205S-2WR2 (12V→5V, 2W) | **TBD** (24V→8V, ~8W) | **New part required** | P0 |
-| Digital Buck | TPS563201 (3A, SOT-23-6) | **TPSM863257RDXR** (3A, integrated L) | Integrated buck module, 5.5V max | **Upgrade** |
+| Isolated DC-DC | B1205S-2WR2 (12V→5V, 2W) | **YLPTEC B2412S-3WR2** (24V→12V, 3W, C5369517) | **Selected** — $1.95, 325 stock | **Resolved** |
+| Digital Buck | TPS563201 (3A, SOT-23-6) | **TPS563201** (reuse, 12V input) | Proven, 12V within 4.5–17V range | **Resolved** |
 | Digital LDO | TLV75901 (1A, 6V max in) | **TLV75901** (reuse) | Now works — buck max 5.5V < Vin 6V | **Resolved** |
 | ~~Pi Filter~~ | ~~YNR4030-101M + 2×10µF~~ | **Removed** | Inductor DCR causes unacceptable voltage drop at 1A; LDO PSRR sufficient | — |
 | Current Sensor | INA185A2 + 100mΩ shunt | INA185A2 + **50mΩ** shunt | Shunt value change | P2 |
-| Output Relay | HFD4/5-SR DPDT | Same | Verify coil supply from 8V domain | P2 |
-| ~~Control LDO~~ | ~~LDK220M-R (5V→3.3V)~~ | **TBD** (8V→3.3V) | **LDK220 removed** | P2 |
+| Output Relay | HFD4/5-SR DPDT | Same | Verify coil supply from 12V domain | P2 |
+| Control LDO | LDK220M-R (5V→3.3V) | **LDK220M-R** (12V→3.3V, Vin max 13.2V) | **Reuse** — 12V within range | **Resolved** |
 | Buck DAC | MCP4725 (addr 0x61) | Same | — | — |
 | LDO DAC | MCP4725 (addr 0x60) | Same | — | — |
 | ADC | ADS1115 (16-bit, I2C) | **ADS131M04** (24-bit, SPI, 32kSPS) | **Upgrade** — 4ch simultaneous, 10× faster | **Upgrade** |
@@ -1069,18 +1153,31 @@ Typical 120mm fan: 40–100 CFM at moderate speed. **2× 120mm fans provide 80�
 | I2C Isolator | ISO1640BDR | Same | I2C path for DACs + GPIO | — |
 | SPI Isolator | — | **ISO7741FDBQR** (4ch, 3F+1R) | **New** — isolates SPI for ADS131M04 | **New** |
 
+**Card-level components (new in v2):**
+
+| Component | Part | Function | Notes |
+|-----------|------|----------|-------|
+| Card-level isolated DC-DC | TDK20-24S24WH (or similar 24V→24V) | Backplane ↔ card isolation | 20W, proven in Peak 48ch |
+| Card-level buck | TPSM84209RKHR | 24V_iso → 3.3V for MCU domain | Integrated inductor, 2.5A |
+| Discrete Ethernet transformer | TBD | Ethernet PHY isolation | Required since Ethernet passes through backplane |
+| UART digital isolator | TBD | UART isolation for card programming | Backplane routes UART via slot mux |
+
 ### 4.8 Power Architecture Open Items
 
 | # | Item | Priority | Impact |
 |---|------|----------|--------|
-| 1 | **Select 24V→8V isolated DC-DC** (~8W, 1.5kV isolation) | P0 | Blocks card PCB design |
-| 2 | ~~Resolve LDO for 6V output~~ | ~~P1~~ | **RESOLVED** — TPSM863257 max 5.5V, TLV75901 works as-is |
-| 3 | Recalculate TPSM863257 feedback divider for 0–5.5V output range (Vref=0.6V) | P2 | Firmware + resistor BOM |
-| 4 | Determine relay coil supply in 8V isolated domain (5V LDO or 8V coil variant) | P2 | Component selection |
-| 5 | PSU sizing for 16-card configurations (reduced — ~8W/cell vs 15W) | P2 | Enclosure + mains wiring |
-| 6 | Select per-cell control rail LDO (LDK220 removed, need Vin ≥ 8V, 3.3V out) | P2 | BOM selection |
-| 7 | ~~Select card-level 3.3V regulator~~ | ~~P2~~ | **RESOLVED** — TLV75901 (same as per-cell LDO, 1A, 5V→3.3V) |
-| ~~6~~ | ~~Per-slot 24V relay/FET for CM5-controlled card power cycling~~ | ~~P3~~ | **RESOLVED** — 16× Omron G5Q-1A4 DC24 relay, MCP23017 + N-FET drive, E-stop cuts coil supply |
+| ~~1~~ | ~~Select 24V→8V isolated DC-DC~~ | ~~P0~~ | **RESOLVED** — YLPTEC B2412S-3WR2 (24V→12V, 3W, C5369517, $1.95) |
+| ~~2~~ | ~~Resolve LDO for 6V output~~ | ~~P1~~ | **RESOLVED** — TPS563201 buck max 5.5V, TLV75901 works as-is |
+| ~~3~~ | ~~Recalculate feedback divider~~ | ~~P2~~ | **RESOLVED** — Reusing TPS563201 with v1 feedback network (Vref=0.768V, proven) |
+| 4 | Determine relay coil supply in 12V isolated domain (5V LDO or 3V coil variant) | P2 | Component selection |
+| ~~5~~ | ~~PSU sizing~~ | ~~P2~~ | **RESOLVED** — LRS-350-24 sufficient for 16 cards typical, LRS-600-24 for max continuous |
+| ~~6~~ | ~~Select per-cell control rail LDO~~ | ~~P2~~ | **RESOLVED** — LDK220M-R reused (Vin max 13.2V, 12V input OK) |
+| ~~7~~ | ~~Select card-level 3.3V regulator~~ | ~~P2~~ | **RESOLVED** — TPSM84209 (24V_iso → 3.3V direct) |
+| ~~8~~ | ~~Per-slot 24V relay/FET~~ | ~~P3~~ | **RESOLVED** — 16× Omron G5Q-1A4 DC24 relay, MCP23017 + N-FET drive, E-stop |
+| 9 | **Evaluate 3W per-cell DC-DC limit** — B2412S-3WR2 limits cell to ~540mA continuous. For full 1A, need 5W+ part (MORNSUN B2412S-5WR2 or similar) or accept 540mA limit. | P1 | Max cell current |
+| 10 | **Select card-level isolated DC-DC** — TDK20-24S24WH ($6.21) is expensive. Evaluate alternatives for 24V→24V, 20W+. | P2 | Card-level BOM cost |
+| 11 | **Select discrete Ethernet transformer** — Required for backplane Ethernet isolation. | P1 | Card PCB design |
+| 12 | **Select UART digital isolator** — For card programming/debug via backplane. | P2 | Card PCB design |
 
 ### 4.9 Control Loop Margins Analysis
 
@@ -1090,14 +1187,14 @@ This section validates that the analog signal chain — DAC → regulator → se
 
 | Component | Parameter | Value | Source |
 |-----------|-----------|-------|--------|
-| **TPSM863257 buck** | Switching frequency | 1.2 MHz | Datasheet |
-| | Control mode | D-CAP3 (internally compensated) | No external compensation needed |
-| | Typical loop BW | ~100 kHz (est.) | D-CAP3 typical for 1.2 MHz f_sw |
-| | Transient response | <50 µs to 1% (est.) | Fast — no external compensation delay |
-| | Output ripple | ~10–20 mV p-p (typ.) | With 2× 22 µF ceramic output caps |
-| | Soft-start time | 1.6 ms (fixed) | — |
+| **TPS563201 buck** | Switching frequency | 500 kHz | Datasheet |
+| | Control mode | D-CAP2 (internally compensated) | No external compensation needed |
+| | Typical loop BW | ~50 kHz (est.) | D-CAP2 typical for 500 kHz f_sw |
+| | Transient response | <100 µs to 1% (est.) | Fast — no external compensation delay |
+| | Output ripple | ~20–40 mV p-p (typ.) | With 2× 22 µF ceramic output caps |
+| | Soft-start time | ~5 ms (typ.) | — |
 | **TLV75901 LDO** | PSRR at 100 kHz | 45 dB | Datasheet |
-| | PSRR at 1.2 MHz (buck f_sw) | ~20–25 dB (est.) | Rolls off ~20 dB/decade above 100 kHz |
+| | PSRR at 500 kHz (buck f_sw) | ~31 dB (est.) | Rolls off ~20 dB/decade above 100 kHz |
 | | Output noise | 53 µVrms | Integrated 10 Hz – 100 kHz |
 | | Dropout voltage | 225 mV max @ 1A | Rises with temperature |
 | | Output accuracy | ±0.7% (typ), ±1% (max) | Before calibration |
@@ -1128,23 +1225,23 @@ The firmware control loop reads ADC, computes PID, and writes DAC setpoints. Two
 | I2C mux select (TCA9548A) | ~50 µs | Channel select for target cell |
 | I2C DAC write × 2 (buck + LDO) | ~200 µs | 2× MCP4725 at 400 kHz |
 | DAC settling | 6 µs | Negligible vs I2C time |
-| Buck transient response | ~50 µs | D-CAP3 fast response |
+| Buck transient response | ~100 µs | D-CAP2 response (500 kHz) |
 | LDO transient response | ~50 µs | Tracks buck output |
 | ADC conversion period | 31–250 µs | At 32 kSPS → 31 µs; at 4 kSPS → 250 µs |
 | SPI ADC read | ~10 µs | 4ch × 24-bit |
-| **Total per cell** | **~370–590 µs** | Depending on ADC rate |
-| **8 cells (2 I2C buses parallel)** | **~1.5–2.4 ms** | 4 cells per bus, sequential |
+| **Total per cell** | **~420–640 µs** | Depending on ADC rate |
+| **8 cells (single I2C bus)** | **~3.4–5.1 ms** | 8 cells sequential on 1 bus |
 
 **Maximum control loop rates:**
 
 | Mode | Rate | Notes |
 |------|------|-------|
-| Full loop (DAC update + ADC read, 8 cells) | ~430–670 Hz | I2C-bottlenecked |
+| Full loop (DAC update + ADC read, 8 cells) | ~195–295 Hz | I2C-bottlenecked (single bus) |
 | Measurement only (ADC read, 8 cells) | ~900 Hz – 12 kHz | SPI-limited, depends on sample rate |
-| Per-cell (single cell control) | ~1.7–2.7 kHz | Full DAC + ADC cycle |
+| Per-cell (single cell control) | ~1.6–2.4 kHz | Full DAC + ADC cycle |
 | ADC streaming (per channel) | up to 32 kHz | ADC data ready interrupt |
 
-**Conclusion:** Full 8-cell control loop tops out at ~430–670 Hz. Measurement-only streaming can reach ~12 kHz. For applications requiring >1 kHz control per cell, use event-driven DAC updates (only write DAC when setpoint changes) and continuous ADC streaming.
+**Conclusion:** Full 8-cell control loop tops out at ~195–295 Hz with single I2C bus. Measurement-only streaming can reach ~12 kHz. For applications requiring >1 kHz control per cell, use event-driven DAC updates (only write DAC when setpoint changes) and continuous ADC streaming. The SPI DAC upgrade path (§4.9.9) eliminates the I2C bottleneck entirely.
 
 #### 4.9.3 Voltage Setpoint Resolution
 
@@ -1157,7 +1254,8 @@ The MCP4725 (12-bit, 0–3.3V) modulates the LDO feedback network through a cont
 - At DAC output, the control resistor injects current into the feedback node
 - Effective output voltage per DAC LSB: ~0.806 mV × (R_top ∥ R_bottom) / R_ctrl × (1 + R_top/R_bottom) ≈ **0.9 mV/LSB** (approximate — actual value depends on exact injection point)
 
-**Buck (TPSM863257) feedback network (v2 — needs recalculation for Vref = 0.6V):**
+**Buck (TPS563201) feedback network (reused from v1, Vref = 0.768V):**
+- R_top = 37 kΩ, R_bottom = 10 kΩ, R_ctrl = 24 kΩ (proven values from v1)
 - Similar architecture, but buck only needs coarse control (±0.5V tracking margin)
 - Buck LSB resolution ~1–2 mV/LSB — sufficient for tracking
 
@@ -1204,24 +1302,25 @@ The buck must maintain enough headroom above the LDO output for the LDO to stay 
 | **Available margin** | 500 mV - 300 mV = **200 mV** | Worst case (hot, max current) |
 
 **Buck output ripple impact:**
-- Buck ripple: ~10–20 mV p-p at 1.2 MHz
-- LDO PSRR at 1.2 MHz: ~20–25 dB (estimated from 45 dB at 100 kHz, rolling off ~20 dB/decade)
-- Ripple at LDO output: 20 mV × 10^(-22.5/20) ≈ **1.5 mV p-p** (worst case)
+- Buck ripple: ~20–40 mV p-p at 500 kHz
+- LDO PSRR at 500 kHz: ~31 dB (estimated from 45 dB at 100 kHz, rolling off ~20 dB/decade)
+- Ripple at LDO output: 40 mV × 10^(-31/20) ≈ **1.1 mV p-p** (worst case)
 - LDO output noise: 53 µVrms (broadband)
-- **Combined output ripple: ~1.5 mV p-p** — within ±1 mV target after averaging by ADC
+- **Combined output ripple: ~1.1 mV p-p** — within ±1 mV target after averaging by ADC
+- Note: Lower buck switching frequency (500 kHz vs 1.2 MHz) means LDO PSRR is actually better at the ripple frequency
 
 **Buck transient during setpoint change:**
-- D-CAP3 responds in ~10–50 µs (no external compensation)
+- D-CAP2 responds in ~50–100 µs (no external compensation)
 - LDO absorbs the buck transient with its output capacitor (10 µF)
 - LDO load-step response: ~50 µs to settle within 1% for 500 mA step
 - The 200 mV margin covers the buck's transient undershoot during step changes
 
 **Tracking at low output voltage:**
-- At V_out = 0.5V, buck setpoint = 1.5V (well above buck minimum 0.6V)
-- At V_out = 0V (disabled), buck output = 0.6V (minimum), LDO in dropout → output ≈ 0.6V - 0.225V = 0.375V
+- At V_out = 0.5V, buck setpoint = 1.5V (well above buck minimum 0.768V)
+- At V_out = 0V (disabled), buck output = 0.768V (minimum), LDO in dropout → output ≈ 0.768V - 0.225V = 0.543V
 - True 0V requires disabling the buck (EN pin via GPIO P2)
 
-**Conclusion:** 500 mV tracking margin provides adequate headroom across the full operating range. The 200 mV worst-case margin above dropout at 85°C is tight but sufficient since the D-CAP3 buck maintains excellent load regulation.
+**Conclusion:** 500 mV tracking margin provides adequate headroom across the full operating range. The 200 mV worst-case margin above dropout at 85°C is tight but sufficient since the D-CAP2 buck maintains excellent load regulation.
 
 #### 4.9.6 Signal Chain Bandwidth vs Control Loop
 
@@ -1229,7 +1328,7 @@ The control loop bandwidth must be less than the analog signal chain bandwidth a
 
 | Stage | Bandwidth | Margin over 10 kHz loop | OK? |
 |-------|-----------|------------------------|-----|
-| Buck internal loop (D-CAP3) | ~100 kHz | 10× | Yes |
+| Buck internal loop (D-CAP2) | ~50 kHz | 5× | Yes |
 | LDO bandwidth | >100 kHz | >10× | Yes |
 | INA185A2 (current sense) | 105 kHz | 10× | Yes |
 | Anti-alias filter (CH0) | 50 kHz | 5× | Yes |
@@ -1239,10 +1338,10 @@ The control loop bandwidth must be less than the analog signal chain bandwidth a
 | I2C DAC update (single cell) | ~5 kHz | 0.5× | **Bottleneck** |
 
 **Key findings:**
-1. **I2C DAC update rate is the control loop bottleneck** at ~5 kHz per cell (two 100 µs DAC writes per update). For 8 cells sequential on 2 buses → ~670 Hz full-loop rate.
+1. **I2C DAC update rate is the control loop bottleneck** at ~5 kHz per cell (two 100 µs DAC writes per update). For 8 cells sequential on 1 bus → ~285 Hz full-loop rate.
 2. **ADC digital filter** at 32 kSPS gives ~13 kHz -3 dB bandwidth — sufficient for 10 kHz control, but with 3 dB attenuation at 10 kHz. For flat response up to 10 kHz, oversample at 32 kSPS.
 3. **Analog signal chain** (regulators + INA + anti-alias filter) is comfortably above 10 kHz at every stage.
-4. **For >5 kHz control:** Would need faster DAC interface (SPI DAC or higher-speed I2C). Current architecture supports ~430–670 Hz full 8-cell control, or ~2.7 kHz per-cell with event-driven updates.
+4. **For >5 kHz control:** Would need faster DAC interface (SPI DAC or higher-speed I2C). Current architecture supports ~195–295 Hz full 8-cell control (single I2C bus), or ~1.6–2.4 kHz per-cell with event-driven updates.
 
 #### 4.9.7 Noise Floor and Measurement Resolution
 
@@ -1253,10 +1352,10 @@ The control loop bandwidth must be less than the analog signal chain bandwidth a
 | ADC ENOB at 4 kSPS | ~20 bits → ~1.1 µV at ADC → **~5.7 µV at signal** (×5 divider) |
 | ADC ENOB at 32 kSPS | ~17 bits → ~9.2 µV at ADC → **~46 µV at signal** |
 | LDO output noise (53 µVrms) | **53 µV** (broadband, reduced by anti-alias filter) |
-| Buck ripple at LDO output | ~1.5 mV p-p → **~430 µVrms** (sinusoidal approx) |
+| Buck ripple at LDO output | ~1.1 mV p-p → **~320 µVrms** (sinusoidal approx) |
 | **Dominant noise source** | **Buck ripple through LDO** |
 
-At 4 kSPS, the ADS131M04 digital filter attenuates 1.2 MHz buck ripple by >60 dB — effectively eliminating it. The limiting noise source becomes LDO broadband noise (~53 µV) which is well below the ±1 mV accuracy target.
+At 4 kSPS, the ADS131M04 digital filter attenuates 500 kHz buck ripple by >50 dB — effectively eliminating it. The limiting noise source becomes LDO broadband noise (~53 µV) which is well below the ±1 mV accuracy target.
 
 **Current measurement (CH2):**
 
@@ -1277,15 +1376,15 @@ The ±0.1 mA accuracy target requires ~2.5σ margin above the noise floor. At 4 
 | Voltage accuracy | ±1 mV | ~±0.5 mV (calibrated) | 2× | **OK** |
 | Current accuracy | ±0.1 mA | ~±0.05 mA (calibrated) | 2× | **OK** |
 | Voltage resolution | <0.1 mV | ~10 µV (ADC) | 10× | **OK** |
-| Control loop rate (8 cells) | 1 kHz | ~430–670 Hz | **0.4–0.7×** | **MARGINAL** |
-| Control loop rate (per cell) | 10 kHz | ~2.7 kHz | **0.27×** | **BELOW TARGET** |
+| Control loop rate (8 cells) | 1 kHz | ~195–295 Hz | **0.2–0.3×** | **BELOW TARGET** (single I2C bus) |
+| Control loop rate (per cell) | 10 kHz | ~1.6–2.4 kHz | **0.16–0.24×** | **BELOW TARGET** |
 | Measurement rate (8 cells) | 10 kHz | ~12 kHz | 1.2× | **OK** |
 | Buck–LDO tracking margin | >0 mV | 200 mV (hot, max load) | — | **OK** |
-| Output ripple (at LDO out) | <1 mV | ~1.5 mV p-p (~0.4 mVrms) | — | **OK** (averaged) |
+| Output ripple (at LDO out) | <1 mV | ~1.1 mV p-p (~0.3 mVrms) | — | **OK** (averaged) |
 
 **Open issues identified:**
-1. **Full 8-cell control loop rate** (430–670 Hz) is below the 1 kHz target. This is an I2C bottleneck — see §4.9.9 for SPI DAC upgrade path.
-2. **Output ripple** of ~1.5 mV p-p marginally exceeds ±1 mV. Acceptable because: (a) the ADC averages it, (b) DUT sees the averaged value, (c) the spec target is for the measured/reported value, not the instantaneous waveform.
+1. **Full 8-cell control loop rate** (~195–295 Hz with single I2C bus) is below the 1 kHz target. This is an I2C bottleneck — see §4.9.9 for SPI DAC upgrade path which eliminates this bottleneck.
+2. **Output ripple** of ~1.1 mV p-p marginally exceeds ±1 mV. Acceptable because: (a) the ADC averages it, (b) DUT sees the averaged value, (c) the spec target is for the measured/reported value, not the instantaneous waveform. The 500 kHz buck switching frequency actually provides better LDO PSRR than the 1.2 MHz TPSM863257 would have.
 
 #### 4.9.9 SPI DAC Upgrade Path (I2C Bottleneck Mitigation)
 
@@ -1310,8 +1409,8 @@ All use external reference (VDD as reference). All have built-in power-on reset.
 |-----------|--------------|---------------|---------|
 | Single DAC write | ~100 µs | **~1 µs** (16 clocks at 10 MHz SPI + CS overhead) | **100×** |
 | 2 DACs per cell | ~200 µs | ~2 µs | 100× |
-| 8 cells (2 SPI buses) | ~800 µs | ~8 µs | 100× |
-| Full loop (DAC + ADC, 8 cells) | ~2.3 ms (**430 Hz**) | ~120 µs (**8.3 kHz**) | **19×** |
+| 8 cells (2 SPI buses) | ~2 ms (single I2C) | ~8 µs | 250× |
+| Full loop (DAC + ADC, 8 cells) | ~3.5 ms (**285 Hz**) | ~120 µs (**8.3 kHz**) | **29×** |
 
 **Architecture change required:**
 
@@ -1389,13 +1488,16 @@ The card firmware reads these at startup and uses the slot ID for:
 
 | Signal | Pins | Notes |
 |--------|------|-------|
-| Ethernet TX+/TX- | 2 | 100Ω differential, to GbE switch port |
-| Ethernet RX+/RX- | 2 | 100Ω differential, from GbE switch port |
-| 24V power | 4 | Multiple pins for ≥4A capacity per slot |
+| Ethernet TX+/TX- | 2 | 100Ω differential, to GbE switch port (before card-level Eth transformer) |
+| Ethernet RX+/RX- | 2 | 100Ω differential, from GbE switch port (before card-level Eth transformer) |
+| 24V power | 4 | Multiple pins for ≥2A capacity per slot |
 | GND | 4 | Multiple pins, low-impedance return |
+| UART TX | 1 | CM5 → card (via slot mux + card UART isolator) |
+| UART RX | 1 | Card → CM5 (via slot mux + card UART isolator) |
 | Slot ID [3:0] | 4 | Per-slot resistor-coded (2⁴ = 16 slots) |
 | Card present | 1 | Pulled high on card, read by CM5/switch |
 | Reset | 1 | Open-drain, CM5 can reset individual cards |
+| BOOT0 | 1 | For STM32 bootloader entry (via slot mux) |
 | CAL_V+ | 1 | Per-slot calibration trace — cell output to slot's backplane relay |
 | CAL_V- | 1 | Per-slot calibration trace — cell ground reference to slot's backplane relay |
 | **Total** | **~20** | |
@@ -2225,9 +2327,9 @@ Card type detected by:
 | `atopile/ti-tmp117` | 0.2.0 | Temperature sensor (±0.1°C, I2C) |
 | `atopile/microchip-emc2101` | 0.2.0 | Fan controller with temp sensor + tach |
 | `atopile/ti-tlv75901` | 0.4.0 | 1A adjustable LDO |
-| `atopile/ti-tps563201` | 0.1.9 | 3A sync buck (replaced by TPSM863257 for per-cell, TPSM84209 for card-level) |
+| `atopile/ti-tps563201` | 0.1.9 | 3A sync buck (per-cell, proven from v1) |
 | `atopile/ti-lv2842x` | 0.2.3 | Buck regulator (4–40V input) |
-| `atopile/tdpower-tdk20x` | 0.2.0 | 20W isolated DC-DC (for per-cell isolation) |
+| `atopile/tdpower-tdk20x` | 0.2.0 | 20W isolated DC-DC (for card-level 24V→24V isolation) |
 | `atopile/ti-ina228` | 0.1.2 | 20-bit power monitor (input current sensing) |
 | `atopile/ti-ina3221` | 0.2.0 | Triple-channel current/power monitor |
 | ~~`atopile/opsco-sk6805-ec20`~~ | ~~0.4.0~~ | ~~Addressable RGB LED~~ (removed — no per-cell LEDs) |
@@ -2246,8 +2348,8 @@ Card type detected by:
 |-----------|----------|-------|
 | **ADS131M04 (24-bit ADC)** | P0 | SPI, 4ch simultaneous, 32 kSPS — no existing package |
 | **ISO7741 (SPI isolator)** | P0 | 4-ch digital isolator (3F+1R) for ADS131M04 SPI |
-| **TPSM863257 (integrated buck)** | P0 | 3A integrated buck module with inductor (per-cell) |
-| **TPSM84209 (integrated buck)** | P0 | 2.5A integrated buck module with inductor (card-level 24V→5V) |
+| ~~TPSM863257 (integrated buck)~~ | ~~P0~~ | **Deferred to Phase 2** — using TPS563201 (proven v1 part) for per-cell buck |
+| **TPSM84209 (integrated buck)** | P0 | 2.5A integrated buck module with inductor (card-level 24V→3.3V) |
 | **24AA025E48 EEPROM** | P1 | I2C, EUI-48 MAC + 256B user EEPROM — card identity |
 | Backplane card-edge connector | P1 | GPU-style, ~20-pin (incl. per-slot CAL traces) |
 | Cell output connector (Kelvin) | P1 | 18-pin, D-Sub or Micro-Fit |
@@ -2270,10 +2372,10 @@ Card type detected by:
 | Form factor | Single PCB | Single PCB | **Backplane + plug-in cards** |
 | Main controller | ESP32-S3 | RPi CM5 | **RPi CM5** |
 | Per-card MCU | — | — | **STM32H723** |
-| I2C topology | 1 bus, muxed | 3 buses, muxed | **2 I2C + 2 SPI buses per card** |
+| I2C topology | 1 bus, muxed | 3 buses, muxed | **1 I2C (8ch mux) + 2 SPI buses per card** |
 | Network | USB serial | I2C (centralized) | **GbE (distributed)** |
 | Switch | None | None | **Cascaded RTL8305NB** |
-| Isolation | Per-cell DC-DC | Per-cell DC-DC | **Per-cell DC-DC + ISO1640 (I2C) + ISO7741 (SPI)** |
+| Isolation | Per-cell DC-DC | Per-cell DC-DC | **Two-tier: card-level (24V→24V + Eth xfmr) + per-cell (DC-DC + ISO1640 + ISO7741)** |
 | Software | Arduino | FastAPI + DT | **FastAPI + DT (same stack)** |
 | Precision ADC | ADS1115 + MicroVault | ADS1219 + MicroVault | **ADS131M04 (SPI, 4ch, 32kSPS)** |
 | PSU | 12V external | 24V XT30 | **Meanwell 24V (IEC mains)** |
@@ -2300,9 +2402,10 @@ Card type detected by:
 - [x] Thermistors — Same card format, different firmware
 - [x] Software stack — Peak-style (FastAPI, device tree, calibration)
 - [x] PSU — Meanwell 24V, IEC C14 mains on rear panel
-- [x] Voltage/Current — 0–5V, 0–1A (TPSM863257 buck max 5.5V, TLV75901 LDO proven)
+- [x] Voltage/Current — 0–5V, 0–1A (TPS563201 buck max 5.5V, TLV75901 LDO proven)
 - [x] Update rate — up to 10 kHz (ADS131M04 SPI ADC at 32 kSPS/ch)
-- [x] Bus architecture — 2 I2C (control) + 2 SPI (ADC), DMA-driven parallel
+- [x] Bus architecture — 1 I2C (control, TCA9548A 8ch mux) + 2 SPI (ADC), DMA-driven parallel
+- [x] Card-level isolation — 24V→24V isolated DC-DC + Ethernet transformer + UART isolator (two-tier isolation)
 - [x] Card enumeration — Hardware slot ID bits (4 GPIO pins, 16 slots)
 - [x] Precision ADC — Per-cell ADS131M04 (SPI, 32 kSPS, simultaneous 4-ch)
 - [x] OTA firmware — CM5 pushes over Ethernet to card bootloader
@@ -2316,7 +2419,7 @@ Card type detected by:
 - [x] **Firmware framework:** Zephyr RTOS — device tree, native TCP/IP, MCUboot OTA, DMA I2C + SPI
 - [x] **Bus architecture:** I2C for control (DACs + GPIO), SPI for high-speed ADC — parallel operation
 - [x] **I2C bus speed:** 400 kHz for control path (TCA9548A + TCA6408A bottleneck), sufficient for DAC/GPIO
-- [x] **Buck converter:** TPSM863257RDXR — integrated buck module, 5.5V max, resolves LDO compatibility
+- [x] **Buck converter:** TPS563201 (reused from v1) — proven feedback network, 12V input within 4.5–17V range. TPSM863257 upgrade deferred to Phase 2.
 - [x] **LDO:** TLV75901 works as-is — buck max 5.5V < LDO max Vin 6V, P1 blocker resolved
 - [x] **Package availability:** Nearly all components have existing atopile packages (see §10)
 - [x] **Card identity:** 24AA025E48 EEPROM — factory-unique EUI-48 for card ID + Ethernet MAC address (§3.4)
@@ -2326,21 +2429,24 @@ Card type detected by:
 - [x] **Output path resistance:** ≤200 mΩ total (LDO→connector), ≤200 mV drop at 1A (§4.2.6)
 - [x] **Calibration data binding:** Per-cell calibration keyed by card EUI-48, survives slot changes (§8.7)
 - [x] **Power budget:** Detailed bottom-up analysis from cell → card → system, PSU sizing table (§4.3–4.5)
-- [x] **Card-level buck:** TPSM84209RKHR — integrated buck module (24V→5V, 2.5A), replaces TPS54560x
-- [x] **Card-level 3.3V LDO:** TLV75901 (same as per-cell output LDO) — BOM consolidation, 5V→3.3V, 1A rated
+- [x] **Card-level buck:** TPSM84209RKHR — integrated buck module (24V_iso→3.3V, 2.5A), replaces TPS54560x
+- [x] **Per-cell isolated DC-DC:** YLPTEC B2412S-3WR2 (24V→12V, 3W, C5369517, $1.95)
+- [x] **Per-cell control LDO:** LDK220M-R reused (12V→3.3V, Vin max 13.2V accommodates 12V ±10%)
+- [x] **Card-level isolation:** Isolated 24V→24V DC-DC + discrete Ethernet transformer + UART digital isolator
 - [x] **Per-slot power switching:** 16× Omron G5Q-1A4 DC24 relay (SPST-NO, 10A/30VDC) — replaces both E-stop bus relay and P-FET/high-side switch. Per-slot isolation + E-stop via coil supply cutoff (§4.5a)
 - [x] **Per-slot current monitoring:** 6× INA3221 (3-ch each) with 10 mΩ shunts, behind TCA9548A mux on CM5 I2C. Plus INA228 on main bus input.
 - [x] **Relay drive:** 2× MCP23017 (16-bit GPIO) + N-FET per relay. Default state: all relays open (cards de-powered). E-stop NC button in series with coil supply.
 
 ### 12.3 Still Open
 
-- [ ] **Isolated DC-DC for 5V/1A:** TDK20x is 20W but defaults 24V→24V. Need 24V→8V variant or alternative. ~8W required (reduced from 12W).
-- [ ] **Per-cell control rail LDO:** LDK220 removed. Need 3.3V LDO with Vin ≥ 8V, ≥50 mA. Low risk — many options (AMS1117-3.3, TLV75533, etc.).
-- [ ] **Backplane connector family:** Samtec? TE? Molex? PCB card-edge (cheapest)? Now 20 pins (incl. per-slot CAL traces).
+- [ ] **3W per-cell DC-DC limit:** YLPTEC B2412S-3WR2 limits continuous cell current to ~540mA. Evaluate if 1A is truly required or if typical 300mA is sufficient. For 1A, find 24V→12V 5W+ part.
+- [ ] **Card-level isolated DC-DC:** TDK20-24S24WH ($6.21) is expensive. Evaluate cheaper 24V→24V, 20W+ alternatives.
+- [ ] **Discrete Ethernet transformer:** Required for backplane Ethernet isolation. Select part.
+- [ ] **UART digital isolator:** Required for card programming/debug via backplane. Select part.
+- [ ] **Backplane connector family:** Samtec? TE? Molex? PCB card-edge (cheapest)? Now 20+ pins (incl. per-slot CAL traces, UART).
 - [ ] **Cell output connector:** D-Sub 25? Molex Micro-Fit? Terminal blocks?
 - [ ] **Enclosure dimensions:** 2U vs. 3U, 16 cards fit comfortably in 19"
 - [ ] **Card mechanical:** Exact PCB dimensions, rear bracket design, ejector mechanism
-- [ ] **Power budget reality check:** Meanwell LRS-350-24 vs LRS-600-24? (See §4.5.3 for analysis)
 - [ ] **Calibration DMM interface:** USB vs LAN connection to CM5, SCPI library selection (pyvisa vs python-vxi11)
 - [ ] **24AA025E48 atopile package:** Needs to be created (SOT-23-5 or MSOP-8)
 
@@ -2350,16 +2456,17 @@ Card type detected by:
 
 ### Phase 1: Architecture Validation
 - STM32H723 + LAN8742A Ethernet bringup (use Nucleo-H723ZG or Hyperion board)
-- Validate I2C + SPI: DMA on 2 I2C buses (DACs/GPIO) + 2 SPI buses (ADS131M04), measure actual cycle time
+- Validate I2C + SPI: DMA on 1 I2C bus (TCA9548A, 8ch mux, DACs/GPIO) + 2 SPI buses (ADS131M04), measure actual cycle time
 - CM5 ↔ STM32H723 communication over Ethernet (UDP streaming, TCP commands)
-- Evaluate ~8W isolated DC-DC candidates (24V → 8V)
-- Test TPSM863257 buck + TLV75901 LDO at 5V / 1A
-- Prototype card bootloader (Ethernet firmware update)
+- Test card-level isolation chain: 24V→24V iso DC-DC + TPSM84209 buck → 3.3V
+- Test per-cell power chain: YLPTEC B2412S-3WR2 (24V→12V) + TPS563201 buck + TLV75901 LDO at 5V / 540 mA
+- Prototype card bootloader (Ethernet firmware update via UART isolator)
 
 ### Phase 2: Cell Card PCB
 - Design cell card in atopile
 - STM32H723 + LAN8742A (from Hyperion packages)
-- 2× TCA9548A, 8× ISO1640, 8× ISO7741, 8× cell circuits (from Peak cellsim package, uprated)
+- Card-level isolation: 24V→24V iso DC-DC + Ethernet transformer + UART isolator + TPSM84209 buck
+- 1× TCA9548A (8ch), 8× ISO1640, 8× ISO7741, 8× cell circuits (from Peak cellsim package, uprated)
 - Card-edge connector + Kelvin output connector
 - Temp sensors per cell
 - Manufacture prototype, validate

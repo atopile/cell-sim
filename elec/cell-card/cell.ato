@@ -25,48 +25,12 @@ from "ti-tlv75901-local/ti-tlv75901.ato" import TI_TLV75901
 from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
 from "atopile/ti-tca6408/ti-tca6408.ato" import TI_TCA6408
 from "atopile/ti-ina185a1/ti-ina185a1.ato" import TI_INA185A1
-from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
 from "atopile/relays/relays.ato" import LogicLevelRelayDPDT1A3V
 from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
 from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
-
-
-# --- Stub Modules (replace with proper packages when available) ---
-
-module ADS131M04_stub:
-    # STUB: replace with proper package (LCSC C2862562) when available
-    "ADS131M04 24-bit 4ch simultaneous SPI ADC. Internal 1.2V ref, PGA gain=1."
-    power = new ElectricPower
-    spi_sclk = new ElectricLogic
-    spi_mosi = new ElectricLogic
-    spi_miso = new ElectricLogic
-    spi_cs = new ElectricLogic
-    ain = new ElectricSignal[4]
-    drdy = new ElectricLogic
-    assert power.voltage within 3.0V to 3.6V
-
-module ISO7741_stub:
-    # STUB: replace with proper package (LCSC C571196) when available
-    "ISO7741 4-ch digital isolator. 3 forward (A->B) + 1 reverse (B->A). 100Mbps, 5kV."
-    power_a = new ElectricPower
-    power_b = new ElectricPower
-    fwd_a = new ElectricLogic[3]
-    fwd_b = new ElectricLogic[3]
-    rev_a = new ElectricLogic
-    rev_b = new ElectricLogic
-    assert power_a.voltage within 3.0V to 5.5V
-    assert power_b.voltage within 3.0V to 5.5V
-
-module CD74HC4052_stub:
-    # STUB: replace with proper package when available
-    "CD74HC4052 dual 4:1 analog mux. We only use MUX1 for SPI MISO routing."
-    power = new ElectricPower
-    y = new Electrical
-    ch = new Electrical[4]
-    sel_a = new ElectricLogic
-    sel_b = new ElectricLogic
-    enable = new ElectricLogic
-    assert power.voltage within 2.0V to 6.0V
+from "ads131m04.ato" import ADS131M04_driver
+from "iso7741.ato" import ISO7741_driver
+from "cd74hc4052.ato" import CD74HC4052_driver
 
 
 # --- Interfaces ---
@@ -138,15 +102,15 @@ module Cell:
     # ========================================
     # 4. SPI Isolation (per cell, ISO7741)
     # ========================================
-    spi_iso = new ISO7741_stub
+    spi_iso = new ISO7741_driver
     spi_iso.power_a ~ power_3v3_mcu
     spi_iso.power_b ~ _power_3v3_iso
     # Forward channels (MCU -> cell): SCLK, MOSI, CS
-    spi_iso.fwd_a[0].line ~ spi_sclk.line
-    spi_iso.fwd_a[1].line ~ spi_mosi.line
-    spi_iso.fwd_a[2].line ~ spi_cs.line
+    spi_iso.fwd_in_a.line ~ spi_sclk.line
+    spi_iso.fwd_in_b.line ~ spi_mosi.line
+    spi_iso.fwd_in_c.line ~ spi_cs.line
     # Reverse channel (cell -> MCU): MISO
-    spi_iso.rev_a.line ~ spi_miso.line
+    spi_iso.rev_out_d.line ~ spi_miso.line
 
     # ========================================
     # 5. Digital Buck (coarse regulation) + DAC
@@ -240,14 +204,14 @@ module Cell:
     # ========================================
     # 9. ADC (ADS131M04) + Input Conditioning
     # ========================================
-    adc = new ADS131M04_stub
+    adc = new ADS131M04_driver
     adc.power ~ _power_3v3_iso
 
-    # Isolated SPI: ISO7741 -> ADC
-    spi_iso.fwd_b[0].line ~ adc.spi_sclk.line
-    spi_iso.fwd_b[1].line ~ adc.spi_mosi.line
-    spi_iso.fwd_b[2].line ~ adc.spi_cs.line
-    spi_iso.rev_b.line ~ adc.spi_miso.line
+    # Isolated SPI: ISO7741 output -> ADC
+    spi_iso.fwd_out_a.line ~ adc.spi_sclk.line
+    spi_iso.fwd_out_b.line ~ adc.spi_mosi.line
+    spi_iso.fwd_out_c.line ~ adc.spi_cs.line
+    spi_iso.rev_in_d.line ~ adc.spi_miso.line
 
     # --- Input conditioning: 4 channels ---
     # Each channel: signal -> R_top -> R_bot -> GND (voltage divider)
@@ -318,12 +282,7 @@ module Cell:
     # GPIO[6]: External load switch (TODO)
     # GPIO[7]: 2-wire/4-wire mode (TODO: needs second relay)
 
-    # ========================================
-    # 11. Temperature Sensor (TMP117)
-    # ========================================
-    temp = new TI_TMP117
-    temp.power ~ _power_3v3_iso
-    temp.i2c ~ _iso_i2c
+    # Temperature sensing is at card level (BaseCard.temp_sensor), not per-cell
 
 
 # --- Cell Block (4 cells on one I2C bus, shared SPI) ---
@@ -348,11 +307,11 @@ module CellBlock4:
     i2c ~ mux.i2c
 
     # MISO mux: 4 isolated MISO outputs -> 1 MISO to MCU
-    miso_mux = new CD74HC4052_stub
+    miso_mux = new CD74HC4052_driver
     miso_mux.power ~ power_3v3_mcu
-    miso_mux.y ~ spi_miso.line
-    miso_mux.sel_a ~ miso_sel[0]
-    miso_mux.sel_b ~ miso_sel[1]
+    miso_mux.a_common ~ spi_miso.line
+    miso_mux.sel_0 ~ miso_sel[0]
+    miso_mux.sel_1 ~ miso_sel[1]
     miso_mux.enable.line ~ power_3v3_mcu.lv
 
     # 4 cells
@@ -365,7 +324,7 @@ module CellBlock4:
     cells[0].spi_sclk.line ~ spi_sclk.line
     cells[0].spi_mosi.line ~ spi_mosi.line
     cells[0].spi_cs.line ~ spi_cs[0].line
-    cells[0].spi_miso.line ~ miso_mux.ch[0]
+    cells[0].spi_miso.line ~ miso_mux.a_ch[0]
     cells[0].output ~ outputs[0]
 
     # Cell 1
@@ -375,7 +334,7 @@ module CellBlock4:
     cells[1].spi_sclk.line ~ spi_sclk.line
     cells[1].spi_mosi.line ~ spi_mosi.line
     cells[1].spi_cs.line ~ spi_cs[1].line
-    cells[1].spi_miso.line ~ miso_mux.ch[1]
+    cells[1].spi_miso.line ~ miso_mux.a_ch[1]
     cells[1].output ~ outputs[1]
 
     # Cell 2
@@ -385,7 +344,7 @@ module CellBlock4:
     cells[2].spi_sclk.line ~ spi_sclk.line
     cells[2].spi_mosi.line ~ spi_mosi.line
     cells[2].spi_cs.line ~ spi_cs[2].line
-    cells[2].spi_miso.line ~ miso_mux.ch[2]
+    cells[2].spi_miso.line ~ miso_mux.a_ch[2]
     cells[2].output ~ outputs[2]
 
     # Cell 3
@@ -395,5 +354,5 @@ module CellBlock4:
     cells[3].spi_sclk.line ~ spi_sclk.line
     cells[3].spi_mosi.line ~ spi_mosi.line
     cells[3].spi_cs.line ~ spi_cs[3].line
-    cells[3].spi_miso.line ~ miso_mux.ch[3]
+    cells[3].spi_miso.line ~ miso_mux.a_ch[3]
     cells[3].output ~ outputs[3]

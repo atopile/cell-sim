@@ -1,0 +1,32 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_ISO7741DWR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C571196", date="2026-02-28T04:13:38.643464+00:00", checksum="9aaba2f4c47a44a721f7e49f83bc6c37bde5f38de56ff1a2225ee86ee4523a80">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="ISO7741DWR", footprint="SOIC-16_L10.3-W7.5-P1.27-LS10.3-BL.kicad_mod", symbol="ISO7741DWR.kicad_sym", model="SOIC-16_L10.3-W7.5-H2.7-LS10.3-P1.27.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C571196", manufacturer="Texas Instruments", partno="ISO7741DWR">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal EN1 ~ pin 7
+    signal EN2 ~ pin 10
+    signal GND1 ~ pin 2
+    GND1 ~ pin 8
+    signal GND2 ~ pin 9
+    GND2 ~ pin 15
+    signal INA ~ pin 3
+    signal INB ~ pin 4
+    signal INC ~ pin 5
+    signal IND ~ pin 11
+    signal OUTA ~ pin 14
+    signal OUTB ~ pin 13
+    signal OUTC ~ pin 12
+    signal OUTD ~ pin 6
+    signal VCC1 ~ pin 1
+    signal VCC2 ~ pin 16

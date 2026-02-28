@@ -1,0 +1,73 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# ISO7721 — Dual-channel digital isolator for UART TX/RX
+# Channel A: Side 2 → Side 1 (backplane RX → card MCU RX)
+# Channel B: Side 1 → Side 2 (card MCU TX → backplane TX)
+
+import ElectricPower
+import UART_Base
+import Capacitor
+
+from "parts/Texas_Instruments_ISO7721DR/Texas_Instruments_ISO7721DR.ato" import Texas_Instruments_ISO7721DR_package
+
+
+module ISO7721_UART_driver:
+    """
+    Texas Instruments ISO7721DR — 2-ch digital isolator for UART.
+    - Channel A: INA (side 2, backplane) → OUTA (side 1, card MCU)
+    - Channel B: INB (side 1, card MCU) → OUTB (side 2, backplane)
+    - 100 Mbps, 3 kVRMS reinforced isolation
+    - SOIC-8 package
+
+    Side 1 = Card MCU domain (isolated)
+    Side 2 = Backplane domain (non-isolated)
+    """
+
+    # --- External interfaces ---
+    power_card = new ElectricPower
+    "Card-side power (3.0V to 5.5V)"
+    power_card.required = True
+    assert power_card.voltage within 3.0V to 5.5V
+
+    power_bp = new ElectricPower
+    "Backplane-side power (3.0V to 5.5V)"
+    power_bp.required = True
+    assert power_bp.voltage within 3.0V to 5.5V
+
+    # UART interfaces
+    uart_card = new UART_Base
+    "Card MCU side UART (TX out, RX in)"
+
+    uart_bp = new UART_Base
+    "Backplane side UART (TX in from mux, RX out to mux)"
+
+    # --- Package ---
+    package = new Texas_Instruments_ISO7721DR_package
+
+    # --- Power connections ---
+    # Side 1 = card MCU domain
+    power_card.hv ~ package.VCC1
+    power_card.lv ~ package.GND1
+    # Side 2 = backplane domain
+    power_bp.hv ~ package.VCC2
+    power_bp.lv ~ package.GND2
+
+    # --- UART connections ---
+    # Channel A (side 2 → side 1): Backplane TX → Card MCU RX
+    uart_bp.tx.line ~ package.INA
+    uart_card.rx.line ~ package.OUTA
+
+    # Channel B (side 1 → side 2): Card MCU TX → Backplane RX
+    uart_card.tx.line ~ package.INB
+    uart_bp.rx.line ~ package.OUTB
+
+    # --- Decoupling capacitors ---
+    decap_card = new Capacitor
+    decap_card.capacitance = 100nF +/- 20%
+    decap_card.package = "0402"
+    power_card.hv ~> decap_card ~> power_card.lv
+
+    decap_bp = new Capacitor
+    decap_bp.capacitance = 100nF +/- 20%
+    decap_bp.package = "0402"
+    power_bp.hv ~> decap_bp ~> power_bp.lv
