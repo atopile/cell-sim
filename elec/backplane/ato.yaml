@@ -44,6 +44,5 @@ dependencies:
     - atopile/pin-headers
     - atopile/mounting-holes
 
-    # Local packages
-    # TODO: add high-side-switch when file:// local deps are working
-    # - file:///home/np/projects/cell-sim/elec/packages/high-side-switch
+    # Per-slot power relays are part of atopile/relays (LogicLevelRelaySPSTNO10A24V)
+    # High-side-switch package no longer needed — replaced by per-slot relays

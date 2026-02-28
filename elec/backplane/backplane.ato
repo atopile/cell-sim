@@ -7,10 +7,15 @@
 # Contains: CM5 controller, cascaded GbE switch, power distribution,
 # fan controller, card slot connectors, front panel I/O.
 #
-# Autonomous bringup infrastructure:
-#   - Per-slot high-side power switches (20x, via MCP23017 GPIO)
-#   - Per-slot current monitoring (7x INA3221 behind TCA9548A)
+# Power switching architecture:
+#   - 16x per-slot SPST-NO relays (Omron G5Q-1A4 DC24, 10A/30VDC)
+#   - MCP23017 GPIO drives relay coils via low-side N-FET (3.3V logic)
+#   - E-stop NC button in series with relay coil supply (24V_COIL rail)
+#   - Pressing E-stop de-energizes all relays → all cards lose power
+#   - Per-slot current monitoring (6x INA3221 behind TCA9548A)
 #   - Main bus monitoring (INA228, 24V V+I)
+#
+# Autonomous bringup infrastructure:
 #   - UART/NRST/BOOT0 mux (8x CD74HC4067SM, for remote flash + reset)
 #   - Card-present detection (MCP23017 GPIO inputs)
 #   - E-stop state readback
@@ -21,15 +26,14 @@
 #   - Cards are NOT directly exposed to WAN; CM5 is the gateway
 #
 # I2C Address Map (CM5 I2C bus):
-#   0x20  MCP23017 #0  SLOT_POWER_EN[0:15]
-#   0x21  MCP23017 #1  SLOT_POWER_EN[16:19], MUX_SEL[0:4], E_STOP
+#   0x20  MCP23017 #0  RELAY_EN[0:15] (per-slot relay coil enable)
+#   0x21  MCP23017 #1  MUX_SEL[0:4], E_STOP_STATE, spare
 #   0x22  MCP23017 #2  CARD_PRESENT[0:15]
 #   0x45  INA228       Main 24V bus V+I
 #   0x48  TMP117       Board temperature
 #   0x4C  EMC2101      Fan controller
 #   0x70  TCA9548A     I2C mux for INA3221 address expansion
-#   0x40-0x43  INA3221 x4 (via TCA9548A ch0)  Slots 0-11 current
-#   0x40-0x42  INA3221 x3 (via TCA9548A ch1)  Slots 12-20 current
+#   0x40  INA3221 x6 (via TCA9548A ch0-5)  Slots 0-15 current (3 ch each)
 
 from "atopile/rpi-cm5/rpi-cm5.ato" import RPI_CM5
 # BLOCKED: atopile/logos broken manifest blocks realtek-rtl8305nb
@@ -39,7 +43,7 @@ from "ti-tps54560x-local/ti-tps54560x.ato" import TI_TPS54560
 from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
 from "atopile/microchip-emc2101/microchip-emc2101.ato" import Microchip_EMC2101
 from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
-from "atopile/relays/relays.ato" import LogicLevelRelaySPDT3A5V
+from "relays-local/relays.ato" import LogicLevelRelaySPSTNO10A24V
 from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
 from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
 from "atopile/buttons/buttons.ato" import VerticalButton
@@ -55,6 +59,9 @@ from "atopile/ti-cd74hc4067sm/ti-cd74hc4067sm.ato" import TI_CD74HC4067SM
 
 import UART_Base
 import Resistor
+import ElectricLogic
+import I2C
+import ElectricPower
 
 
 # ============================================================================
@@ -64,86 +71,106 @@ import Resistor
 # Controlled by CM5 over I2C.
 
 module SlotManager:
-    "Per-slot power control, current monitoring, and card detection for 20 slots"
+    "Per-slot power control via relays, current monitoring, and card detection for 16 slots"
 
     # External interfaces
     i2c = new I2C                      # CM5 I2C bus
-    power_24v_in = new ElectricPower   # 24V bus (post E-stop)
-    power_3v3 = new ElectricPower      # 3.3V for ICs
+    power_24v_bus = new ElectricPower   # 24V bus (always live — relay common contacts)
+    power_24v_coil = new ElectricPower  # 24V coil supply (through E-stop NC button)
+    power_3v3 = new ElectricPower      # 3.3V for ICs + relay enable logic
 
-    # Per-slot switched power outputs
-    power_slot = new ElectricPower[20]
+    # Per-slot switched power outputs (downstream of relay NO + INA3221 shunt)
+    power_slot = new ElectricPower[16]
 
     # === GPIO Expanders (3x MCP23017) ===
-    # IC0 (0x20): Port A = SLOT_POWER_EN[0:7], Port B = SLOT_POWER_EN[8:15]
-    gpio_power_0_15 = new Microchip_MCP23017
-    gpio_power_0_15.power ~ power_3v3
-    gpio_power_0_15.i2c ~ i2c
+
+    # IC0 (0x20): 16 outputs — relay enable for slots 0-15
+    # Port A[0:7] = RELAY_EN[0:7], Port B[0:7] = RELAY_EN[8:15]
+    # Default: all LOW → all relays open → all cards de-powered
+    gpio_relay = new Microchip_MCP23017
+    gpio_relay.power ~ power_3v3
+    gpio_relay.i2c ~ i2c
     # TODO: set address to 0x20 (A2=0, A1=0, A0=0)
 
-    # IC1 (0x21): Port A[0:3] = SLOT_POWER_EN[16:19]
-    #             Port A[4:7] = MUX_SEL[0:3]
-    #             Port B[0] = MUX_SEL[4] (bank select)
-    #             Port B[1] = E_STOP_STATE (input)
-    #             Port B[2:7] = spare
+    # IC1 (0x21): Mux select + E-stop readback
+    #   Port A[0:3] = MUX_SEL[0:3]
+    #   Port A[4] = MUX_BANK_SEL
+    #   Port A[5:7] = spare
+    #   Port B[0] = E_STOP_STATE (input — reads 1 when coil supply is live)
+    #   Port B[1:7] = spare
     gpio_aux = new Microchip_MCP23017
     gpio_aux.power ~ power_3v3
     gpio_aux.i2c ~ i2c
     # TODO: set address to 0x21 (A2=0, A1=0, A0=1)
 
-    # IC2 (0x22): Port A = CARD_PRESENT[0:7], Port B = CARD_PRESENT[8:15]
-    # Card-present for slots 16-19 detected via INA3221 current (no current = no card)
+    # IC2 (0x22): 16 inputs — card-present detection for slots 0-15
+    # Pull-up on backplane, pulled low by card insertion
     gpio_detect = new Microchip_MCP23017
     gpio_detect.power ~ power_3v3
     gpio_detect.i2c ~ i2c
     # TODO: set address to 0x22 (A2=0, A1=1, A0=0)
 
-    # === High-Side Power Switches (20 slots) ===
-    # Each switch controlled by one MCP23017 GPIO output.
-    # Default state: OFF (power switches default off on boot).
+    # === Per-Slot Power Relays (16x Omron G5Q-1A4 DC24) ===
+    # SPST-NO, 10A @ 30VDC, 24V coil (200mW / 8.3mA per coil)
+    # Each relay includes: N-FET low-side driver, flyback protection, indicator LED
     #
-    # Switch enable GPIOs mapped to:
-    #   gpio_power_0_15 Port A[0:7] -> slots 0-7
-    #   gpio_power_0_15 Port B[0:7] -> slots 8-15
-    #   gpio_aux Port A[0:3] -> slots 16-19
+    # Power flow:  24V_BUS → relay common → relay NO → INA3221 shunt → slot connector
+    # Coil supply: 24V_COIL (through E-stop) → relay coil → N-FET → GND
+    # Enable:      MCP23017 GPIO (3.3V logic) → relay enable (N-FET gate)
     #
-    # NOTE: HighSidePowerSwitch package instantiation and connections.
-    # Each switch takes power_24v_in and outputs to power_slot[n].
-    # Enable line connected to the corresponding MCP23017 GPIO.
-    # The P-FET + NPN driver circuit is defined in the high-side-switch package.
-    # TODO: instantiate 20x HighSidePowerSwitch and connect when package is finalized
-    #       with actual transistor component definitions
+    # E-stop: NC button breaks 24V_COIL → all relay coils de-energize →
+    #         all NO contacts open → all cards instantly lose 24V
+
+    slot_relay = new LogicLevelRelaySPSTNO10A24V[16]
+    for relay in slot_relay:
+        relay.coil_power ~ power_24v_coil
+        relay.enable.reference ~ power_3v3
+
+    # Connect relay contacts: common ← 24V bus, NO → slot power
+    # Connect relay enable: GPIO → relay enable line
+    # TODO: connect gpio_relay outputs to slot_relay[n].enable.line
+    #   gpio_relay Port A[0] → slot_relay[0].enable.line
+    #   gpio_relay Port A[1] → slot_relay[1].enable.line
+    #   ... etc (requires MCP23017 pin-level access)
+
+    # Connect relay switch contacts to power bus and slot outputs
+    for relay in slot_relay:
+        relay.relay.switch_no.common ~ power_24v_bus.hv
 
     # === Per-Slot Current Monitoring ===
-    # 7x INA3221 (3 channels each = 21 channels for 20 slots + 1 spare)
-    # Addressed via TCA9548A I2C mux to avoid address conflicts:
-    #   TCA9548A ch0: INA3221 x4 at 0x40-0x43 (slots 0-11)
-    #   TCA9548A ch1: INA3221 x3 at 0x40-0x42 (slots 12-20)
+    # 6x INA3221 (3 channels each = 18 channels, 16 used + 2 spare)
+    # All at address 0x40, selected via TCA9548A I2C mux channels 0-5
+    #
+    # Layout:
+    #   TCA9548A ch0: INA3221 #0 (slots 0-2)
+    #   TCA9548A ch1: INA3221 #1 (slots 3-5)
+    #   TCA9548A ch2: INA3221 #2 (slots 6-8)
+    #   TCA9548A ch3: INA3221 #3 (slots 9-11)
+    #   TCA9548A ch4: INA3221 #4 (slots 12-14)
+    #   TCA9548A ch5: INA3221 #5 (slots 15 + 2 spare)
+
     i2c_mux = new TI_TCA9548A
     i2c_mux.i2c ~ i2c
     i2c_mux.power ~ power_3v3
     # TODO: set address to 0x70
 
-    # Bank 0: slots 0-11 (4x INA3221, each on a separate TCA9548A channel)
-    ina_bank0 = new TI_INA3221[4]
-    for monitor in ina_bank0:
+    ina = new TI_INA3221[6]
+    for monitor in ina:
         monitor.power ~ power_3v3
-    ina_bank0[0].i2c ~ i2c_mux.i2cs[0]
-    ina_bank0[1].i2c ~ i2c_mux.i2cs[1]
-    ina_bank0[2].i2c ~ i2c_mux.i2cs[2]
-    ina_bank0[3].i2c ~ i2c_mux.i2cs[3]
-    # TODO: set unique addresses (0x40, 0x41, 0x42, 0x43)
-    # TODO: connect shunt resistors between power switch output and card slot
+    ina[0].i2c ~ i2c_mux.i2cs[0]
+    ina[1].i2c ~ i2c_mux.i2cs[1]
+    ina[2].i2c ~ i2c_mux.i2cs[2]
+    ina[3].i2c ~ i2c_mux.i2cs[3]
+    ina[4].i2c ~ i2c_mux.i2cs[4]
+    ina[5].i2c ~ i2c_mux.i2cs[5]
 
-    # Bank 1: slots 12-20 (3x INA3221, each on a separate TCA9548A channel)
-    ina_bank1 = new TI_INA3221[3]
-    for monitor in ina_bank1:
-        monitor.power ~ power_3v3
-    ina_bank1[0].i2c ~ i2c_mux.i2cs[4]
-    ina_bank1[1].i2c ~ i2c_mux.i2cs[5]
-    ina_bank1[2].i2c ~ i2c_mux.i2cs[6]
-    # TODO: set unique addresses (0x40, 0x41, 0x42)
-    # TODO: connect shunt resistors
+    # INA3221 shunts sit between relay NO output and slot connector:
+    #   relay NO → INA3221 shunt high-side → INA3221 shunt low-side → slot power
+    # 10mohm shunts for ~8A full-scale (±81.92mV range)
+    # TODO: connect INA3221 shunt inputs to relay outputs and slot power rails
+    #   ina[0].channels[0] between slot_relay[0].relay.switch_no.normally_open and power_slot[0].hv
+    #   ina[0].channels[1] between slot_relay[1].relay.switch_no.normally_open and power_slot[1].hv
+    #   ... etc
 
 
 # ============================================================================
@@ -284,31 +311,34 @@ module SlotMux:
 # ============================================================================
 
 module Backplane:
-    "CellSim v2 backplane: CM5 + GbE switch + power + 20 card slots + bringup infrastructure"
+    "CellSim v2 backplane: CM5 + GbE switch + power + 16 card slots + bringup infrastructure"
 
     # === Power rails ===
     power_24v = new ElectricPower          # From Meanwell PSU (IEC C14 input)
-    power_24v_switched = new ElectricPower  # After E-stop relay
+    power_24v_coil = new ElectricPower     # Relay coil supply (24V through E-stop NC button)
     power_5v = new ElectricPower           # For CM5, switch, LEDs
     power_3v3 = new ElectricPower          # For CM5, switch, I2C devices
 
     # === CM5 I2C bus (shared by all management ICs) ===
     cm5_i2c = new I2C
 
-    # === E-Stop ===
-    estop_relay = new LogicLevelRelaySPDT3A5V
-    # 24V through normally-open contact of relay to card slots
-    # When relay energized (e-stop OK): power flows
-    # When relay de-energized (e-stop pressed / power loss): power cut
-    bus_monitor.power_out.hv ~ estop_relay.relay.switch_no.common
-    estop_relay.relay.switch_no.normally_open ~ power_24v_switched.hv
-    power_24v.lv ~ power_24v_switched.lv
-    estop_relay.coil_power ~ power_5v
-    # TODO: E-stop button connector (front panel, screw terminal)
+    # === E-Stop Architecture ===
+    # The E-stop button is a NC (normally-closed) mushroom-head switch in series
+    # with the relay coil supply rail (24V_COIL). It does NOT switch the main
+    # 24V power bus directly.
+    #
+    # When E-stop OK:   24V_COIL = 24V → relay coils energized → NO contacts closed → cards powered
+    # When E-stop pressed: 24V_COIL = 0V → relay coils de-energized → NO contacts open → cards off
+    # Base board power (CM5, fans, switches) is NOT affected by E-stop.
+    #
+    # E-stop circuit: power_24v.hv → [E-stop NC button] → power_24v_coil.hv
+    power_24v.hv ~ power_24v_coil.hv    # TODO: insert E-stop NC button in series here
+    power_24v.lv ~ power_24v_coil.lv
+    # TODO: E-stop button connector (front panel, screw terminal / panel mount NC switch)
 
     # === Main 24V Bus Monitor (INA228) ===
     # Monitors total system current and voltage on the 24V bus
-    # Inline on 24V bus before E-stop: PSU -> INA228 -> E-stop -> cards
+    # Inline on 24V bus: PSU → INA228 → relay commons + base board
     # Shunt: 5mohm for ~30A full-scale
     bus_monitor = new TI_INA228
     bus_monitor.power ~ power_3v3
@@ -319,8 +349,9 @@ module Backplane:
 
     # === Power regulation ===
     # 24V -> 5V buck (for CM5, switch ICs, LEDs)
+    # Fed from bus monitor output (always live, not behind E-stop)
     buck_5v = new TI_TPS54560
-    power_24v ~> buck_5v ~> power_5v
+    bus_monitor.power_out ~> buck_5v ~> power_5v
     assert power_5v.voltage within 4.9V to 5.1V
 
     # 5V -> 3.3V LDO (for switch ICs, I2C)
@@ -359,10 +390,11 @@ module Backplane:
     # switch_d.power_3v3 ~ power_3v3
 
     # === Slot Manager ===
-    # Per-slot power switching, current monitoring, card-present detection
+    # Per-slot relay power switching, current monitoring, card-present detection
     slot_mgr = new SlotManager
     slot_mgr.i2c ~ cm5_i2c
-    slot_mgr.power_24v_in ~ power_24v_switched
+    slot_mgr.power_24v_bus ~ bus_monitor.power_out    # Always-live 24V → relay common contacts
+    slot_mgr.power_24v_coil ~ power_24v_coil          # E-stop protected → relay coil supply
     slot_mgr.power_3v3 ~ power_3v3
 
     # === Slot Mux ===
@@ -375,16 +407,17 @@ module Backplane:
     # TODO: connect slot_mux.uart_host to CM5 UART
     # TODO: connect slot_mux.nrst_host/boot0_host to CM5 GPIO
 
-    # === Card Slots (×20) ===
+    # === Card Slots (×16) ===
     # Each slot connector provides:
     #   - Ethernet TX/RX pairs (from GbE switch)
-    #   - Switched 24V power (from slot_mgr power_slot[n])
+    #   - Switched 24V power (from slot_mgr power_slot[n], through relay + INA3221)
     #   - UART TX/RX (from slot_mux)
     #   - NRST (from slot_mux)
     #   - BOOT0 (from slot_mux)
-    #   - Slot ID (5 bits, hardwired per slot via resistor network)
+    #   - Slot ID (4 bits, hardwired per slot via resistor network)
     #   - Card-present (pull-up on backplane, pulled down by card)
-    # TODO: define card slot connector component and wire all 20 slots
+    #   - CAL_V+ / CAL_V- (calibration traces to backplane DPDT relay)
+    # TODO: define card slot connector component and wire all 16 slots
 
     # === Fan Controller ===
     fan_ctrl = new Microchip_EMC2101
