@@ -1,0 +1,225 @@
+#pragma experiment("TRAITS")
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("FOR_LOOP")
+
+import ElectricPower
+import I2C
+import Resistor
+import has_net_name_suggestion
+
+from "modules/filters.ato" import PiFilter
+
+from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640QDWRQ1
+from "atopile/ti-ads1115/ti-ads1115.ato" import TI_ADS1115
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+from "atopile/opsco-sk6805-ec20/opsco-sk6805-ec20.ato" import OPSCO_SK6805_EC20
+from "atopile/ti-tca6408/ti-tca6408.ato" import TI_TCA6408
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B1205S_2WR2
+
+# local modules
+from "modules/power_relay.ato" import PowerRelay
+from "modules/digital_regulators.ato" import DigitalBuck
+from "modules/digital_regulators.ato" import DigitalLDO
+from "modules/helpers.ato" import SeriesPowerResistors
+from "modules/helpers.ato" import SwitchableLoad
+from "modules/current_sensor.ato" import CurrentSensor
+
+module Cell:
+    """
+    Isolated stackable cell module with digital control and monitoring
+    Power:
+    Isolated DCDC converter -> Buck regulator -> LDO -> filter -> Output switch -> current sensor -> Cell output
+
+    Control:
+    Digital isolator (i2c) -> 
+        - ADC current sense
+        - ADC voltage sense (buck)
+        - ADC voltage sense (LDO)
+        - gpio output (switch)
+        - DAC (buck)
+        - DAC (LDO)
+
+    Parts list:
+        gpio expander: TI_TCA6408 (0x20/0x21)
+        DAC: Microchip_MCP4725_driver-E/CH
+        ADC: TI_ADS1115
+        Digital isolator: TI_ISO1640QDWRQ1
+        Output relay: HFD4/5-SR
+        Buck regulator: TPS563201DDCR
+        LDO: TLV75901PDRVR
+        Addressable leds: SK6805
+    """
+    # External interfaces
+    power_in = new ElectricPower
+    power_in.required = True
+
+    power_out = new ElectricPower
+    power_out.required = True
+
+    power_5v = new ElectricPower  # micro gnd referenced rail 
+    power_5v.required = True
+
+    power_isolator = new ElectricPower  # power for digital isolators
+    power_isolator.required = True
+
+    dmm_out = new ElectricPower
+    dmm_out.required = True
+
+    i2c = new I2C
+    i2c.required = True
+
+    cell_up = new CellJumper
+    cell_up.required = True
+
+    cell_down = new CellJumper
+    cell_down.required = False
+
+    dmm_relay_enable = new ElectricLogic
+    dmm_relay_enable.required = True
+
+    # Output specs
+    assert power_out.voltage within 0V to 5V
+    # power_out.current -= 300mA
+
+    # Internal interfaces
+    _power_5v = new ElectricPower
+    _power_3v3 = new ElectricPower
+    _iso_i2c = new I2C
+
+    isolated_converter = new YLPTEC_B1205S_2WR2
+    adc = new TI_ADS1115
+    buck = new DigitalBuck
+    ldo = new DigitalLDO
+    current_sense = new CurrentSensor
+    output_relay = new PowerRelay
+    dmm_relay = new PowerRelay
+    gpio = new TI_TCA6408
+    filter = new PiFilter
+    digital_isolator = new TI_ISO1640QDWRQ1
+    voltage_led = new OPSCO_SK6805_EC20
+    current_led = new OPSCO_SK6805_EC20
+    load_switch = new SwitchableLoad
+
+    # addresses:
+    adc.address = "0x48"
+    buck.dac.address = "0x61"
+    ldo.dac.address = "0x60"
+    gpio.address = "0x20"
+    current_sense.address = "0x21"
+
+    # Power LEDs
+    power_5v ~ voltage_led.power
+    power_5v ~ current_led.power
+
+    # Connect LEDs
+    cell_down.led_data ~ current_led.din.io
+    current_led.dout.io ~ voltage_led.din.io
+    voltage_led.dout.io ~ cell_up.led_data
+
+    # Jumper connections
+    cell_up.cell ~ filter.power_out.hv
+    cell_down.cell ~ filter.power_out.lv
+
+    # Digital i2c isolator
+    i2c ~ digital_isolator.i2cs[0]
+    digital_isolator.i2cs[1] ~ _iso_i2c
+
+    # Connect I2C to devices
+    _iso_i2c ~ adc.i2c
+    _iso_i2c ~ buck.i2c
+    _iso_i2c ~ ldo.i2c
+    _iso_i2c ~ gpio.i2c
+
+    # Internal rails
+    internal_ldo = new LDK220M_R
+    _power_5v ~> internal_ldo ~> _power_3v3
+
+    # Pi Filter
+    filter.C1.capacitance = 10uF +/- 10%
+    filter.C1.package = "0805"
+    filter.L1.lcsc_id = "C341017"
+    filter.C2.capacitance = 10uF +/- 10%
+    filter.C2.package = "0805"
+
+    # Current sense config
+    current_sense.current = 0.5A
+    current_sense.shunt.resistance = 100mohm +/- 10%
+
+    # Power devices
+    power_isolator ~ digital_isolator.power_rails[0]
+    _power_5v ~ adc.power
+    _power_3v3 ~ digital_isolator.power_rails[1]
+    _power_3v3 ~ buck.power_3v3
+    _power_3v3 ~ ldo.power_3v3
+    _power_3v3 ~ gpio.power
+    _power_3v3 ~ current_sense.power
+    _power_5v ~ output_relay.power_relay
+    power_5v ~ dmm_relay.power_relay
+
+    # TODO: do the math in ato
+    # Buck config: vout = 5v when vctrl = 0V, vout = 0V when vctrl = 3.3V
+    assert buck.power_out.voltage within 0V to 5V
+    buck.feedback_div.r_top.resistance = 37kohm +/- 2%
+    buck.feedback_div.r_bottom.resistance = 10kohm +/- 2%
+    buck.ctrl_resistor.resistance = 24kohm +/- 2%
+
+    # TODO: do the math in ato
+    # LDO config: vout = 5v when vctrl = 0V, vout = 0V when vctrl = 3.3V
+    ldo.feedback_div.r_top.resistance = 60kohm +/- 2%
+    ldo.feedback_div.r_bottom.resistance = 10kohm +/- 2%
+    ldo.ctrl_resistor.resistance = 43kohm +/- 2%
+
+    # Connect Cell components
+    power_in ~ isolated_converter.power_in
+    isolated_converter.power_out ~ _power_5v
+    _power_5v ~ buck.power_in
+    buck.power_out ~ ldo.power_in
+    ldo.power_out ~ filter.power_in
+    filter.power_out ~ current_sense.power_in
+    current_sense.power_out ~> output_relay ~> power_out
+
+    # Load switch
+    filter.power_out ~ load_switch.power_in
+    load_resistor_current = 20mA to 30mA
+    assert ldo.power_out.voltage.max / load_switch.load_resistor.resistance within load_resistor_current
+
+    # dmm relay
+    dmm_current_limiting_resistors = new SeriesPowerResistors
+    current_sense.power_out ~> dmm_relay ~> dmm_current_limiting_resistors ~> dmm_out
+    dmm_relay_enable ~ dmm_relay.enable
+
+    # ADC connections
+    adc.inputs[0].line ~ buck.power_out.hv
+    adc.inputs[1].line ~ ldo.power_out.hv
+    adc.inputs[2] ~ current_sense.output
+    adc.inputs[3].line ~ current_sense.power_out.hv
+
+    # GPIO expander
+    gpio.gpios[2].line ~ buck.enable
+    gpio.gpios[3] ~ ldo.enable
+    gpio.gpios[4] ~ load_switch.control.line
+    gpio.gpios[5] ~ output_relay.enable
+
+    _power_5v.hv.suggest_net_name = "CELL_5V_VCC"
+    _power_3v3.hv.suggest_net_name = "CELL_3V3_VCC"
+    _iso_i2c.scl.suggest_net_name = "CELL_I2C_SCL"
+    _iso_i2c.sda.suggest_net_name = "CELL_I2C_SDA"
+    buck.enable.suggest_net_name = "CELL_BUCK_ENABLE"
+    ldo.enable.suggest_net_name = "CELL_LDO_ENABLE"
+    load_switch.control.suggest_net_name = "CELL_LOAD_SWITCH_CONTROL"
+    output_relay.input.suggest_net_name = "CELL_OUTPUT_RELAY_CONTROL"
+    dmm_relay.input.suggest_net_name = "CELL_DMM_RELAY_CONTROL"
+    current_sense.output.suggest_net_name = "CELL_CURRENT_SENSE_OUTPUT"
+    filter.power_out.hv.suggest_net_name = "CELL_FILTER_POWER_OUT_VCC"
+    buck.power_out.hv.suggest_net_name = "CELL_BUCK_POWER_OUT_VCC"
+    ldo.power_out.hv.suggest_net_name = "CELL_LDO_POWER_OUT_VCC"
+    current_sense.power_out.hv.suggest_net_name = "CELL_CURRENT_SENSE_POWER_OUT_VCC"
+
+interface CellJumper:
+    """
+    Custom interface for connecting the cells together
+    """
+    cell = new Electrical
+    """Carries the power from or to the Cell module"""
+    led_data = new ElectricLogic
+    """Carries the addressable led data from or to the Cell module"""

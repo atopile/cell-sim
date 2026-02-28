@@ -1,0 +1,36 @@
+import Resistor
+import ElectricPower
+import ElectricSignal
+
+from "atopile/ti-ina185a1/ti-ina185a1.ato" import TI_INA185A1
+
+module CurrentSensor:
+    """
+    Current sensor module using the TI INA185A1 shunt amplifier + shunt resistor.
+    """
+    amplifier = new TI_INA185A1
+    shunt = new Resistor
+
+    power = new ElectricPower
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+    output = new ElectricSignal
+
+    max_current: A
+    """Maximum current to measure"""
+
+    assert shunt.resistance * max_current * amplifier.gain within 1.2V to 3V
+    shunt.package = "0805"
+
+    # connect the
+    power_in.hv ~> shunt ~> power_out.hv
+    power_in.lv ~ power_out.lv
+
+    # connect the amplifier
+    amplifier.input.p.line ~> shunt ~> amplifier.input.n.line
+    amplifier.ref.line ~ power_in.lv
+    amplifier.output ~ output
+    amplifier.power ~ power
+
+    # connect grounds
+    power_in.lv ~ power.lv

@@ -1,0 +1,123 @@
+import Resistor
+import ElectricPower
+import ElectricLogic
+
+from "atopile/ti-tlv75901/ti-tlv75901.ato" import TI_TLV75901
+from "atopile/ti-tps563201/ti-tps563201.ato" import TI_TPS563201
+from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
+
+module DigitalLDO:
+    """
+    I2C controllable adjustable LDO regulator
+
+    Resistor configuration:
+    ```
+                                power_out.hv
+                                    |
+                                +--+--+
+                                |r_top|
+                                +--+--+
+                    +--+--+ |
+    dac.output -- -> | ctrl|--------+----- -> feedback_to_regulator
+                    +--+--+ |
+                                +--+--+
+                                |r_bot|
+                                +--+--+
+                                    |
+                        power_in.lv | power_out.lv
+    ```
+    """
+    ldo = new TI_TLV75901
+    dac = new Microchip_MCP4725_driver
+    ctrl_resistor = new Resistor
+    ctrl_resistor.package = "0402"
+
+    power_in = new ElectricPower
+    assert power_in.voltage within 1.5V to 6V
+    power_in.required = True
+
+    power_out = new ElectricPower
+    power_out.required = True
+
+    power_3v3 = new ElectricPower
+    assert power_3v3.voltage within 3.3V +/- 10%
+    power_3v3.required = True
+
+    i2c = new I2C
+    i2c.required = True
+
+    enable = new ElectricLogic
+    enable.required = True
+
+    power_in ~ ldo.power_in
+    power_out ~ ldo.power_out
+
+    power_3v3 ~ dac.power
+
+    i2c ~ dac.i2c
+
+    dac.output ~> ctrl_resistor ~> feedback_div.ref_out.hv
+
+    # Enable current limiting resistor
+    enable_current_limmiting_resistor = new Resistor
+    enable_current_limmiting_resistor.resistance = 10kohm +/- 5%
+    enable_current_limmiting_resistor.package = "0402"
+    enable ~> enable_current_limmiting_resistor ~> ldo.enable
+
+module DigitalBuck:
+    """
+    I2C controllable adjustable buck regulator
+
+    Resistor configuration:
+    ```
+                                power_out.hv
+                                    |
+                                +--+--+
+                                |r_top|
+                                +--+--+
+                    +--+--+ |
+    dac.output -- -> | ctrl|--------+----- -> feedback_to_regulator
+                    +--+--+ |
+                                +--+--+
+                                |r_bot|
+                                +--+--+
+                                    |
+                        power_in.lv | power_out.lv
+    ```
+    """
+    buck = new TI_TPS563201
+    dac = new Microchip_MCP4725_driver
+    ctrl_resistor = new Resistor
+    ctrl_resistor.package = "0402"
+
+    power_in = new ElectricPower
+    assert power_in.voltage within 4.5V to 17V
+    power_in.required = True
+
+    power_out = new ElectricPower
+    power_out.required = True
+
+    power_3v3 = new ElectricPower
+    assert power_3v3.voltage within 3.3V +/- 10%
+    power_3v3.required = True
+
+    i2c = new I2C
+    i2c.required = True
+
+    enable = new ElectricLogic
+    enable.required = True
+
+    power_in ~ buck.power_in
+    power_out ~ buck.power_out
+
+    power_3v3 ~ dac.power
+
+    i2c ~ dac.i2c
+
+    dac.output ~> ctrl_resistor ~> feedback_div.ref_out.hv
+
+    # Enable current limiting resistor
+    enable_current_limmiting_resistor = new Resistor
+    enable_current_limmiting_resistor.resistance = 10kohm +/- 5%
+    enable_current_limmiting_resistor.package = "0402"
+    enable ~> enable_current_limmiting_resistor ~> ldo.enable

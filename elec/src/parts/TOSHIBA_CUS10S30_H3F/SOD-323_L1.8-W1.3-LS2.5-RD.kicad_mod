@@ -1,0 +1,137 @@
+(footprint "TOSHIBA_CUS10S30_H3F:SOD-323_L1.8-W1.3-LS2.5-RD"
+	(version 20241229)
+	(generator "faebryk_convert")
+	(generator_version "v5")
+	(layer "F.Cu")
+	(tedit "5DC5F6A4")
+	(uuid "84989cb0-6577-4b6d-996d-a8051b19f277")
+	(property "Reference" "REF**"
+		(at 0 -4)
+		(layer "F.SilkS")
+		(uuid "c7fac0ce-6881-4ce2-b44d-fe35ffe31d3d")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "SOD-323_L1.8-W1.3-LS2.5-RD"
+		(at 0 4)
+		(layer "F.Fab")
+		(uuid "a3736489-4681-40a7-88b5-e599ce87a857")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_circle
+		(center -1.22 0.65)
+		(end -1.19 0.65)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(locked no)
+		(uuid "fe79f15a-ec58-4bc9-8987-9528106f67c7")
+	)
+	(fp_line
+		(start 0.91 0.73)
+		(end 0.91 0.52)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "7b245d8b-9063-4a72-8eb7-9a74019a7f5b")
+	)
+	(fp_line
+		(start 0.91 -0.73)
+		(end 0.91 -0.53)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "44985097-b813-49ad-897a-32b3d9e1caa4")
+	)
+	(fp_line
+		(start -0.85 -0.73)
+		(end 0.91 -0.73)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "6702123b-6a2d-4b6e-b574-18eb61e0a3ad")
+	)
+	(fp_line
+		(start -0.85 0.73)
+		(end 0.91 0.73)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "633ca371-c60e-40c4-af8c-38a56eaeac4b")
+	)
+	(fp_line
+		(start -0.44 -0.73)
+		(end -0.44 0.73)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "d8917358-4e70-4be6-a286-295ab164e0d3")
+	)
+	(fp_text user "%R"
+		(at 0 0)
+		(layer "F.Fab")
+		(uuid "7517dfb3-7e6d-4caf-8fa7-d34a0165c05d")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "2" smd rect
+		(at 1.17 0 0)
+		(size 1 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "ee33f53d-7a48-4016-bca1-7887040ea7be")
+	)
+	(pad "1" smd rect
+		(at -1.17 0 0)
+		(size 1 0.75)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "89bfe795-a3e7-43d7-b207-7d5ee4d8ef58")
+	)
+	(model "${KIPRJMOD}/../../src/parts/TOSHIBA_CUS10S30_H3F/2.STEP"
+		(offset
+			(xyz 0 0 -0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+	(embedded_fonts no)
+)

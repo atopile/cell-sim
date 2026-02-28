@@ -1,0 +1,24 @@
+import ElectricPower
+import Capacitor
+import Inductor
+
+module PiFilter:
+    """Non polarized pi filter for power rails"""
+    C1 = new Capacitor
+    L1 = new Inductor
+    C2 = new Capacitor
+    cutoff_frequency = 1kHz +/- 20%
+
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+
+    assert power_out.voltage within power_in.voltage
+    # TODO: power_in.current += power_out.current
+
+    power_in.hv ~> L1 ~> power_out.hv
+    power_in ~ C1.power
+    power_out ~ C2.power
+
+    power_in.lv ~ power_out.lv
+
+    # assert 1 / (2 * 3.14 * L1.inductance * C1.value) within cutoff_frequency

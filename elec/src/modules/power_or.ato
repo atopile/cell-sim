@@ -1,0 +1,15 @@
+import Diode
+import ElectricPower
+
+module PowerDiodeOr:
+    """
+    OR-ing 2 power inputs to a single output with 1 diode on input 0.
+    """
+    diode = new Diode
+    diode.lcsc_id = "C146335"
+
+    power_in = new ElectricPower[2]
+    power_out = new ElectricPower
+
+    power_in[0] ~> diode ~> power_out
+    power_in[1] ~ power_out

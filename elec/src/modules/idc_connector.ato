@@ -1,0 +1,30 @@
+import ElectricPower
+
+from "parts/Nextron_Z_231012820106/Nextron_Z_231012820106.ato" import Nextron_Z_231012820106_package
+
+module IDC_VSH_connector:
+    package = new Nextron_Z_231012820106_package
+
+    signal cell0 ~ package.18
+    signal cell1 ~ package.17
+    signal cell2 ~ package.16
+    signal cell3 ~ package.15
+    signal cell4 ~ package.14
+    signal cell5 ~ package.13
+    signal cell6 ~ package.12
+    signal cell7 ~ package.11
+    signal cell8 ~ package.10
+    signal cell9 ~ package.9
+    signal cell10 ~ package.8
+    signal cell11 ~ package.7
+    signal cell12 ~ package.6
+    signal cell13 ~ package.5
+    signal cell14 ~ package.4
+    signal cell15 ~ package.3
+    signal cell16 ~ package.2
+
+    power = new ElectricPower
+    power.voltage = 3.3V +/- 10%
+    power.required = True
+    power.vcc ~ package.1
+    power.gnd ~ package.19
