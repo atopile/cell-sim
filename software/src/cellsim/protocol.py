@@ -156,6 +156,47 @@ class MeasurementPacket:
         return self.vin_mv / 1000.0
 
 
+@dataclass(slots=True)
+class CardState:
+    """Decoded GET_STATE response from a card."""
+    fw_major: int = 0
+    fw_minor: int = 0
+    fw_patch: int = 0
+    slot_id: int = 0
+    safe_state: bool = False
+    eui48: bytes = b"\x00" * 6
+    cells: list[CellMeasurement] | None = None
+    mcu_temp_c10: int = 0
+    vin_mv: int = 0
+    uptime_ms: int = 0
+
+    def __post_init__(self) -> None:
+        if self.cells is None:
+            self.cells = [CellMeasurement() for _ in range(CELLS_PER_CARD)]
+
+    @property
+    def fw_version(self) -> str:
+        return f"{self.fw_major}.{self.fw_minor}.{self.fw_patch}"
+
+    @property
+    def card_id(self) -> str:
+        """Format EUI-48 as XX:XX:XX:XX:XX:XX."""
+        return ":".join(f"{b:02X}" for b in self.eui48)
+
+    @property
+    def mcu_temp_c(self) -> float:
+        return self.mcu_temp_c10 / 10.0
+
+    @property
+    def vin_v(self) -> float:
+        return self.vin_mv / 1000.0
+
+
+# GET_STATE response sizes
+# Header: fw_major(1) + fw_minor(1) + fw_patch(1) + slot_id(1) + safe_state(1) + eui48(6) = 11 bytes
+STATE_HEADER_SIZE = 11
+STATE_RESPONSE_SIZE = STATE_HEADER_SIZE + (CELLS_PER_CARD * CELL_MEAS_SIZE) + HEALTH_TRAILER_SIZE
+
 # ── Encoding Helpers ──
 
 # Struct formats (big-endian)
@@ -164,6 +205,7 @@ _RESP_HDR_FMT = ">BH"  # status, payload_len
 _MEAS_HDR_FMT = ">BIQ"  # slot_id, seq, timestamp_us
 _CELL_MEAS_FMT = ">HHIhB"  # setpoint_mv, voltage_mv, current_ua, temp_c10, flags
 _HEALTH_FMT = ">hHI"  # mcu_temp_c10, vin_mv, uptime_ms
+_STATE_HDR_FMT = ">BBBBB"  # fw_major, fw_minor, fw_patch, slot_id, safe_state
 
 
 def encode_command(cmd: Cmd, cell_id: int = 0, payload: bytes = b"") -> bytes:
@@ -205,6 +247,45 @@ def decode_measurement(data: bytes) -> MeasurementPacket:
         slot_id=slot_id,
         sequence=seq,
         timestamp_us=timestamp_us,
+        cells=cells,
+        mcu_temp_c10=mcu_temp,
+        vin_mv=vin,
+        uptime_ms=uptime,
+    )
+
+
+def decode_card_state(data: bytes) -> CardState:
+    """Decode a GET_STATE response payload (after stripping response header)."""
+    if len(data) < STATE_RESPONSE_SIZE:
+        raise ValueError(f"Card state too short: {len(data)} < {STATE_RESPONSE_SIZE}")
+
+    major, minor, patch, slot_id, safe = struct.unpack(
+        _STATE_HDR_FMT, data[:5]
+    )
+    eui48 = data[5:11]
+
+    cells: list[CellMeasurement] = []
+    offset = STATE_HEADER_SIZE
+    for _ in range(CELLS_PER_CARD):
+        sp, v, i, t, f = struct.unpack(
+            _CELL_MEAS_FMT, data[offset:offset + CELL_MEAS_SIZE]
+        )
+        cells.append(CellMeasurement(
+            setpoint_mv=sp, voltage_mv=v, current_ua=i, temp_c10=t, flags=f,
+        ))
+        offset += CELL_MEAS_SIZE
+
+    mcu_temp, vin, uptime = struct.unpack(
+        _HEALTH_FMT, data[offset:offset + HEALTH_TRAILER_SIZE]
+    )
+
+    return CardState(
+        fw_major=major,
+        fw_minor=minor,
+        fw_patch=patch,
+        slot_id=slot_id,
+        safe_state=bool(safe),
+        eui48=eui48,
         cells=cells,
         mcu_temp_c10=mcu_temp,
         vin_mv=vin,

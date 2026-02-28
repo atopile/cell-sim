@@ -9,6 +9,7 @@
  */
 
 #include "network.h"
+#include "card_id.h"
 #include "cell.h"
 #include "watchdog.h"
 #include "self_test.h"
@@ -197,12 +198,13 @@ static uint16_t serialize_self_test(uint8_t *buf, size_t buf_size)
 /*
  * Serialize full card state into response payload.
  * Format: [fw_major:u8][fw_minor:u8][fw_patch:u8][slot_id:u8][safe_state:u8]
+ *         [eui48:6B]
  *         [cells × 8: setpoint_mv:u16, voltage_mv:u16, current_ua:u32, temp_c10:i16, flags:u8]
  *         [mcu_temp_c10:i16][vin_mv:u16][uptime_ms:u32]
  */
 static uint16_t serialize_card_state(uint8_t *buf, size_t buf_size)
 {
-    const size_t hdr = 5;
+    const size_t hdr = 5 + CARD_ID_EUI48_LEN;  /* 5 + 6 = 11 bytes */
     const size_t cell_block = CELL_COUNT * MEAS_CELL_SIZE;
     const size_t health_block = MEAS_HEALTH_SIZE;
     const size_t total = hdr + cell_block + health_block;
@@ -219,6 +221,12 @@ static uint16_t serialize_card_state(uint8_t *buf, size_t buf_size)
     pack_u8(p++, FW_VERSION_PATCH);
     pack_u8(p++, card_slot_id);
     pack_u8(p++, watchdog_heartbeat_expired() ? 1 : 0);
+
+    /* Card identity (EUI-48) */
+    if (!card_id_get_eui48(p)) {
+        memset(p, 0, CARD_ID_EUI48_LEN);  /* Zero if not available */
+    }
+    p += CARD_ID_EUI48_LEN;
 
     /* Per-cell state */
     for (int i = 0; i < CELL_COUNT; i++) {
@@ -561,6 +569,14 @@ int network_init(uint8_t slot_id)
     snprintf(mdns_hostname, sizeof(mdns_hostname),
              "cellsim-card-%d", slot_id);
     net_hostname_set(mdns_hostname, strlen(mdns_hostname));
+
+    /* Log card identity for mDNS TXT record context */
+    char id_str[18];
+    if (card_id_format_eui48(id_str, sizeof(id_str)) > 0) {
+        LOG_INF("Card ID: %s (slot %d, fw %d.%d.%d)",
+                id_str, slot_id,
+                FW_VERSION_MAJOR, FW_VERSION_MINOR, FW_VERSION_PATCH);
+    }
 
     /* Create UDP socket for measurement streaming */
     udp_sock = zsock_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);

@@ -4,6 +4,7 @@
 
 #include "watchdog.h"
 #include "cell.h"
+#include "led.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -128,7 +129,8 @@ void watchdog_enter_safe_state(void)
 
     cell_safe_state_all();
 
-    /* TODO: Set fault LED (red) on, clear status LED (green) off */
+    /* Set status LED to red (fault indication) */
+    led_set_status_fault();
 }
 
 int watchdog_exit_safe_state(void)

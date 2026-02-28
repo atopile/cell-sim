@@ -3,10 +3,14 @@
  *
  * Based on nucleo_h723zg, customized for the CellSim card PCB.
  *
- * I2C Bus Architecture:
+ * I2C Bus Architecture (control path — DACs, GPIO, temp):
  *   i2c1 -> TCA9548A #1 -> cells 0-3 (each behind ISO1640)
  *   i2c2 -> TCA9548A #2 -> cells 4-7 (each behind ISO1640)
- *   i2c3 -> board temp sensor (TMP117), spare
+ *   i2c3 -> 24AA025E48 EEPROM (card identity) + board temp sensor
+ *
+ * SPI Bus Architecture (measurement path — ADC):
+ *   spi1 -> ISO7741 ×4 -> cells 0-3 ADS131M04 (MISO via CD74HC4052)
+ *   spi2 -> ISO7741 ×4 -> cells 4-7 ADS131M04 (MISO via CD74HC4052)
  *
  * UART:
  *   usart1 -> backplane slot mux -> CM5 (remote debug/flash)
@@ -23,31 +27,78 @@
  */
 
 #include <st/h7/stm32h723zgtx-pinctrl.dtsi>
+#include <dt-bindings/led/led.h>
 
 / {
     aliases {
-        /* I2C buses for cell blocks */
+        /* I2C buses for cell blocks (control path) */
         i2c-cells-a = &i2c1;
         i2c-cells-b = &i2c2;
         i2c-aux = &i2c3;
 
+        /* SPI buses for cell ADCs (measurement path) */
+        spi-cells-a = &spi1;
+        spi-cells-b = &spi2;
+
         /* Hardware watchdog */
         watchdog0 = &iwdg1;
+
+        /* Status LED (SK6805-EC20, WS2812-compatible) */
+        led-strip = &status_led;
+    };
+
+    /* SK6805-EC20 addressable RGB status LED on PF13 */
+    status_led: ws2812 {
+        compatible = "worldsemi,ws2812-gpio";
+        chain-length = <1>;
+        color-mapping = <LED_COLOR_MAPPING_GREEN
+                         LED_COLOR_MAPPING_RED
+                         LED_COLOR_MAPPING_BLUE>;
+        in-gpios = <&gpiof 13 0>;
     };
 
     /* Slot ID GPIO inputs (active-low, coded by backplane resistors) */
     slot-id {
         compatible = "gpio-keys";
         /* TODO: assign actual GPIO pins once schematic is finalized
+         * 4 bits for 16 slots (reduced from 5 bits / 20 slots)
          *
          * Example (placeholder pins):
          * slot-id-0 { gpios = <&gpiod 0 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
          * slot-id-1 { gpios = <&gpiod 1 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
          * slot-id-2 { gpios = <&gpiod 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
          * slot-id-3 { gpios = <&gpiod 3 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
-         * slot-id-4 { gpios = <&gpiod 4 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
          */
     };
+
+    /*
+     * SPI ADC chip-select and MISO mux GPIO pins.
+     * Each SPI bus has:
+     *   4× CS lines (one per cell's ADS131M04, directly to ISO7741)
+     *   2× MISO mux select (CD74HC4052 address bits A0/A1)
+     *
+     * TODO: assign actual GPIO pins once schematic is finalized.
+     *
+     * spi1-adc-gpios {
+     *     compatible = "gpio-leds";
+     *     spi1_cs0 { gpios = <&gpioe 0 GPIO_ACTIVE_LOW>; };
+     *     spi1_cs1 { gpios = <&gpioe 1 GPIO_ACTIVE_LOW>; };
+     *     spi1_cs2 { gpios = <&gpioe 2 GPIO_ACTIVE_LOW>; };
+     *     spi1_cs3 { gpios = <&gpioe 3 GPIO_ACTIVE_LOW>; };
+     *     spi1_mux_a0 { gpios = <&gpioe 4 GPIO_ACTIVE_HIGH>; };
+     *     spi1_mux_a1 { gpios = <&gpioe 5 GPIO_ACTIVE_HIGH>; };
+     * };
+     *
+     * spi2-adc-gpios {
+     *     compatible = "gpio-leds";
+     *     spi2_cs0 { gpios = <&gpioe 6 GPIO_ACTIVE_LOW>; };
+     *     spi2_cs1 { gpios = <&gpioe 7 GPIO_ACTIVE_LOW>; };
+     *     spi2_cs2 { gpios = <&gpioe 8 GPIO_ACTIVE_LOW>; };
+     *     spi2_cs3 { gpios = <&gpioe 9 GPIO_ACTIVE_LOW>; };
+     *     spi2_mux_a0 { gpios = <&gpioe 10 GPIO_ACTIVE_HIGH>; };
+     *     spi2_mux_a1 { gpios = <&gpioe 11 GPIO_ACTIVE_HIGH>; };
+     * };
+     */
 };
 
 /* I2C1: Cells 0-3 (via TCA9548A #1) — pinctrl from base board (PB8/PB9) */
@@ -61,12 +112,29 @@
     clock-frequency = <400000>;
 };
 
-/* I2C3: Auxiliary (board temp sensor, spare) — PA8 (SCL), PC9 (SDA) */
+/* I2C3: Card identity EEPROM (24AA025E48) + board temp sensor — PA8 (SCL), PC9 (SDA) */
 &i2c3 {
     pinctrl-0 = <&i2c3_scl_pa8 &i2c3_sda_pc9>;
     pinctrl-names = "default";
     status = "okay";
     clock-frequency = <400000>;
+};
+
+/* SPI1: Cells 0-3 ADC (ADS131M04 via ISO7741) — PA5 (SCK), PA7 (MOSI), PA6 (MISO) */
+&spi1 {
+    pinctrl-0 = <&spi1_sck_pa5 &spi1_miso_pa6 &spi1_mosi_pa7>;
+    pinctrl-names = "default";
+    status = "okay";
+    /* CS managed by software GPIO (per-cell through ISO7741) */
+    cs-gpios = <>;
+};
+
+/* SPI2: Cells 4-7 ADC (ADS131M04 via ISO7741) — PB13 (SCK), PB15 (MOSI), PB14 (MISO) */
+&spi2 {
+    pinctrl-0 = <&spi2_sck_pb13 &spi2_miso_pb14 &spi2_mosi_pb15>;
+    pinctrl-names = "default";
+    status = "okay";
+    cs-gpios = <>;
 };
 
 /* USART1: Backplane slot mux (remote debug/flash from CM5) — PA9 (TX), PA10 (RX) */

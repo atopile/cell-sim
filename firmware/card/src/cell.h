@@ -3,16 +3,21 @@
  *
  * Hardware abstraction for per-cell voltage/current control.
  *
- * Per-cell I2C topology (isolated side, behind TCA9548A mux):
- *   MCP4725 (0x60) — Buck converter DAC setpoint
- *   MCP4725 (0x61) — LDO fine-tune DAC setpoint
- *   ADS1115 (0x48) — 4-channel ADC (V_out, I_out, V_buck, V_ldo)
- *   TCA6408 (0x20) — GPIO expander (relay, buck_en, ldo_en, load_sw, 4wire)
- *   TMP117  (0x49) — Temperature sensor (ADDR pin to VDD)
+ * Per-cell topology (isolated side):
+ *   I2C path (behind TCA9548A mux + ISO1640 isolator):
+ *     MCP4725 (0x61) — Buck converter DAC setpoint (A0=VIN)
+ *     MCP4725 (0x60) — LDO fine-tune DAC setpoint (A0=GND)
+ *     TCA6408 (0x20) — GPIO expander (relay, enable, cal, load, 4wire)
+ *     TMP117  (0x49) — Temperature sensor (ADDR=VDD)
  *
- * Cell addressing:
- *   Cells 0–3: I2C1 → TCA9548A channel 0–3
- *   Cells 4–7: I2C2 → TCA9548A channel 0–3
+ *   SPI path (behind ISO7741 isolator, per-cell CS):
+ *     ADS131M04 — 24-bit 4-channel simultaneous ADC (Vbuck, Vldo, Isense, Vsense)
+ *
+ * Bus architecture:
+ *   I2C1 → TCA9548A → Cells 0–3 (DACs + GPIO + temp)
+ *   I2C2 → TCA9548A → Cells 4–7 (DACs + GPIO + temp)
+ *   SPI1 → ISO7741 ×4 → Cells 0–3 ADC (MISO via CD74HC4052 mux)
+ *   SPI2 → ISO7741 ×4 → Cells 4–7 ADC (MISO via CD74HC4052 mux)
  */
 
 #ifndef CELLSIM_CELL_H
@@ -24,30 +29,52 @@
 #define CELL_COUNT          8
 #define CELLS_PER_BUS       4
 
-/* TCA6408 GPIO bit assignments */
-#define GPIO_BUCK_EN        BIT(0)
-#define GPIO_LDO_EN         BIT(1)
-#define GPIO_OUTPUT_RELAY   BIT(2)
-#define GPIO_LOAD_SWITCH    BIT(3)
-#define GPIO_FOUR_WIRE      BIT(4)
-/* bits 5–7 reserved */
+/* ── TCA6408 GPIO bit assignments (spec §2.5) ─────────────────── */
+#define GPIO_DMM_CAL        BIT(0)  /* DMM calibration relay */
+/* bit 1 spare */
+#define GPIO_BUCK_EN        BIT(2)  /* Buck converter enable */
+#define GPIO_LDO_EN         BIT(3)  /* LDO enable */
+#define GPIO_LOAD_SWITCH    BIT(4)  /* Internal load switch (discharge) */
+#define GPIO_OUTPUT_RELAY   BIT(5)  /* Output DPDT relay */
+#define GPIO_EXT_LOAD_SW    BIT(6)  /* External load switch */
+#define GPIO_FOUR_WIRE      BIT(7)  /* 2-wire/4-wire mode select */
 
-/* ADS1115 channel assignments */
-#define ADC_CH_VOUT         0   /* Output voltage (after relay) */
-#define ADC_CH_IOUT         1   /* Output current (shunt voltage) */
-#define ADC_CH_VBUCK        2   /* Buck output voltage */
-#define ADC_CH_VLDO         3   /* LDO output voltage */
+/* Convenience: all power-stage enables */
+#define GPIO_ALL_ENABLES    (GPIO_BUCK_EN | GPIO_LDO_EN | GPIO_OUTPUT_RELAY | \
+                             GPIO_LOAD_SWITCH | GPIO_EXT_LOAD_SW)
 
-/* ADC scaling */
-#define ADC_VOUT_SCALE      1.0f    /* Direct measurement, 0–5V range */
-#define ADC_IOUT_SHUNT_R    0.1f    /* 100 mΩ shunt, I = V_shunt / R */
-#define ADC_FULL_SCALE_MV   4096    /* ADS1115 ±4.096V range → 1 mV/LSB */
+/* ── ADS131M04 channel assignments (spec §2.5, §4.2.8) ────────── */
+#define ADC_CH_VBUCK        0   /* Buck output voltage (1:5 divider) */
+#define ADC_CH_VLDO         1   /* LDO output voltage (1:5 divider) */
+#define ADC_CH_ISENSE       2   /* Current sense amp output (2:5 divider) */
+#define ADC_CH_VSENSE       3   /* Cell output voltage / Kelvin sense (1:5 divider) */
 
-/* Protection thresholds */
-#define OVERCURRENT_UA      5000000 /* 5 A — per-cell max before flag set */
+/* ── ADC scaling ───────────────────────────────────────────────── */
+/*
+ * ADS131M04: 24-bit delta-sigma, internal 1.2V reference, gain=1
+ * Single-ended usable range: 0 to +1.2V
+ * LSB = 1.2V / 2^23 = 143 nV
+ *
+ * Voltage dividers scale cell-domain signals into 0–1.2V:
+ *   CH0/1/3 (voltage): 1:5 divider → 5V signal → 1.0V at ADC
+ *   CH2 (current):     INA185 50× gain, 50mΩ shunt → 2:5 divider
+ */
+#define ADC_VREF_MV         1200    /* Internal reference 1.2V */
+#define ADC_FULL_SCALE      8388608 /* 2^23 (24-bit, positive half) */
+
+/* Voltage divider ratios (signal → ADC input) */
+#define ADC_VDIV_VOLTAGE    5.0f    /* 1:5 for buck/LDO/sense channels */
+#define ADC_VDIV_CURRENT    2.5f    /* 2:5 for current sense channel */
+
+/* Current sensing */
+#define ADC_IOUT_SHUNT_R    0.05f   /* 50 mΩ shunt resistor */
+#define ADC_IOUT_INA_GAIN   50.0f   /* INA185A2 gain */
+
+/* ── Protection thresholds ─────────────────────────────────────── */
+#define OVERCURRENT_UA      1500000 /* 1.5 A — trip threshold */
 #define OVERTEMP_C10        850     /* 85.0 °C */
 
-/* Measurement flags (matches Python CellFlags) */
+/* ── Measurement flags (matches Python CellFlags in protocol.py) ─ */
 #define CELL_FLAG_OUTPUT_EN     0x01
 #define CELL_FLAG_RELAY_CLOSED  0x02
 #define CELL_FLAG_LOAD_SW_ON    0x04
@@ -56,15 +83,15 @@
 #define CELL_FLAG_OVER_CURRENT  0x20
 #define CELL_FLAG_OVER_TEMP     0x40
 
-/* Per-cell runtime state */
+/* ── Per-cell runtime state ────────────────────────────────────── */
 struct cell_state {
     /* Setpoints (written by CM5) */
     uint16_t setpoint_mv;       /* Target voltage in mV */
     bool     output_enabled;    /* Output relay + buck/LDO */
     bool     four_wire;         /* Kelvin mode */
 
-    /* Measurements (read from ADC) */
-    uint16_t voltage_mv;        /* Measured output voltage */
+    /* Measurements (read from SPI ADC) */
+    uint16_t voltage_mv;        /* Measured output voltage (sense line) */
     uint32_t current_ua;        /* Measured output current */
     uint16_t buck_mv;           /* Buck converter output */
     uint16_t ldo_mv;            /* LDO output */
@@ -79,7 +106,7 @@ struct cell_state {
 
 /**
  * Initialize cell control hardware.
- * Must be called after I2C buses are ready.
+ * Must be called after I2C and SPI buses are ready.
  *
  * @return 0 on success, negative errno on error
  */
@@ -87,7 +114,7 @@ int cell_init(void);
 
 /**
  * Set the output voltage setpoint for a cell.
- * Writes to both buck DAC and LDO DAC.
+ * Writes to both buck DAC (tracking) and LDO DAC.
  *
  * @param cell_id  0–7
  * @param mv       Voltage in millivolts (0–5000)
@@ -115,7 +142,7 @@ int cell_set_mode(uint8_t cell_id, bool four_wire);
 
 /**
  * Read all measurements for a single cell.
- * Selects mux channel, reads ADC channels + temp sensor, deselects.
+ * Reads SPI ADC (4 channels) + I2C temp sensor.
  *
  * @param cell_id  0–7
  * @param state    Output: updated with latest measurements

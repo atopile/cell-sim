@@ -4,9 +4,11 @@ project(cellsim-card)
 
 target_sources(app PRIVATE
     src/main.c
+    src/card_id.c
     src/cell.c
     src/self_test.c
     src/watchdog.c
     src/health.c
     src/network.c
+    src/led.c
 )

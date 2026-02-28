@@ -19,7 +19,7 @@ import Resistor
 import Capacitor
 
 from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640QDWRQ1
-from "atopile/tdpower-tdk20x/tdpower-tdk20x.ato" import TDPOWER_TDK20_driver
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B2412S_3WR2
 from "ti-tps563201-local/ti-tps563201.ato" import TI_TPS563201
 from "ti-tlv75901-local/ti-tlv75901.ato" import TI_TLV75901
 from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
@@ -112,15 +112,14 @@ module Cell:
     isolator.i2cs[1] ~ _iso_i2c
 
     # ========================================
-    # 2. Isolated DC-DC (24V -> 8V)
+    # 2. Isolated DC-DC (24V -> 12V)
     # ========================================
-    iso_dcdc = new TDPOWER_TDK20_driver
+    iso_dcdc = new YLPTEC_B2412S_3WR2
     power_24v ~ iso_dcdc.power_in
     iso_dcdc.power_out ~ _power_iso
-    # TODO: need 24V->8V variant; current package is 24V->24V
 
     # ========================================
-    # 3. Per-Cell 3.3V Control LDO (8V -> 3.3V)
+    # 3. Per-Cell 3.3V Control LDO (12V -> 3.3V)
     # ========================================
     ctrl_ldo = new LDK220M_R
     _power_iso ~> ctrl_ldo ~> _power_3v3_iso
