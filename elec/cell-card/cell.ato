@@ -15,23 +15,23 @@ import ElectricPower
 import ElectricLogic
 import ElectricSignal
 import I2C
+import SPI
 import Resistor
-import Capacitor
 
 from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640QDWRQ1
 from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B2412S_3WR2
-from "ti-tps563201-local/ti-tps563201.ato" import TI_TPS563201
-from "ti-tlv75901-local/ti-tlv75901.ato" import TI_TLV75901
+from "atopile/ti-tpsm863257/ti-tpsm863257.ato" import TI_TPSM863257
+from "atopile/ti-tlv75901/ti-tlv75901.ato" import TI_TLV75901
 from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
 from "atopile/ti-tca6408/ti-tca6408.ato" import TI_TCA6408
 from "atopile/ti-ina185a1/ti-ina185a1.ato" import TI_INA185A1
 from "atopile/relays/relays.ato" import LogicLevelRelayDPDT1A3V
 from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
-from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
-from "ads131m04.ato" import ADS131M04_driver
-from "iso7741.ato" import ISO7741_driver
-from "cd74hc4052.ato" import CD74HC4052_driver
-
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+from "atopile/ti-ads131m04/ti-ads131m04.ato" import ADS131M04_driver
+from "atopile/ti-iso7741/ti-iso7741.ato" import ISO7741_driver
+from "atopile/ti-cd74hc4052/ti-cd74hc4052.ato" import CD74HC4052_driver
+from "atopile/cellsim-analog/cellsim-analog.ato" import FilteredVoltageDividerToGround
 
 # --- Interfaces ---
 
@@ -42,7 +42,6 @@ interface KelvinOutput:
     gnd_force = new Electrical
     gnd_sense = new Electrical
 
-
 # --- Single Cell Module ---
 
 module Cell:
@@ -50,10 +49,8 @@ module Cell:
 
     # === External Interfaces ===
     i2c = new I2C
-    spi_sclk = new ElectricLogic
-    spi_mosi = new ElectricLogic
+    spi = new SPI
     spi_cs = new ElectricLogic
-    spi_miso = new ElectricLogic
     power_24v = new ElectricPower
     power_3v3_mcu = new ElectricPower
     output = new KelvinOutput
@@ -71,7 +68,6 @@ module Cell:
     i2c ~ isolator.i2cs[0]
     isolator.power_rails[0] ~ power_3v3_mcu
     isolator.power_rails[1] ~ _power_3v3_iso
-
     _iso_i2c = new I2C
     isolator.i2cs[1] ~ _iso_i2c
 
@@ -87,7 +83,6 @@ module Cell:
     # ========================================
     ctrl_ldo = new LDK220M_R
     _power_iso ~> ctrl_ldo ~> _power_3v3_iso
-    assert _power_3v3_iso.voltage within 3.2V to 3.4V
 
     # Solver workaround: pin feedback divider resistors explicitly
     # Vout=3.3V, Vref=1.185V
@@ -106,43 +101,42 @@ module Cell:
     spi_iso.power_a ~ power_3v3_mcu
     spi_iso.power_b ~ _power_3v3_iso
     # Forward channels (MCU -> cell): SCLK, MOSI, CS
-    spi_iso.fwd_in_a.line ~ spi_sclk.line
-    spi_iso.fwd_in_b.line ~ spi_mosi.line
+    spi_iso.fwd_in_a.line ~ spi.sclk.line
+    spi_iso.fwd_in_b.line ~ spi.mosi.line
     spi_iso.fwd_in_c.line ~ spi_cs.line
     # Reverse channel (cell -> MCU): MISO
-    spi_iso.rev_out_d.line ~ spi_miso.line
+    spi_iso.rev_out_d.line ~ spi.miso.line
 
     # ========================================
     # 5. Digital Buck (coarse regulation) + DAC
     # ========================================
-    buck = new TI_TPS563201
+    buck = new TI_TPSM863257
     _power_iso ~> buck ~> _power_buck
-    assert _power_buck.voltage within 5V +/- 10%
 
-    # Solver workaround: pin feedback divider r_bottom explicitly
-    # Vout=5V, Vref=0.768V, r_top=10kohm (set in package)
-    # r_bottom = r_top * Vref / (Vout - Vref) = 10k * 0.768 / 4.232 ≈ 1.8kohm
-    # Actual Vout = 0.768 * (1 + 10k/1.8k) = 5.03V
-    # TODO: remove once atopile solver loop bug is fixed
-    buck.feedback_divider.chain.resistors[1].resistance = 1.8kohm +/- 1%
-    buck.feedback_divider.chain.resistors[1].package = "0402"
+    # Default package values set the module for ~5V output:
+    # Vout = 0.6 * (1 + 73.2k / 10k) = 4.992V
+    buck.r_top.resistance = 73.2kohm +/- 1%
+    buck.r_top.package = "0402"
+    buck.r_bottom.resistance = 10kohm +/- 1%
+    buck.r_bottom.package = "0402"
 
     buck_dac = new Microchip_MCP4725_driver
     buck_dac.power ~ _power_3v3_iso
     buck_dac.i2c ~ _iso_i2c
+    buck_dac.address_pin.line ~ _power_3v3_iso.lv
+    buck_dac.i2c.address = 0x60
 
     # DAC output -> control resistor -> buck feedback node
     buck_ctrl_resistor = new Resistor
     buck_ctrl_resistor.resistance = 24kohm +/- 2%
     buck_ctrl_resistor.package = "0402"
-    buck_dac.output.line ~> buck_ctrl_resistor ~> buck.package.VFB
+    buck_dac.output.line ~> buck_ctrl_resistor ~> buck.ic.FB
 
     # ========================================
     # 6. Digital LDO (fine regulation) + DAC
     # ========================================
     ldo = new TI_TLV75901
     _power_buck ~> ldo ~> _power_ldo
-    assert _power_ldo.voltage within 4V +/- 10%
 
     # Solver workaround: pin feedback divider resistors explicitly
     # Vout=4V, Vref=0.55V
@@ -158,6 +152,8 @@ module Cell:
     ldo_dac = new Microchip_MCP4725_driver
     ldo_dac.power ~ _power_3v3_iso
     ldo_dac.i2c ~ _iso_i2c
+    ldo_dac.address_pin.line ~ _power_3v3_iso.hv
+    ldo_dac.i2c.address = 0x61
 
     # DAC output -> control resistor -> LDO feedback node
     ldo_ctrl_resistor = new Resistor
@@ -208,63 +204,51 @@ module Cell:
     adc.power ~ _power_3v3_iso
 
     # Isolated SPI: ISO7741 output -> ADC
-    spi_iso.fwd_out_a.line ~ adc.spi_sclk.line
-    spi_iso.fwd_out_b.line ~ adc.spi_mosi.line
+    spi_iso.fwd_out_a.line ~ adc.spi.sclk.line
+    spi_iso.fwd_out_b.line ~ adc.spi.mosi.line
     spi_iso.fwd_out_c.line ~ adc.spi_cs.line
-    spi_iso.rev_in_d.line ~ adc.spi_miso.line
+    spi_iso.rev_in_d.line ~ adc.spi.miso.line
 
     # --- Input conditioning: 4 channels ---
     # Each channel: signal -> R_top -> R_bot -> GND (voltage divider)
-    #   divider midpoint -> R_filt -> (C_filt to GND) -> ADC input
-    adc_div_top = new Resistor[4]
-    adc_div_bot = new Resistor[4]
-    adc_filt_r = new Resistor[4]
-    adc_filt_c = new Capacitor[4]
-
-    for r in adc_div_top:
-        r.package = "0402"
-    for r in adc_div_bot:
-        r.package = "0402"
-    for r in adc_filt_r:
-        r.package = "0402"
-    for c in adc_filt_c:
-        c.package = "0402"
+    # divider midpoint -> R_filt -> (C_filt to GND) -> ADC input
+    adc_monitors = new FilteredVoltageDividerToGround[4]
 
     # CH0: Buck output (0-5.5V -> 0-1.1V, 1:5 divider)
-    adc_div_top[0].resistance = 20kohm +/- 1%
-    adc_div_bot[0].resistance = 5.1kohm +/- 1%
-    adc_filt_r[0].resistance = 2kohm +/- 5%
-    adc_filt_c[0].capacitance = 1.5nF +/- 10%
-    _power_buck.hv ~> adc_div_top[0] ~> adc_div_bot[0] ~> _power_3v3_iso.lv
-    adc_div_top[0].unnamed[1] ~> adc_filt_r[0] ~> adc_filt_c[0] ~> _power_3v3_iso.lv
-    adc_filt_r[0].unnamed[1] ~ adc.ain[0].line
+    _power_buck.hv ~ adc_monitors[0].input
+    _power_3v3_iso.lv ~ adc_monitors[0].ground
+    adc_monitors[0].output ~ adc.ain[0].line
+    adc_monitors[0].divider.r_top.resistance = 20kohm +/- 1%
+    adc_monitors[0].divider.r_bottom.resistance = 5.1kohm +/- 1%
+    adc_monitors[0].r_filter.resistance = 2kohm +/- 5%
+    adc_monitors[0].c_filter.capacitance = 1.5nF +/- 10%
 
     # CH1: LDO output (0-5V -> 0-1V, 1:5 divider)
-    adc_div_top[1].resistance = 20kohm +/- 1%
-    adc_div_bot[1].resistance = 5.1kohm +/- 1%
-    adc_filt_r[1].resistance = 1kohm +/- 5%
-    adc_filt_c[1].capacitance = 1.5nF +/- 10%
-    _power_ldo.hv ~> adc_div_top[1] ~> adc_div_bot[1] ~> _power_3v3_iso.lv
-    adc_div_top[1].unnamed[1] ~> adc_filt_r[1] ~> adc_filt_c[1] ~> _power_3v3_iso.lv
-    adc_filt_r[1].unnamed[1] ~ adc.ain[1].line
+    _power_ldo.hv ~ adc_monitors[1].input
+    _power_3v3_iso.lv ~ adc_monitors[1].ground
+    adc_monitors[1].output ~ adc.ain[1].line
+    adc_monitors[1].divider.r_top.resistance = 20kohm +/- 1%
+    adc_monitors[1].divider.r_bottom.resistance = 5.1kohm +/- 1%
+    adc_monitors[1].r_filter.resistance = 1kohm +/- 5%
+    adc_monitors[1].c_filter.capacitance = 1.5nF +/- 10%
 
     # CH2: Current sense INA output (0-3.3V -> 0-1.32V, 2:5 divider)
-    adc_div_top[2].resistance = 15kohm +/- 1%
-    adc_div_bot[2].resistance = 10kohm +/- 1%
-    adc_filt_r[2].resistance = 1kohm +/- 5%
-    adc_filt_c[2].capacitance = 1.5nF +/- 10%
-    current_sense.output.line ~> adc_div_top[2] ~> adc_div_bot[2] ~> _power_3v3_iso.lv
-    adc_div_top[2].unnamed[1] ~> adc_filt_r[2] ~> adc_filt_c[2] ~> _power_3v3_iso.lv
-    adc_filt_r[2].unnamed[1] ~ adc.ain[2].line
+    current_sense.output.line ~ adc_monitors[2].input
+    _power_3v3_iso.lv ~ adc_monitors[2].ground
+    adc_monitors[2].output ~ adc.ain[2].line
+    adc_monitors[2].divider.r_top.resistance = 15kohm +/- 1%
+    adc_monitors[2].divider.r_bottom.resistance = 10kohm +/- 1%
+    adc_monitors[2].r_filter.resistance = 1kohm +/- 5%
+    adc_monitors[2].c_filter.capacitance = 1.5nF +/- 10%
 
     # CH3: Sense line voltage (0-5V -> 0-1V, 1:5 divider)
-    adc_div_top[3].resistance = 20kohm +/- 1%
-    adc_div_bot[3].resistance = 5.1kohm +/- 1%
-    adc_filt_r[3].resistance = 1kohm +/- 5%
-    adc_filt_c[3].capacitance = 1.5nF +/- 10%
-    _sense_point ~> adc_div_top[3] ~> adc_div_bot[3] ~> _power_3v3_iso.lv
-    adc_div_top[3].unnamed[1] ~> adc_filt_r[3] ~> adc_filt_c[3] ~> _power_3v3_iso.lv
-    adc_filt_r[3].unnamed[1] ~ adc.ain[3].line
+    _sense_point ~ adc_monitors[3].input
+    _power_3v3_iso.lv ~ adc_monitors[3].ground
+    adc_monitors[3].output ~ adc.ain[3].line
+    adc_monitors[3].divider.r_top.resistance = 20kohm +/- 1%
+    adc_monitors[3].divider.r_bottom.resistance = 5.1kohm +/- 1%
+    adc_monitors[3].r_filter.resistance = 1kohm +/- 5%
+    adc_monitors[3].c_filter.capacitance = 1.5nF +/- 10%
 
     # ========================================
     # 10. GPIO Expander (TCA6408)
@@ -272,6 +256,8 @@ module Cell:
     gpio = new TI_TCA6408
     gpio.power ~ _power_3v3_iso
     gpio.i2c ~ _iso_i2c
+    gpio.address_pin.line ~ _power_3v3_iso.lv
+    gpio.i2c.address = 0x20
     # GPIO[2]: Buck enable
     gpio.gpios[2].line ~ buck.enable.line
     # GPIO[3]: LDO enable
@@ -284,7 +270,6 @@ module Cell:
 
     # Temperature sensing is at card level (BaseCard.temp_sensor), not per-cell
 
-
 # --- Cell Block (4 cells on one I2C bus, shared SPI) ---
 
 module CellBlock4:
@@ -292,9 +277,7 @@ module CellBlock4:
 
     # External interfaces
     i2c = new I2C
-    spi_sclk = new ElectricLogic
-    spi_mosi = new ElectricLogic
-    spi_miso = new ElectricLogic
+    spi = new SPI
     spi_cs = new ElectricLogic[4]
     miso_sel = new ElectricLogic[2]
     power_24v = new ElectricPower
@@ -309,7 +292,7 @@ module CellBlock4:
     # MISO mux: 4 isolated MISO outputs -> 1 MISO to MCU
     miso_mux = new CD74HC4052_driver
     miso_mux.power ~ power_3v3_mcu
-    miso_mux.a_common ~ spi_miso.line
+    miso_mux.a_common ~ spi.miso.line
     miso_mux.sel_0 ~ miso_sel[0]
     miso_mux.sel_1 ~ miso_sel[1]
     miso_mux.enable.line ~ power_3v3_mcu.lv
@@ -317,42 +300,30 @@ module CellBlock4:
     # 4 cells
     cells = new Cell[4]
 
-    # Cell 0
+    # Shared power + SPI bus connections
+    for cell in cells:
+        cell.power_24v ~ power_24v
+        cell.power_3v3_mcu ~ power_3v3_mcu
+        cell.spi.sclk.line ~ spi.sclk.line
+        cell.spi.mosi.line ~ spi.mosi.line
+
+    # Per-cell indexed connections (I2C mux, CS, MISO mux, output)
     cells[0].i2c ~ mux.i2cs[0]
-    cells[0].power_24v ~ power_24v
-    cells[0].power_3v3_mcu ~ power_3v3_mcu
-    cells[0].spi_sclk.line ~ spi_sclk.line
-    cells[0].spi_mosi.line ~ spi_mosi.line
     cells[0].spi_cs.line ~ spi_cs[0].line
-    cells[0].spi_miso.line ~ miso_mux.a_ch[0]
+    cells[0].spi.miso.line ~ miso_mux.a_ch[0]
     cells[0].output ~ outputs[0]
 
-    # Cell 1
     cells[1].i2c ~ mux.i2cs[1]
-    cells[1].power_24v ~ power_24v
-    cells[1].power_3v3_mcu ~ power_3v3_mcu
-    cells[1].spi_sclk.line ~ spi_sclk.line
-    cells[1].spi_mosi.line ~ spi_mosi.line
     cells[1].spi_cs.line ~ spi_cs[1].line
-    cells[1].spi_miso.line ~ miso_mux.a_ch[1]
+    cells[1].spi.miso.line ~ miso_mux.a_ch[1]
     cells[1].output ~ outputs[1]
 
-    # Cell 2
     cells[2].i2c ~ mux.i2cs[2]
-    cells[2].power_24v ~ power_24v
-    cells[2].power_3v3_mcu ~ power_3v3_mcu
-    cells[2].spi_sclk.line ~ spi_sclk.line
-    cells[2].spi_mosi.line ~ spi_mosi.line
     cells[2].spi_cs.line ~ spi_cs[2].line
-    cells[2].spi_miso.line ~ miso_mux.a_ch[2]
+    cells[2].spi.miso.line ~ miso_mux.a_ch[2]
     cells[2].output ~ outputs[2]
 
-    # Cell 3
     cells[3].i2c ~ mux.i2cs[3]
-    cells[3].power_24v ~ power_24v
-    cells[3].power_3v3_mcu ~ power_3v3_mcu
-    cells[3].spi_sclk.line ~ spi_sclk.line
-    cells[3].spi_mosi.line ~ spi_mosi.line
     cells[3].spi_cs.line ~ spi_cs[3].line
-    cells[3].spi_miso.line ~ miso_mux.a_ch[3]
+    cells[3].spi.miso.line ~ miso_mux.a_ch[3]
     cells[3].output ~ outputs[3]

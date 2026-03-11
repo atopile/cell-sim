@@ -1,3 +1,4 @@
 {
-    "python.defaultInterpreterPath": "/Users/narayanpowderly/.local/pipx/venvs/atopile/bin/python"
+    "python.defaultInterpreterPath": "/Users/narayanpowderly/.local/pipx/venvs/atopile/bin/python",
+    "atopile.ato": "/home/np/projects/atopile_autolayout/.venv/bin/ato"
 }

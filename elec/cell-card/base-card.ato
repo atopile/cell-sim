@@ -8,40 +8,39 @@
 # status LEDs, debug interfaces, backplane connector interface.
 #
 # Two-tier galvanic isolation:
-#   Tier 1 (this module): Backplane <-> Card MCU domain
-#     - Isolated 24V->24V DC-DC (TDK20)
-#     - Discrete Ethernet transformer
-#     - UART digital isolator
-#   Tier 2 (per-cell, in cell.ato): Card MCU domain <-> each cell
-#     - Per-cell isolated DC-DC, I2C isolator, SPI isolator
+# Tier 1 (this module): Backplane <-> Card MCU domain
+# - Isolated 24V->24V DC-DC (TDK20)
+# - Discrete Ethernet transformer
+# - UART digital isolator
+# Tier 2 (per-cell, in cell.ato): Card MCU domain <-> each cell
+# - Per-cell isolated DC-DC, I2C isolator, SPI isolator
 #
 # Card-specific modules (CellBlock, ThermistorBlock) compose with this
 # module rather than inheriting from it.
 
-from "st-stm32h723-local/st-stm32h723.ato" import ST_STM32H723
-from "microchip-lan8742a-local/microchip-lan8742a.ato" import Microchip_LAN8742A
-from "ti-tps54560x-local/ti-tps54560x.ato" import TI_TPS54560
-from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
+from "atopile/st-stm32h723/st-stm32h723.ato" import ST_STM32H723
+from "atopile/microchip-lan8742a/microchip-lan8742a.ato" import Microchip_LAN8742A
+from "atopile/ti-tpsm84209/ti-tpsm84209.ato" import TI_TPSM84209
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R_3V3
 from "atopile/tdpower-tdk20x/tdpower-tdk20x.ato" import TDPOWER_TDK20_driver
 from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
-from "atopile/programming-headers/programming-headers.ato" import TC2030_ARM_Cortex
+from "atopile/programming-headers/programming-headers.ato" import IDC_2_54mm_10pin_ARM_Cortex
 from "atopile/buttons/buttons.ato" import VerticalButton
-from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
-from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
 from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
 from "atopile/mounting-holes/mounting-holes.ato" import MountingHole_3_2_M3
-from "hx1198.ato" import HX1198_driver
-from "iso7721.ato" import ISO7721_UART_driver
+from "atopile/pulse-hx1198/pulse-hx1198.ato" import HX1198_driver
+from "atopile/ti-iso7721/ti-iso7721.ato" import ISO7721_UART_driver
+from "atopile/ti-iso7721/ti-iso7721.ato" import TI_ISO7721
 
 import Electrical
 import ElectricPower
 import ElectricLogic
 import I2C
+import SPI
 import Ethernet
 import UART_Base
 import Resistor
 import Capacitor
-
 
 # --- Interfaces ---
 
@@ -51,20 +50,16 @@ interface BackplaneCard:
     ethernet = new Ethernet
     # Power
     power_24v = new ElectricPower
+    power_3v3 = new ElectricPower
     # Slot ID (active-low GPIOs, coded by backplane resistors)
-    slot_id_0 = new ElectricLogic
-    slot_id_1 = new ElectricLogic
-    slot_id_2 = new ElectricLogic
-    slot_id_3 = new ElectricLogic
-    slot_id_4 = new ElectricLogic
+    slot_id = new ElectricLogic[4]
     # Control
     card_present = new ElectricLogic
     reset = new ElectricLogic
     # UART (for remote flashing and debug via CM5 slot mux)
-    uart = new UART_Base            # STM32 USART1 <-> backplane <-> CM5 (via mux)
+    uart = new UART_Base  # STM32 USART1 <-> backplane <-> CM5 (via mux)
     # Boot mode control (active-high for STM32 ROM bootloader)
-    boot0 = new ElectricLogic       # Pulled low on card; mux drives high for bootloader
-
+    boot0 = new ElectricLogic  # Pulled low on card; mux drives high for bootloader
 
 # --- Base Card Module ---
 
@@ -73,7 +68,7 @@ module BaseCard:
 
     # === External interfaces ===
     backplane = new BackplaneCard
-    power_24v_iso = new ElectricPower   # Isolated 24V for cell blocks
+    power_24v_iso = new ElectricPower  # Isolated 24V for cell blocks
     power_5v = new ElectricPower
     power_3v3 = new ElectricPower
 
@@ -81,74 +76,61 @@ module BaseCard:
     i2c_bus = new I2C
 
     # SPI buses exposed for cell blocks (2 buses for 8 cells)
-    spi_1_sclk = new ElectricLogic
-    spi_1_mosi = new ElectricLogic
-    spi_1_miso = new ElectricLogic
+    spi_1 = new SPI
     spi_1_cs = new ElectricLogic[4]
     spi_1_miso_sel = new ElectricLogic[2]
-    spi_2_sclk = new ElectricLogic
-    spi_2_mosi = new ElectricLogic
-    spi_2_miso = new ElectricLogic
+    spi_2 = new SPI
     spi_2_cs = new ElectricLogic[4]
     spi_2_miso_sel = new ElectricLogic[2]
 
     # === MCU ===
     micro = new ST_STM32H723
+    micro.power_3v3 ~ power_3v3
 
     # === Ethernet PHY ===
     phy = new Microchip_LAN8742A
     phy.power_3v3 ~ power_3v3
 
-    # RMII connection: MCU <-> PHY (both use stdlib RMII interface)
     micro.rmii ~ phy.rmii
-
-    # MDIO management bus: MCU <-> PHY
     micro.mdio ~ phy.mdio
 
     # Ethernet isolation: PHY <-> transformer <-> backplane
     eth_xfmr = new HX1198_driver
     eth_xfmr.phy_power ~ power_3v3
 
-    # PHY MDI pairs -> transformer PHY side
-    phy.ethernet.pairs[1].p.line ~ eth_xfmr.phy_txp
-    phy.ethernet.pairs[1].n.line ~ eth_xfmr.phy_txn
-    phy.ethernet.pairs[0].p.line ~ eth_xfmr.phy_rxp
-    phy.ethernet.pairs[0].n.line ~ eth_xfmr.phy_rxn
+    phy.ethernet.pairs[1] ~ eth_xfmr.phy_ethernet.pairs[1]
+    phy.ethernet.pairs[0] ~ eth_xfmr.phy_ethernet.pairs[0]
 
     # Transformer line side -> backplane Ethernet
-    eth_xfmr.line_txp ~ backplane.ethernet.pairs[1].p.line
-    eth_xfmr.line_txn ~ backplane.ethernet.pairs[1].n.line
-    eth_xfmr.line_rxp ~ backplane.ethernet.pairs[0].p.line
-    eth_xfmr.line_rxn ~ backplane.ethernet.pairs[0].n.line
+    eth_xfmr.line_ethernet.pairs[1] ~ backplane.ethernet.pairs[1]
+    eth_xfmr.line_ethernet.pairs[0] ~ backplane.ethernet.pairs[0]
 
     # PHY reset
-    # TODO: phy._reset ~ micro.gpio_a[4]
+    phy._reset ~ micro.gpio_a[4]
 
     # === Card-Level Isolation: Power ===
     # Backplane 24V -> Isolated DC-DC (24V->24V) -> card domain
     iso_dcdc = new TDPOWER_TDK20_driver
-    backplane.power_24v ~ iso_dcdc.power_in
-    iso_dcdc.power_out ~ power_24v_iso
+    backplane.power_24v ~> iso_dcdc ~> power_24v_iso
 
     # === Power regulation (card-isolated domain) ===
-    # 24V_iso -> 5V buck
-    buck_5v = new TI_TPS54560
+    # 24V_iso -> 5V buck module
+    buck_5v = new TI_TPSM84209
+    buck_5v.r_top.resistance = 52.3kohm +/- 1%
+    buck_5v.r_bottom.resistance = 10kohm +/- 1%
     power_24v_iso ~> buck_5v ~> power_5v
-    assert power_5v.voltage within 4.9V to 5.1V
 
     # 5V -> 3.3V LDO
-    ldo_3v3 = new LDK220M_R
+    ldo_3v3 = new LDK220M_R_3V3
+    ldo_3v3.r_top.resistance = 18kohm +/- 1%
+    ldo_3v3.r_bottom.resistance = 10kohm +/- 1%
     power_5v ~> ldo_3v3 ~> power_3v3
-    assert power_3v3.voltage within 3.2V to 3.4V
 
-    # MCU power
-    micro.power_3v3 ~ power_3v3
 
     # === Card-Level Isolation: UART ===
     uart_iso = new ISO7721_UART_driver
-    # Backplane side power: 3.3V from backplane (provided via connector)
-    # TODO: backplane must supply 3.3V for isolator side 2 (or add small LDO from 24V pre-isolation)
-    uart_iso.power_bp ~ backplane.power_24v  # FIXME: needs backplane-side 3.3V, not 24V
+    # Backplane side power comes from a dedicated 3.3V rail on the connector.
+    uart_iso.power_bp ~ backplane.power_3v3
     uart_iso.power_card ~ power_3v3
     # Backplane side UART
     uart_iso.uart_bp ~ backplane.uart
@@ -156,13 +138,16 @@ module BaseCard:
     micro.uart.base_uart ~ uart_iso.uart_card
 
     # === Card-Level Isolation: BOOT0 ===
-    # BOOT0 comes from backplane through UART isolator or separate isolator
-    # For now, BOOT0 is directly from backplane (TODO: add isolator channel)
+    boot0_iso = new TI_ISO7721
+    boot0_iso.power_side1 ~ power_3v3
+    boot0_iso.power_side2 ~ backplane.power_3v3
+    backplane.boot0 ~ boot0_iso.in_side2
+    boot0_iso.out_side1 ~ micro.boot0
+
     boot0_pulldown = new Resistor
     boot0_pulldown.resistance = 10kohm +/- 5%
     boot0_pulldown.package = "0402"
-    # TODO: connect boot0_pulldown between backplane.boot0.line and GND
-    # TODO: connect backplane.boot0.line to micro.boot0
+    micro.boot0.line ~> boot0_pulldown ~> power_3v3.lv
 
     # === NRST (remote reset via backplane mux) ===
     nrst_pullup = new Resistor
@@ -171,19 +156,33 @@ module BaseCard:
     nrst_cap = new Capacitor
     nrst_cap.capacitance = 100nF +/- 20%
     nrst_cap.package = "0402"
-    # TODO: connect nrst_pullup from NRST to 3.3V, nrst_cap from NRST to GND
-    # TODO: connect backplane.reset to micro NRST
+    power_3v3.hv ~> nrst_pullup ~> micro.reset.line
+    micro.reset.line ~> nrst_cap ~> power_3v3.lv
+    backplane.reset ~ micro.reset
 
     # === I2C bus (single bus, exposed for composition) ===
     # MCU I2C1 -> exposed as i2c_bus -> CellCard connects TCA9548A(s)
-    # TODO: connect i2c_bus to micro.i2c[0] equivalent
+    micro.i2c[0] ~ i2c_bus
 
     # === SPI buses (exposed for composition) ===
     # MCU SPI1 -> cells 0-3 (via CellBlock4)
     # MCU SPI2 -> cells 4-7 (via CellBlock4)
-    # TODO: connect spi_1_* to micro.spi[0] pins
-    # TODO: connect spi_2_* to micro.spi[1] pins
-    # TODO: connect miso_sel GPIOs to micro GPIO pins
+    micro.spi[0] ~ spi_1
+    micro.spi[1] ~ spi_2
+
+    spi_1_cs[0] ~ micro.gpio_d[0]
+    spi_1_cs[1] ~ micro.gpio_d[1]
+    spi_1_cs[2] ~ micro.gpio_d[2]
+    spi_1_cs[3] ~ micro.gpio_d[6]
+    spi_1_miso_sel[0] ~ micro.gpio_d[7]
+    spi_1_miso_sel[1] ~ micro.gpio_d[8]
+
+    spi_2_cs[0] ~ micro.gpio_d[9]
+    spi_2_cs[1] ~ micro.gpio_d[10]
+    spi_2_cs[2] ~ micro.gpio_d[11]
+    spi_2_cs[3] ~ micro.gpio_d[12]
+    spi_2_miso_sel[0] ~ micro.gpio_d[13]
+    spi_2_miso_sel[1] ~ micro.gpio_d[14]
 
     # === Input voltage monitoring (24V bus health check) ===
     # Resistor divider: 24V_iso -> 100k -> ADC_IN -> 10k -> GND
@@ -196,32 +195,27 @@ module BaseCard:
     c_vmon_filter = new Capacitor
     c_vmon_filter.capacitance = 100nF +/- 20%
     c_vmon_filter.package = "0402"
-    # TODO: connect divider: power_24v_iso.hv -> r_vmon_high -> ADC_IN -> r_vmon_low -> GND
-    # TODO: connect c_vmon_filter from ADC_IN to GND
-    # TODO: connect ADC_IN to micro ADC3 pin
+    power_24v_iso.hv ~> r_vmon_high ~> r_vmon_low ~> power_24v_iso.lv
+    r_vmon_high.unnamed[1] ~> c_vmon_filter ~> power_24v_iso.lv
+    r_vmon_high.unnamed[1] ~ micro.gpio_a[0].line
 
     # === USB (DFU fallback) ===
     usb = new USB2_0TypeCHorizontalConnector
     micro.usb ~ usb.usb
 
     # === Debug ===
-    swd = new TC2030_ARM_Cortex
-    micro.jtag ~ swd.jtag
+    swd = new IDC_2_54mm_10pin_ARM_Cortex
+    micro.swd ~ swd.swd
 
     # Reset button
     reset_btn = new VerticalButton
-    # TODO: connect to micro NRST
+    power_3v3.lv ~ reset_btn.input
+    reset_btn.output ~ micro.reset.line
 
     # Boot button
     boot_btn = new VerticalButton
-    # TODO: connect to micro BOOT0
-
-    # === Status LEDs ===
-    led_status_green = new LEDIndicatorGreen
-    led_status_red = new LEDIndicatorRed
-    led_status_green.power ~ power_3v3
-    led_status_red.power ~ power_3v3
-    # TODO: connect to micro GPIOs
+    power_3v3.lv ~ boot_btn.input
+    boot_btn.output ~ micro.boot0.line
 
     # === Board temperature sensor ===
     temp_sensor = new TI_TMP117
@@ -229,7 +223,4 @@ module BaseCard:
     temp_sensor.i2c ~ i2c_bus
 
     # === Mounting ===
-    mh1 = new MountingHole_3_2_M3
-    mh2 = new MountingHole_3_2_M3
-    mh3 = new MountingHole_3_2_M3
-    mh4 = new MountingHole_3_2_M3
+    mounting_holes = new MountingHole_3_2_M3[4]

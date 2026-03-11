@@ -8,41 +8,97 @@ builds:
     backplane:
         entry: backplane.ato:Backplane
 
+# Historical registry dependencies kept commented for reference.
+# Project-specific packages are pinned below as local file dependencies.
+#
+# dependencies:
+#     #
+#     # CM5
+#     - atopile/rpi-cm5
+#
+#     # Ethernet switch (cascade for 20+ ports)
+#     # BLOCKED: atopile/realtek-rtl8305nb depends on atopile/logos@0.1.4 which has broken manifest
+#     # - atopile/realtek-rtl8305nb
+#     - atopile/rj45-connectors
+#
+#     # Power
+#     - atopile/ti-tpsm84209
+#     - atopile/st-ldk220
+#     - atopile/relays
+#
+#     # Slot management (power switching, current monitoring, GPIO expanders)
+#     - atopile/microchip-mcp23017
+#     - atopile/ti-ina3221
+#     - atopile/ti-ina228
+#     - atopile/ti-tca9548a
+#
+#     # Slot mux (UART/NRST/BOOT0 routing to selected card)
+#     - atopile/ti-cd74hc4067sm
+#
+#     # Fan control + thermal
+#     - atopile/microchip-emc2101
+#     - atopile/ti-tmp117
+#
+#     # UI
+#     - atopile/indicator-leds
+#     - atopile/buttons
+#
+#     # Connectors
+#     - atopile/usb-connectors
+#     - atopile/pin-headers
+#     - atopile/mounting-holes
+#
+#     # Per-slot power relays are part of atopile/relays (LogicLevelRelaySPSTNO10A24V)
+#     # High-side-switch package no longer needed — replaced by per-slot relays
 dependencies:
-    # CM5
-    - atopile/rpi-cm5
-
-    # Ethernet switch (cascade for 20+ ports)
-    # BLOCKED: atopile/realtek-rtl8305nb depends on atopile/logos@0.1.4 which has broken manifest
-    # - atopile/realtek-rtl8305nb
-    - atopile/rj45-connectors
-
-    # Power
-    - atopile/ti-tps54560x
-    - atopile/st-ldk220
-    - atopile/relays
-
-    # Slot management (power switching, current monitoring, GPIO expanders)
-    - atopile/microchip-mcp23017
-    - atopile/ti-ina3221
-    - atopile/ti-ina228
-    - atopile/ti-tca9548a
-
-    # Slot mux (UART/NRST/BOOT0 routing to selected card)
-    - atopile/ti-cd74hc4067sm
-
-    # Fan control + thermal
-    - atopile/microchip-emc2101
-    - atopile/ti-tmp117
-
-    # UI
-    - atopile/indicator-leds
-    - atopile/buttons
-
-    # Connectors
-    - atopile/usb-connectors
-    - atopile/pin-headers
-    - atopile/mounting-holes
-
-    # Per-slot power relays are part of atopile/relays (LogicLevelRelaySPSTNO10A24V)
-    # High-side-switch package no longer needed — replaced by per-slot relays
+  - type: file
+    identifier: atopile/buttons
+    path: ../packages/buttons
+  - type: file
+    identifier: atopile/cellsim-regulators
+    path: ../packages/cellsim-regulators
+  - type: file
+    identifier: atopile/indicator-leds
+    path: ../packages/indicator-leds
+  - type: file
+    identifier: atopile/microchip-emc2101
+    path: ../packages/microchip-emc2101
+  - type: file
+    identifier: atopile/microchip-mcp23017
+    path: ../packages/microchip-mcp23017
+  - type: file
+    identifier: atopile/mounting-holes
+    path: ../packages/mounting-holes
+  - type: file
+    identifier: atopile/relays
+    path: ../packages/relays
+  - type: file
+    identifier: atopile/rj45-connectors
+    path: ../packages/rj45-connectors
+  - type: file
+    identifier: atopile/rpi-cm5
+    path: ../packages/rpi-cm5
+  - type: file
+    identifier: atopile/st-ldk220
+    path: ../packages/st-ldk220
+  - type: file
+    identifier: atopile/ti-cd74hc4067sm
+    path: ../packages/ti-cd74hc4067sm
+  - type: file
+    identifier: atopile/ti-ina228
+    path: ../packages/ti-ina228
+  - type: file
+    identifier: atopile/ti-ina3221
+    path: ../packages/ti-ina3221
+  - type: file
+    identifier: atopile/ti-tca9548a
+    path: ../packages/ti-tca9548a
+  - type: file
+    identifier: atopile/ti-tmp117
+    path: ../packages/ti-tmp117
+  - type: file
+    identifier: atopile/ti-tpsm84209
+    path: ../packages/ti-tpsm84209
+  - type: file
+    identifier: atopile/usb-connectors
+    path: ../packages/usb-connectors

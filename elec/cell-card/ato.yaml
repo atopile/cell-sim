@@ -16,47 +16,139 @@ builds:
     base-card:
         entry: base-card.ato:BaseCard
 
+# Historical registry dependencies kept commented for reference.
+# Project-specific packages are pinned below as local file dependencies.
+#
+# dependencies:
+#     #
+#     # MCU + Networking (proven in Hyperion)
+# - atopile/st-stm32h723
+# - atopile/microchip-lan8742a
+#
+#     # I2C infrastructure
+# - atopile/ti-tca9548a
+# - atopile/ti-iso1640x
+# - atopile/microchip-mcp4725
+#
+#     # Measurement
+# - atopile/ti-ads1115      # fallback; ADS1219 package TBD
+# - atopile/ti-ina185a1
+#
+#     # Power
+# - atopile/ti-tpsm84209
+# - atopile/ti-tpsm863257
+# - atopile/ti-tlv75901
+# - atopile/st-ldk220
+# - atopile/tdpower-tdk20x
+#
+#     # GPIO + Temp
+# - atopile/ti-tca6408
+# - atopile/ti-tmp117
+#
+#     # Relays + Output
+# - atopile/relays
+#
+#     # LEDs + UI
+# - atopile/indicator-leds
+#
+#     # Connectors + Debug
+# - atopile/usb-connectors
+# - atopile/programming-headers
+# - atopile/buttons
+# - atopile/pin-headers
+# - atopile/testpoints
+# - atopile/mounting-holes
+#
+#     # DAC (thermistor card)
+# - atopile/microchip-mcp4728
+# - type: file
+#   identifier: atopile/ylptech-byyxx
+#   path: /home/np/projects/packages/packages/ylptech-byyxx
 dependencies:
-    # MCU + Networking (proven in Hyperion)
-- atopile/st-stm32h723
-- atopile/microchip-lan8742a
-
-    # I2C infrastructure
-- atopile/ti-tca9548a
-- atopile/ti-iso1640x
-- atopile/microchip-mcp4725
-
-    # Measurement
-- atopile/ti-ads1115      # fallback; ADS1219 package TBD
-- atopile/ti-ina185a1
-
-    # Power
-- atopile/ti-tps54560x
-- atopile/ti-tps563201
-- atopile/ti-tlv75901
-- atopile/st-ldk220
-- atopile/tdpower-tdk20x
-
-    # GPIO + Temp
-- atopile/ti-tca6408
-- atopile/ti-tmp117
-
-    # Relays + Output
-- atopile/relays
-
-    # LEDs + UI
-- atopile/indicator-leds
-
-    # Connectors + Debug
-- atopile/usb-connectors
-- atopile/programming-headers
-- atopile/buttons
-- atopile/pin-headers
-- atopile/testpoints
-- atopile/mounting-holes
-
-    # DAC (thermistor card)
-- atopile/microchip-mcp4728
-- type: file
-  identifier: atopile/ylptech-byyxx
-  path: /home/np/projects/packages/packages/ylptech-byyxx
+  - type: file
+    identifier: atopile/buttons
+    path: ../packages/buttons
+  - type: file
+    identifier: atopile/indicator-leds
+    path: ../packages/indicator-leds
+  - type: file
+    identifier: atopile/microchip-lan8742a
+    path: ../packages/microchip-lan8742a
+  - type: file
+    identifier: atopile/microchip-mcp3221
+    path: ../packages/microchip-mcp3221
+  - type: file
+    identifier: atopile/microchip-mcp4725
+    path: ../packages/microchip-mcp4725
+  - type: file
+    identifier: atopile/cellsim-regulators
+    path: ../packages/cellsim-regulators
+  - type: file
+    identifier: atopile/cellsim-analog
+    path: ../packages/cellsim-analog
+  - type: file
+    identifier: atopile/mounting-holes
+    path: ../packages/mounting-holes
+  - type: file
+    identifier: atopile/programming-headers
+    path: ../packages/programming-headers
+  - type: file
+    identifier: atopile/pulse-hx1198
+    path: ../packages/pulse-hx1198
+  - type: file
+    identifier: atopile/relays
+    path: ../packages/relays
+  - type: file
+    identifier: atopile/st-ldk220
+    path: ../packages/st-ldk220
+  - type: file
+    identifier: atopile/st-stm32h723
+    path: ../packages/st-stm32h723
+  - type: file
+    identifier: atopile/tdpower-tdk20x
+    path: ../packages/tdpower-tdk20x
+  - type: file
+    identifier: atopile/ti-ads131m04
+    path: ../packages/ti-ads131m04
+  - type: file
+    identifier: atopile/ti-cd74hc4052
+    path: ../packages/ti-cd74hc4052
+  - type: file
+    identifier: atopile/ti-drv883x
+    path: ../packages/ti-drv883x
+  - type: file
+    identifier: atopile/ti-ina185a1
+    path: ../packages/ti-ina185a1
+  - type: file
+    identifier: atopile/ti-iso1640x
+    path: ../packages/ti-iso1640x
+  - type: file
+    identifier: atopile/ti-iso7721
+    path: ../packages/ti-iso7721
+  - type: file
+    identifier: atopile/ti-iso7741
+    path: ../packages/ti-iso7741
+  - type: file
+    identifier: atopile/ti-tca6408
+    path: ../packages/ti-tca6408
+  - type: file
+    identifier: atopile/ti-tca9548a
+    path: ../packages/ti-tca9548a
+  - type: file
+    identifier: atopile/ti-tlv75901
+    path: ../packages/ti-tlv75901
+  - type: file
+    identifier: atopile/ti-tmp117
+    path: ../packages/ti-tmp117
+  - type: file
+    identifier: atopile/ti-tpsm84209
+    path: ../packages/ti-tpsm84209
+  - type: file
+    identifier: atopile/ti-tpsm863257
+    path: ../packages/ti-tpsm863257
+  - type: file
+    identifier: atopile/usb-connectors
+    path: ../packages/usb-connectors
+  - type: file
+    identifier: atopile/ylptech-byyxx
+    path: ../packages/ylptech-byyxx

@@ -21,7 +21,6 @@ fp-info-cache
 # === atopile ===
 .ato/
 build/
-layouts/
 
 # === Zephyr / west ===
 firmware/build/

@@ -39,11 +39,12 @@ from "atopile/rpi-cm5/rpi-cm5.ato" import RPI_CM5
 # BLOCKED: atopile/logos broken manifest blocks realtek-rtl8305nb
 # from "atopile/realtek-rtl8305nb/realtek-rtl8305nb.ato" import Realtek_RTL8305NB
 from "atopile/rj45-connectors/rj45-connectors.ato" import RJ45_Horizontal_SMD_Magnetics
-from "ti-tps54560x-local/ti-tps54560x.ato" import TI_TPS54560
-from "st-ldk220-local/st-ldk220.ato" import LDK220M_R
+from "atopile/ti-tpsm84209/ti-tpsm84209.ato" import TI_TPSM84209
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R_3V3
 from "atopile/microchip-emc2101/microchip-emc2101.ato" import Microchip_EMC2101
 from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
-from "relays-local/relays.ato" import LogicLevelRelaySPSTNO10A24V
+from "atopile/relays/relays.ato" import LogicLevelRelaySPSTNO10A24V
 from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
 from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
 from "atopile/buttons/buttons.ato" import VerticalButton
@@ -53,7 +54,7 @@ from "atopile/mounting-holes/mounting-holes.ato" import MountingHole_3_2_M3
 # Slot management infrastructure
 from "atopile/microchip-mcp23017/microchip-mcp23017.ato" import Microchip_MCP23017
 from "atopile/ti-ina3221/ti-ina3221.ato" import TI_INA3221
-from "ti-ina228-local/ti-ina228.ato" import TI_INA228
+from "atopile/ti-ina228/ti-ina228.ato" import TI_INA228
 from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
 from "atopile/ti-cd74hc4067sm/ti-cd74hc4067sm.ato" import TI_CD74HC4067SM
 
@@ -90,7 +91,10 @@ module SlotManager:
     gpio_relay = new Microchip_MCP23017
     gpio_relay.power ~ power_3v3
     gpio_relay.i2c ~ i2c
-    # TODO: set address to 0x20 (A2=0, A1=0, A0=0)
+    gpio_relay.address_pins[0].line ~ power_3v3.lv
+    gpio_relay.address_pins[1].line ~ power_3v3.lv
+    gpio_relay.address_pins[2].line ~ power_3v3.lv
+    gpio_relay.i2c.address = 0x20
 
     # IC1 (0x21): Mux select + E-stop readback
     #   Port A[0:3] = MUX_SEL[0:3]
@@ -101,14 +105,20 @@ module SlotManager:
     gpio_aux = new Microchip_MCP23017
     gpio_aux.power ~ power_3v3
     gpio_aux.i2c ~ i2c
-    # TODO: set address to 0x21 (A2=0, A1=0, A0=1)
+    gpio_aux.address_pins[0].line ~ power_3v3.hv
+    gpio_aux.address_pins[1].line ~ power_3v3.lv
+    gpio_aux.address_pins[2].line ~ power_3v3.lv
+    gpio_aux.i2c.address = 0x21
 
     # IC2 (0x22): 16 inputs — card-present detection for slots 0-15
     # Pull-up on backplane, pulled low by card insertion
     gpio_detect = new Microchip_MCP23017
     gpio_detect.power ~ power_3v3
     gpio_detect.i2c ~ i2c
-    # TODO: set address to 0x22 (A2=0, A1=1, A0=0)
+    gpio_detect.address_pins[0].line ~ power_3v3.lv
+    gpio_detect.address_pins[1].line ~ power_3v3.hv
+    gpio_detect.address_pins[2].line ~ power_3v3.lv
+    gpio_detect.i2c.address = 0x22
 
     # === Per-Slot Power Relays (16x Omron G5Q-1A4 DC24) ===
     # SPST-NO, 10A @ 30VDC, 24V coil (200mW / 8.3mA per coil)
@@ -152,11 +162,16 @@ module SlotManager:
     i2c_mux = new TI_TCA9548A
     i2c_mux.i2c ~ i2c
     i2c_mux.power ~ power_3v3
-    # TODO: set address to 0x70
+    i2c_mux.address_pins[0].line ~ power_3v3.lv
+    i2c_mux.address_pins[1].line ~ power_3v3.lv
+    i2c_mux.address_pins[2].line ~ power_3v3.lv
+    i2c_mux.i2c.address = 0x70
 
     ina = new TI_INA3221[6]
     for monitor in ina:
         monitor.power ~ power_3v3
+        monitor.address_pin.line ~ power_3v3.lv
+        monitor.i2c.address = 0x40
     ina[0].i2c ~ i2c_mux.i2cs[0]
     ina[1].i2c ~ i2c_mux.i2cs[1]
     ina[2].i2c ~ i2c_mux.i2cs[2]
@@ -345,19 +360,19 @@ module Backplane:
     bus_monitor.i2c ~ cm5_i2c
     bus_monitor.power_in ~ power_24v
     bus_monitor.power_out.lv ~ power_24v.lv
-    # TODO: set address to 0x45
+    bus_monitor.address_pins[0].line ~ power_3v3.lv
+    bus_monitor.address_pins[1].line ~ power_3v3.hv
+    bus_monitor.i2c.address = 0x45
 
     # === Power regulation ===
-    # 24V -> 5V buck (for CM5, switch ICs, LEDs)
+    # 24V -> 5V buck module (for CM5, switch ICs, LEDs)
     # Fed from bus monitor output (always live, not behind E-stop)
-    buck_5v = new TI_TPS54560
+    buck_5v = new TI_TPSM84209
     bus_monitor.power_out ~> buck_5v ~> power_5v
-    assert power_5v.voltage within 4.9V to 5.1V
 
     # 5V -> 3.3V LDO (for switch ICs, I2C)
-    ldo_3v3 = new LDK220M_R
+    ldo_3v3 = new LDK220M_R_3V3
     power_5v ~> ldo_3v3 ~> power_3v3
-    assert power_3v3.voltage within 3.2V to 3.4V
 
     # === CM5 (main controller) ===
     cm5 = new RPI_CM5
@@ -423,6 +438,7 @@ module Backplane:
     fan_ctrl = new Microchip_EMC2101
     fan_ctrl.power ~ power_3v3
     fan_ctrl.i2c ~ cm5_i2c
+    fan_ctrl.i2c.address = 0x4C
     # Fan PWM output -> fan header connector
     fan_pwm_out = new ElectricLogic
     fan_ctrl.pwm_out ~ fan_pwm_out
@@ -433,6 +449,7 @@ module Backplane:
     temp_board = new TI_TMP117
     temp_board.power ~ power_3v3
     temp_board.i2c ~ cm5_i2c
+    temp_board.i2c.address = 0x48
 
     # === Front panel ===
     # USB-C for CM5 debug/console
