@@ -1,0 +1,26 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_ISO1640QDWRQ1_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C5216231", date="2025-06-03T23:47:23.545213+00:00", checksum="097ecc663168598677dd75405f70461aaeddd41c99942c0f575a805d1f2d5f0b">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="ISO1640QDWRQ1", footprint="SOIC-16_L10.3-W7.4-P1.27-LS10.3-BL.kicad_mod", symbol="ISO1640QDWRQ1.kicad_sym", model="SOIC-16_L10.3-W7.4-P1.27-LS10.3-BL.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C5216231", manufacturer="Texas Instruments", partno="ISO1640QDWRQ1">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal GND1 ~ pin 1
+    GND1 ~ pin 7
+    signal GND2 ~ pin 9
+    GND2 ~ pin 16
+    signal SCL1 ~ pin 6
+    signal SCL2 ~ pin 11
+    signal SDA1 ~ pin 5
+    signal SDA2 ~ pin 12
+    signal VCC1 ~ pin 3
+    signal VCC2 ~ pin 14

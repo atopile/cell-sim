@@ -1,0 +1,26 @@
+requires-atopile: "^0.12.4"
+
+paths:
+  src: ./
+  layout: ./layouts
+
+builds:
+  default:
+    entry: ti-tmp117.ato:TI_TMP117
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+
+package:
+  identifier: atopile/ti-tmp117
+  repository: https://github.com/atopile/packages
+  homepage: https://github.com/atopile/packages/blob/main/packages/ti-tmp117/README.md
+  version: "0.2.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: "Tags: Texas Instruments; TI; TMP117; Temperature; Sensor; I2C; High-precision; ±0.1°C; 16-bit; Medical; ASTM; ISO; SOT563"
+  license: MIT

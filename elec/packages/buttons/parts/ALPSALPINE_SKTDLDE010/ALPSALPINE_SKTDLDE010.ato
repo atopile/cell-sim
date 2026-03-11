@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component ALPSALPINE_SKTDLDE010_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C115365", date="2026-01-20T05:03:44.515425+00:00", checksum="409c8ecb4271745dd87ad30468cbbad99c1bcf51881f785a8b1cda0bbe31d231">
+
+    trait is_atomic_part<manufacturer="ALPSALPINE", partnumber="SKTDLDE010", footprint="KEY-SMD_SKTDLDE010.kicad_mod", symbol="SKTDLDE010.kicad_sym", model="KEY-SMD_SKTDLDE010.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C115365", manufacturer="ALPSALPINE", partno="SKTDLDE010">
+    trait has_designator_prefix<prefix="SW">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_1809051314_ALPSALPINE-SKTDLDE010_C115365.pdf">
+
+    # pins
+    pin 1
+    pin 2
+    pin 3
+    pin 4

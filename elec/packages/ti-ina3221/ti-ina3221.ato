@@ -1,0 +1,217 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("MODULE_TEMPLATING")
+
+import ElectricPower
+import ElectricLogic
+import I2C
+import Resistor
+import Capacitor
+import DifferentialPair
+import can_bridge_by_name
+
+from "parts/Texas_Instruments_INA3221AIRGVR/Texas_Instruments_INA3221AIRGVR.ato" import Texas_Instruments_INA3221AIRGVR_package
+
+module TI_INA3221:
+    """
+    Texas Instruments INA3221 triple-channel current and power monitor
+
+    Features:
+    - Operating voltage: 2.7V to 5.5V supply
+    - Bus voltage monitoring: 0V to 26V per channel
+    - I2C interface with configurable address (0x40-0x43)
+    - Triple-channel high-side current sensing
+    - Programmable conversion times and averaging
+    - Alert functionality with programmable thresholds
+    - Supply current: 350µA typical
+    - Operating temperature: -40°C to +125°C
+    - 16-bit ADC with programmable conversion time
+    """
+
+    # --- External interfaces ---
+    i2c = new I2C
+    """
+    I2C bus interface (7-bit addresses 0x40-0x43)
+    """
+    i2c.required = True
+
+    power = new ElectricPower
+    """
+    Main power supply for the IC (2.7V to 5.5V)
+    """
+    power.required = True
+
+    # --- Channel interfaces ---
+    channels = new Channel[3]
+    """
+    Three current sensing channels with integrated shunt resistors
+    """
+
+    # --- Alert/status interfaces ---
+    warning = new ElectricLogic
+    """
+    Warning alert output pin
+    """
+    warning.required = False
+
+    critical = new ElectricLogic
+    """
+    Critical alert output pin
+    """
+    critical.required = False
+
+    timing_control = new ElectricLogic
+    """
+    Timing control pin for conversion triggering
+    """
+    timing_control.required = False
+
+    address_pin = new ElectricLogic
+    address_pin.reference ~ power
+    address_pin.required = False
+
+    # --- Power rail constraints ---
+    assert power.voltage within 2.7V to 5.5V
+
+    # --- I2C address configuration ---
+    # Keep the address strapped low by default until board-level selection is modeled.
+    i2c.address.default = 0x40
+
+    # --- I2C pull-up resistors ---
+    i2c_pullup_scl = new Resistor
+    i2c_pullup_sda = new Resistor
+
+    for pullup in [i2c_pullup_scl, i2c_pullup_sda]:
+        pullup.resistance = 10kohm +/- 20%
+        pullup.package = "0402"
+
+    power.hv ~> i2c_pullup_scl ~> i2c.scl.line
+    power.hv ~> i2c_pullup_sda ~> i2c.sda.line
+
+    # --- Alert pin pull-up resistors ---
+    warning_pullup = new Resistor
+    critical_pullup = new Resistor
+
+    for pullup in [warning_pullup, critical_pullup]:
+        pullup.resistance = 10kohm +/- 20%
+        pullup.package = "0402"
+
+    power.hv ~> warning_pullup ~> warning.line
+    power.hv ~> critical_pullup ~> critical.line
+
+    # --- Power Valid (PV) pullup resistor ---
+    pv_pullup = new Resistor
+    pv_pullup.resistance = 10kohm +/- 20%
+    pv_pullup.package = "0402"
+
+    # --- Decoupling capacitors ---
+    power_cap = new Capacitor
+    power_cap.capacitance = 100nF +/- 20%
+    power_cap.max_voltage = 10V to 50V
+    power_cap.package = "0402"
+
+    power.hv ~> power_cap ~> power.lv
+
+    # --- Package connections ---
+    package = new Texas_Instruments_INA3221AIRGVR_package
+
+    # Power connections
+    package.VS ~ power.hv
+    package.GND ~ power.lv
+    package.PAD ~ power.lv
+
+    # I2C connections
+    package.SCL ~ i2c.scl.line
+    package.SDA ~ i2c.sda.line
+
+    # Address configuration (A0 pin). The board straps A0 and sets the matching
+    # bus address explicitly.
+    package.A0 ~ address_pin.line
+
+    # Channel connections
+    package.INplus1 ~ channels[0].sense.p.line
+    package.IN_1 ~ channels[0].sense.n.line
+
+    package.INplus2 ~ channels[1].sense.p.line
+    package.IN_2 ~ channels[1].sense.n.line
+
+    package.INplus3 ~ channels[2].sense.p.line
+    package.IN_3 ~ channels[2].sense.n.line
+
+    # Alert and control connections
+    package.WARNING ~ warning.line
+    warning.reference ~ power
+
+    package.CRITICAL ~ critical.line
+    critical.reference ~ power
+
+    package.TC ~ timing_control.line
+    timing_control.reference ~ power
+
+    # PV (Power Valid) pin with pullup
+    power.hv ~> pv_pullup ~> package.PV
+
+    # VPU (Pullup supply) - connect to main power supply
+    package.VPU ~ power.hv
+
+module Channel:
+    """
+    Channel interface for the INA3221 current monitor
+
+    This module provides a complete current sensing channel with:
+    - Input and output power connections
+    - Integrated shunt resistor for current measurement
+    - Differential sense lines for the INA3221
+    """
+    trait can_bridge_by_name<input_name = "power_in", output_name = "power_out">
+
+    # External power connections
+    power_in = new ElectricPower
+    """
+    Input power rail being monitored
+    """
+    power_in.required = False
+
+    power_out = new ElectricPower
+    """
+    Output power rail (after shunt resistor)
+    """
+    power_out.required = False
+
+    # User-defined maximum current parameter
+    max_current: current
+    # Default to 1A to provide initial constraint (can be overridden by instantiations)
+    max_current.default = 1A
+
+    # INA3221 full-scale shunt voltage range (±163.8mV)
+    shunt_drop = 163.8mV
+
+    # Current sensing shunt resistor
+    shunt = new Resistor
+    """
+    Current sensing shunt resistor - value calculated from max_current
+    """
+    shunt.package = "1206"  # adequate power rating for most designs
+
+    # Calculate shunt value bounds given desired max current
+    assert shunt.resistance <= shunt_drop / max_current * 1
+    assert shunt.resistance >= shunt_drop / max_current * 0.85
+
+    # Differential sense interface for INA3221
+    sense = new DifferentialPair
+    """
+    Differential voltage sensing interface connected to INA3221
+    """
+
+    # Power and voltage constraints
+    assert power_in.voltage within 0V to 26V
+    assert power_out.voltage within 0V to 26V
+
+    # Connect the shunt resistor in series with power flow
+    power_in.hv ~> shunt ~> power_out.hv
+    power_in.lv ~ power_out.lv
+
+    # Connect sense lines across the shunt for voltage measurement
+    sense.p.line ~ power_in.hv  # Sense positive (high-side)
+    sense.n.line ~ power_out.hv  # Sense negative (load-side)

@@ -1,0 +1,82 @@
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+import ElectricPower
+import I2C
+import ElectricSignal
+import ElectricLogic
+import Capacitor
+import Resistor
+
+from "parts/Microchip_Tech_MCP4725A0T_E_CH/Microchip_Tech_MCP4725A0T_E_CH.ato" import Microchip_Tech_MCP4725A0T_E_CH_package
+
+module Microchip_MCP4725_driver:
+    """Microchip_MCP4725_driver"""
+    package = new Microchip_Tech_MCP4725A0T_E_CH_package
+
+    # power
+    power = new ElectricPower
+    power.hv ~ package.VDD
+    power.lv ~ package.VSS
+    assert power.voltage within 2.7V to 5.5V
+
+    # Decoupling Capacitor
+    decoupling_capacitor = new Capacitor
+    decoupling_capacitor.capacitance = 100nF +/- 10%
+    decoupling_capacitor.package = "C0402"
+    power.hv ~> decoupling_capacitor ~> power.lv
+
+    # I2C
+    i2c = new I2C
+    i2c.scl.line ~ package.SCL
+    i2c.sda.line ~ package.SDA
+
+    # Set required interfaces
+    power.required = True
+    i2c.required = True
+
+    # Output
+    output = new ElectricSignal
+    output.line ~ package.VOUT
+    output.reference ~ power
+
+    # Manual address strap. The board ties this high or low and sets the matching
+    # bus address explicitly.
+    address_pin = new ElectricLogic
+    address_pin.reference ~ power
+    address_pin.required = False
+    address_pin.line ~ package.A0
+
+    # Default to base address (0x60), can be overridden by the board.
+    i2c.address.default = 0x60
+
+module Test:
+    # Create 2 DACs
+    dacs = new Microchip_MCP4725_driver[2]
+
+    # Create power and I2C interfaces
+    power = new ElectricPower
+    i2c = new I2C
+
+    # Add pullups to I2C bus
+    pullups = new Resistor[2]
+    for pullup in pullups:
+        pullup.resistance = 10kohm +/- 10%
+        pullup.package = "R0402"
+
+    i2c.scl.line ~> pullups[0] ~> i2c.scl.reference.hv
+    i2c.sda.line ~> pullups[1] ~> i2c.sda.reference.hv
+
+    # Connect DACs to power and I2C
+    for dac in dacs:
+        dac.power ~ power
+        dac.i2c ~ i2c
+
+    # Set DAC strap levels and matching bus addresses.
+    dacs[0].address_pin.line ~ power.lv
+    dacs[1].address_pin.line ~ power.hv
+    dacs[0].i2c.address = 0x60
+    dacs[1].i2c.address = 0x61
+    assert dacs[0].i2c.address within 0x60
+    assert dacs[1].i2c.address within 0x61

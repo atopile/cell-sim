@@ -1,0 +1,29 @@
+requires-atopile: ^0.12.4
+
+paths:
+  src: ./
+  layout: ./layouts
+
+builds:
+  default:
+    entry: ti-ina228.ato:TI_INA228
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check, Bus.appropriate_pull_resistance]
+
+package:
+  identifier: atopile/ti-ina228
+  repository: https://github.com/atopile/packages
+  homepage: 
+    https://github.com/atopile/packages/blob/main/packages/ti-ina228/README.md
+  version: 0.1.2
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: 'Tags: Texas Instruments; TI; INA228; Power Monitor; Current Monitor; Voltage
+    Monitor; I2C; 20-bit ADC; 85V; High-side; Low-side; Adafruit; 5832; STEMMA QT;
+    Qwiic'
+  license: MIT

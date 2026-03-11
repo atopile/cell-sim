@@ -1,0 +1,83 @@
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+
+import Regulator
+import ElectricPower
+import Electrical
+import Capacitor
+import Resistor
+import can_bridge_by_name
+from "parts/Honor_Elec_RVT1V101M0607/Honor_Elec_RVT1V101M0607.ato" import Honor_Elec_RVT1V101M0607_package
+
+from "parts/TDPOWER_TDK20_24S24WH/TDPOWER_TDK20_24S24WH.ato" import TDPOWER_TDK20_24S24WH_package
+
+module TDPOWER_TDK20_driver from Regulator:
+    """TDPOWER_TDK20_24S24WH"""
+    package = new TDPOWER_TDK20_24S24WH_package
+    trait can_bridge_by_name<input_name="power_in", output_name="power_out">
+
+    # Connect package to power
+    power_in.hv ~ package.VINpos
+    power_in.lv ~ package.VINneg
+
+    power_out.hv ~ package.VOpos
+    power_out.lv ~ package.VOneg
+
+    # Input ceramics
+    input_caps = new Capacitor[3]
+    for cap in input_caps:
+        cap.package = "0805"
+        assert cap.max_voltage within 30V to 100V
+        assert cap.capacitance within 10uF +/- 10%
+        power_in.hv ~> cap ~> power_in.lv
+
+    # Output ceramics
+    output_cap_1 = new Capacitor
+    output_cap_1.package = "0805"
+    assert output_cap_1.max_voltage within 30V to 100V
+    assert output_cap_1.capacitance within 1uF +/- 10%
+    power_out.hv ~> output_cap_1 ~> power_out.lv
+
+    # Output electrolytics
+    output_electrolytics = new Honor_Elec_RVT1V101M0607_driver[2]
+
+    for cap in output_electrolytics:
+        power_out.hv ~> cap ~> power_out.lv
+
+    # Y capacitors
+    y_caps = new Capacitor[3]
+
+    # Connect the Y capacitors across the power input and output gnd
+    power_in.lv ~> y_caps[0] ~> y_caps[1] ~> y_caps[2] ~> power_out.lv
+
+    for y_cap in y_caps:
+        assert y_cap.max_voltage within 1kV to 2kV
+        assert y_cap.capacitance within 2.2nF +/- 20%
+        y_cap.package = "1206"
+
+    # Enable resistor
+    enable_resistor = new Resistor
+    enable_resistor.package = "0402"
+    enable_resistor.resistance = 10kohm +/- 10%
+
+    # Enable
+    # enable = new ElectricLogic
+    # TODO: logic level enable
+
+    # Enabled by default
+    package.CNT ~> enable_resistor ~> power_in.hv
+
+module Honor_Elec_RVT1V101M0607_driver:
+    """Polarized electrolytic capacitor - Honor Elec RVT1V101M0607 (100uF 35V)"""
+    package = new Honor_Elec_RVT1V101M0607_package
+
+    # Polarized capacitor interfaces (anode = positive, cathode = negative)
+    anode = new Electrical
+    cathode = new Electrical
+
+    package.1 ~ anode
+    package.2 ~ cathode
+
+    # Enable bridge syntax: power.hv ~> cap ~> power.lv
+    trait can_bridge_by_name<input_name = "anode", output_name = "cathode">

@@ -1,0 +1,26 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component XFCN_BH254VS_10P_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C492446", date="2025-09-16T18:06:23.400640+00:00", checksum="809662e34657a831a8c814be9bf3eba1946fe6960ae7402964d496e8ee916bfe">
+
+    trait is_atomic_part<manufacturer="XFCN", partnumber="BH254VS-10P", footprint="IDC-SMD_10P-P2.54-V-R2-C5-S9.50.kicad_mod", symbol="BH254VS-10P.kicad_sym", model="IDC-SMD_10P-P2.54-V-R2-C5-S9.50.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C492446", manufacturer="XFCN", partno="BH254VS-10P">
+    trait has_designator_prefix<prefix="CN">
+
+    # pins
+    pin 1
+    pin 10
+    pin 3
+    pin 8
+    pin 5
+    pin 6
+    pin 7
+    pin 4
+    pin 9
+    pin 2

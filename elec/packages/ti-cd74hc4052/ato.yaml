@@ -1,0 +1,23 @@
+requires-atopile: "^0.14.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: ti-cd74hc4052.ato:CD74HC4052_driver
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []
+
+package:
+    identifier: atopile/ti-cd74hc4052
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Texas Instruments CD74HC4052 analog mux/demux
+    license: MIT

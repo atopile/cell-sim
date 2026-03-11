@@ -11,3 +11,13 @@ builds:
         entry: usage.ato:Usage
 
 dependencies: []
+
+package:
+    identifier: atopile/ti-iso7741
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Texas Instruments ISO7741 quad-channel digital isolator
+    license: MIT

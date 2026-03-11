@@ -1,4 +1,5 @@
 #pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
 #pragma experiment("FOR_LOOP")
 
 # TI TPSM863257 — 3A Synchronous Buck Module with Integrated Inductor
@@ -16,9 +17,11 @@ import Resistor
 import Capacitor
 import ElectricPower
 import ElectricLogic
+import can_bridge_by_name
 
 module TI_TPSM863257:
     "3A synchronous buck module with integrated inductor. Default output ~5V."
+    trait can_bridge_by_name<input_name="power_in", output_name="power_out">
 
     # --- External Interfaces ---
     power_in = new ElectricPower

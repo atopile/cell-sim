@@ -115,3 +115,38 @@ module TI_ISO7741:
 
     power_side1.hv ~> decap_side1 ~> power_side1.lv
     power_side2.hv ~> decap_side2 ~> power_side2.lv
+
+
+module ISO7741_driver:
+    """
+    Compatibility wrapper preserving the original CellSim-side ISO7741 interface.
+    """
+
+    power_a = new ElectricPower
+    power_b = new ElectricPower
+
+    fwd_in_a = new ElectricLogic
+    fwd_in_b = new ElectricLogic
+    fwd_in_c = new ElectricLogic
+    fwd_out_a = new ElectricLogic
+    fwd_out_b = new ElectricLogic
+    fwd_out_c = new ElectricLogic
+
+    rev_in_d = new ElectricLogic
+    rev_out_d = new ElectricLogic
+
+    core = new TI_ISO7741
+
+    power_a ~ core.power_side1
+    power_b ~ core.power_side2
+
+    fwd_in_a ~ core.spi_side1.sclk
+    fwd_in_b ~ core.spi_side1.mosi
+    fwd_out_a ~ core.spi_side2.sclk
+    fwd_out_b ~ core.spi_side2.mosi
+
+    fwd_in_c ~ core.cs_side1
+    fwd_out_c ~ core.cs_side2
+
+    rev_in_d ~ core.spi_side2.miso
+    rev_out_d ~ core.spi_side1.miso

@@ -1,0 +1,37 @@
+(kicad_symbol_lib
+	(version 20241229)
+	(generator "mounting_hole_generator")
+	(symbol "MountingHole_3.2_M3_Pad_Via"
+		(property "Reference" "H"
+			(at 0 0 0)
+		)
+		(property "Value" "MountingHole_3.2_M3_Pad_Via"
+			(at 0 2.54 0)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(symbol "MountingHole_3.2_M3_Pad_Via"
+			(pin passive line
+				(at 0 2.54 270)
+				(length 2.54)
+				(name "contact"
+					(effects
+						(font
+							(size 1 1)
+							(thickness 0.15)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1 1)
+							(thickness 0.15)
+						)
+					)
+				)
+			)
+		)
+	)
+)

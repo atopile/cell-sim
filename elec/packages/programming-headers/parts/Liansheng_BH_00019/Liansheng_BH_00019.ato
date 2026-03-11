@@ -1,0 +1,36 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Liansheng_BH_00019_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2829930", date="2025-09-16T18:26:02.103277+00:00", checksum="d60b345882bd7b3d29c0794fa22a4a301d38c03ba865459e71afa5756cb2e7d7">
+
+    trait is_atomic_part<manufacturer="Liansheng", partnumber="BH-00019", footprint="CONN-SMD_20P-P2.54_BH-00019.kicad_mod", symbol="BH-00019.kicad_sym", model="CONN-SMD_20P-P2.54_BH-00019.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2829930", manufacturer="Liansheng", partno="BH-00019">
+    trait has_designator_prefix<prefix="CN">
+
+    # pins
+    pin 1
+    pin 20
+    pin 3
+    pin 18
+    pin 5
+    pin 16
+    pin 7
+    pin 14
+    pin 9
+    pin 12
+    pin 11
+    pin 10
+    pin 13
+    pin 8
+    pin 15
+    pin 6
+    pin 17
+    pin 4
+    pin 19
+    pin 2

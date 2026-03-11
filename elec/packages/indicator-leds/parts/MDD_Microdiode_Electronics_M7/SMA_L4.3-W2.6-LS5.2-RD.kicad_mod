@@ -1,0 +1,137 @@
+(footprint "MDD_Microdiode_Electronics_M7:SMA_L4.3-W2.6-LS5.2-RD"
+	(version 20241229)
+	(generator "faebryk_convert")
+	(generator_version "v5")
+	(layer "F.Cu")
+	(tedit "5DC5F6A4")
+	(uuid "6d4f1b0c-846b-4c73-b4fc-68f795df540d")
+	(property "Reference" "REF**"
+		(at 0 -4)
+		(layer "F.SilkS")
+		(uuid "be749ecb-5982-4898-b058-f794e17619a7")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "SMA_L4.3-W2.6-LS5.2-RD"
+		(at 0 4)
+		(layer "F.Fab")
+		(uuid "5a574cd6-0d9d-4b28-9c93-6f633b5a16a6")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_circle
+		(center -2.61 1.3)
+		(end -2.58 1.3)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(locked no)
+		(uuid "11a9698e-59cb-4f94-887e-73ff66fa8362")
+	)
+	(fp_line
+		(start -0.88 -1.43)
+		(end -0.88 1.43)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "d83545ec-16ee-4d58-8685-e80e191efde7")
+	)
+	(fp_line
+		(start -2.6 -1.43)
+		(end 2.6 -1.43)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "173212ef-eba9-4274-82cc-1013a8757280")
+	)
+	(fp_line
+		(start 2.59 1.18)
+		(end 2.6 1.41)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "c8f44615-18ae-41f3-a066-8276a3daccdf")
+	)
+	(fp_line
+		(start 2.6 -1.43)
+		(end 2.6 -1.19)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "375a5e3b-169e-4029-ab61-3e8b9a95762f")
+	)
+	(fp_line
+		(start -2.6 1.43)
+		(end 2.6 1.43)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "26c9d1f3-72f9-4dfd-ac96-928088b5c9d4")
+	)
+	(fp_text user "%R"
+		(at 0 0)
+		(layer "F.Fab")
+		(uuid "2831ef28-8f03-47c3-8237-f29d1b79ba15")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "2" smd rect
+		(at 2.2 0 180)
+		(size 2 2)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "edb175c1-3e6e-4423-a23e-bc5f1d817c38")
+	)
+	(pad "1" smd rect
+		(at -2.2 0 180)
+		(size 2 2)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "873ff3e6-3f54-42f9-bb07-d92399c01c74")
+	)
+	(model "${KIPRJMOD}/../../parts/MDD_Microdiode_Electronics_M7/SMA_L4.3-W2.6-LS5.2-RD.step"
+		(offset
+			(xyz 0 0 -0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+	(embedded_fonts no)
+)

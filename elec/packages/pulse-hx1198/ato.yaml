@@ -1,0 +1,23 @@
+requires-atopile: "^0.14.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: pulse-hx1198.ato:HX1198_driver
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []
+
+package:
+    identifier: atopile/pulse-hx1198
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Pulse HX1198 Ethernet magnetics module
+    license: MIT

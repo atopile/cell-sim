@@ -1,0 +1,48 @@
+# YLPTEC BYYXX Isolated DC-DC Converters
+
+YLPTEC isolated 2W DC-DC converter modules with multiple input/output voltage options. These modules provide galvanic isolation and include input/output capacitors and status LED.
+
+## Usage
+
+```ato
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+
+import ElectricPower
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B2405S_2WR3
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B0505S_2WR3
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B1205S_2WR2
+
+module Usage:
+    """
+    Usage example for ylptech-byyxx package.
+    Demonstrates all three YLPTEC isolated DC-DC converter variants.
+    """
+
+    # --- 24V to 5V isolated converter ---
+    reg_24v_to_5v = new YLPTEC_B2405S_2WR3
+    power_24v = new ElectricPower
+    power_5v_from_24v = new ElectricPower
+    power_24v ~> reg_24v_to_5v ~> power_5v_from_24v
+
+    # --- 5V to 5V isolated converter ---
+    reg_5v_to_5v = new YLPTEC_B0505S_2WR3
+    power_5v_in = new ElectricPower
+    power_5v_isolated = new ElectricPower
+    power_5v_in ~> reg_5v_to_5v ~> power_5v_isolated
+
+    # --- 12V to 5V isolated converter ---
+    reg_12v_to_5v = new YLPTEC_B1205S_2WR2
+    power_12v = new ElectricPower
+    power_5v_from_12v = new ElectricPower
+    power_12v ~> reg_12v_to_5v ~> power_5v_from_12v
+
+```
+
+## Contributing
+
+Contributions to this package are welcome via pull requests on the GitHub repository.
+
+## License
+
+This atopile package is provided under the [MIT License](https://opensource.org/license/mit/).

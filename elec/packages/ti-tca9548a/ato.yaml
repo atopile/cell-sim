@@ -1,0 +1,25 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: "."
+  layout: ./layouts
+
+builds:
+  default:
+    entry: ti-tca9548a.ato:TI_TCA9548A
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+
+package:
+  identifier: atopile/ti-tca9548a
+  repository: https://github.com/atopile/packages
+  version: "0.2.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: TCA9548A Low-Voltage 8-Channel I2C Switch with Reset
+  license: MIT

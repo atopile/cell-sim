@@ -1,0 +1,19 @@
+import Electrical
+
+from "cellsim-analog.ato" import FilteredVoltageDividerToGround
+
+
+module Usage:
+    vin = new Electrical
+    gnd = new Electrical
+    vout = new Electrical
+
+    monitor = new FilteredVoltageDividerToGround
+    vin ~ monitor.input
+    gnd ~ monitor.ground
+    monitor.output ~ vout
+
+    monitor.divider.r_top.resistance = 20kohm +/- 1%
+    monitor.divider.r_bottom.resistance = 5.1kohm +/- 1%
+    monitor.r_filter.resistance = 1kohm +/- 5%
+    monitor.c_filter.capacitance = 1.5nF +/- 10%

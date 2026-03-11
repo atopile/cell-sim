@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component FH_0402B152K500NT_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C284989", date="2026-03-10T20:17:37.353323+00:00", checksum="25107a1f5ccf72f64a40af4f89b7c0d60a0f261fe782f3c292ea1fb779c968bd">
+
+    trait is_atomic_part<manufacturer="FH", partnumber="0402B152K500NT", footprint="C0402.kicad_mod", symbol="0402B152K500NT.kicad_sym", model="C0402_L1.0-W0.5-H0.5.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C284989", manufacturer="FH", partno="0402B152K500NT">
+    trait has_designator_prefix<prefix="C">
+    trait has_datasheet<datasheet="https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2304140030_FH--Guangdong-Fenghua-Advanced-Tech-0402B152K500NT_C284989.pdf">
+
+    # pins
+    pin 1
+    pin 2

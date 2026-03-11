@@ -1,0 +1,26 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_INA228AQDGSRQ1_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C5214669", date="2025-07-10T23:37:58.320193+00:00", checksum="f530237deb589decec87c249c8348bb3d5bf56514ceb85f46147e25c627c8df1">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="INA228AQDGSRQ1", footprint="VSSOP-10_L3.0-W3.0-P0.50-LS4.9-BL.kicad_mod", symbol="INA228AQDGSRQ1.kicad_sym", model="VSSOP-10_L3.0-W3.0-H1.1-LS4.9-P0.50.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C5214669", manufacturer="Texas Instruments", partno="INA228AQDGSRQ1">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal A0 ~ pin 2
+    signal A1 ~ pin 1
+    signal ALERT ~ pin 3
+    signal GND ~ pin 7
+    signal INneg ~ pin 9
+    signal INpos ~ pin 10
+    signal SCL ~ pin 5
+    signal SDA ~ pin 4
+    signal VBUS ~ pin 8
+    signal VS ~ pin 6

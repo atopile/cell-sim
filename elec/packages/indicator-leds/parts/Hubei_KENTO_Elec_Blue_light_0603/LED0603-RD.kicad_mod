@@ -1,0 +1,264 @@
+(footprint "Hubei_KENTO_Elec_Blue_light_0603:LED0603-RD"
+    (layer "F.Cu")
+    (descr "")
+    (version 20241229)
+    (generator "faebryk")
+    (generator_version "v5")
+    (tedit "5DC5F6A4")
+    (property "Reference" "REF**"
+        (at 0 -4 0)
+        (layer "F.SilkS")
+        (hide no)
+        (uuid "c78db71f-e374-4437-9313-18446f639d5b")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "Value" "LED0603-RD"
+        (at 0 4 0)
+        (layer "F.Fab")
+        (hide no)
+        (uuid "6b8bd4af-d38a-47ab-af4a-8aae96f49c23")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "checksum" "f9095df00059fd3851fb362cfad0408de370f2e4caf95056b6af7e15c23f4614"
+        (at 0 0 0)
+        (layer "User.9")
+        (hide no)
+        (uuid "93c33148-73f3-49b9-abf7-18042558ddb3")
+        (effects
+            (font
+                (size 0.125 0.125)
+                (thickness 0.01875)
+            )
+            (hide yes)
+        )
+    )
+    (attr smd)
+    (fp_line
+        (start 0.22 0.33)
+        (end 0.21 0.33)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "14736d3a-dbcb-4a08-b06f-aa6c6d40c076")
+    )
+    (fp_line
+        (start 0.21 0.33)
+        (end -0.12 0)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "e6cb1ce7-d1b7-4e21-ae24-9ed10807dae0")
+    )
+    (fp_line
+        (start 0.22 -0.35)
+        (end 0.22 -0.34)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "5659b266-b628-4d91-9595-041fadd6fc3f")
+    )
+    (fp_line
+        (start 0.22 -0.34)
+        (end -0.12 0)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "9895feaa-db06-4104-9563-244ed8fbcab3")
+    )
+    (fp_line
+        (start 0.22 -0.35)
+        (end 0.22 0.33)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "8368cc82-4cd5-498b-a36d-e4ad8cf3c598")
+    )
+    (fp_line
+        (start 0.24 -0.75)
+        (end 1.39 -0.75)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "beef82ce-e55f-49b1-af3f-2758a6de595d")
+    )
+    (fp_line
+        (start 0.24 0.75)
+        (end 1.39 0.75)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "00ca2747-0e83-47f1-a6fa-4ba6fe270b87")
+    )
+    (fp_line
+        (start 1.39 -0.75)
+        (end 1.39 0.73)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "680aa28f-61bb-4e3f-839d-d667296cc483")
+    )
+    (fp_line
+        (start -0.14 0.75)
+        (end -1.19 0.75)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "c7b3d5cc-8a07-4bf5-8d79-2541229029ca")
+    )
+    (fp_line
+        (start -1.49 0.35)
+        (end -1.49 0.45)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "52ab2208-4c7c-4e12-8a9b-db44e383a4b2")
+    )
+    (fp_line
+        (start -1.49 0.45)
+        (end -1.19 0.75)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "a854aa74-5c1a-49f0-b4c1-b3612ef7f7af")
+    )
+    (fp_line
+        (start -1.49 -0.35)
+        (end -1.49 0.35)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "8079b002-9a8e-45b9-856a-be0e6c554f34")
+    )
+    (fp_line
+        (start -1.49 -0.35)
+        (end -1.49 -0.45)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "1bd3cea2-eecf-4302-99f9-85c112208066")
+    )
+    (fp_line
+        (start -1.49 -0.45)
+        (end -1.19 -0.75)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "f60160b0-becb-41cd-bc7d-e7b3f6b47f8b")
+    )
+    (fp_line
+        (start -0.14 -0.75)
+        (end -1.19 -0.75)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "571d3d47-c982-41e5-b820-dc4f0be4e3b0")
+    )
+    (fp_line
+        (start 0.22 0)
+        (end -0.12 0)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "0001e785-5029-42b0-854c-1809bfc249fb")
+    )
+    (fp_circle
+        (center -0.8 0.4)
+        (end -0.77 0.4)
+        (stroke
+            (width 0.06)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.Fab")
+        (uuid "2986d9e1-f575-4721-8035-5898e66e45d4")
+    )
+    (fp_text user "%R"
+        (at 0 0 0)
+        (layer "F.Fab")
+        (uuid "7792e618-3583-4319-bf11-80cafd37bf4e")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (fp_text user "${REFERENCE}"
+        (at 0 -4 0)
+        (layer "F.SilkS")
+        (uuid "c78db71f-e374-4437-9313-18446f639d5b")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (pad "2" smd rect
+        (at 0.8 0 90)
+        (size 0.8 0.8)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "7cfcc534-17c9-47eb-bb93-3809cc3b8d29")
+    )
+    (pad "1" smd rect
+        (at -0.8 0 90)
+        (size 0.8 0.8)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "a58272df-396b-401f-a57b-242cf2235c01")
+    )
+    (model "${KIPRJMOD}/../../parts/Hubei_KENTO_Elec_Blue_light_0603/LED0603-RD-YELLOW.STEP"
+        (offset
+            (xyz 0 0 0)
+        )
+        (scale
+            (xyz 1 1 1)
+        )
+        (rotate
+            (xyz 0 0 0)
+        )
+    )
+)

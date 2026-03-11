@@ -1,0 +1,32 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  default:
+    entry: rpi-cm5.ato:RPI_CM5
+    exclude_checks: [PCB.requires_drc_check]
+    hide_designators: true
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+
+package:
+  identifier: atopile/rpi-cm5
+  repository: https://github.com/atopile/packages
+  version: 0.3.0
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: Raspberry Pi CM5 module
+  license: MIT
+dependencies:
+  - type: registry
+    identifier: atopile/usb-connectors
+    release: 0.3.2
+  - type: registry
+    identifier: atopile/rj45-connectors
+    release: 0.2.0

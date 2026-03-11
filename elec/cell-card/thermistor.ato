@@ -1,0 +1,73 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# Thermistor Channel
+# ==================
+# Single isolated thermistor emulation channel.
+# Simplified version of Cell: isolated DC-DC (24V→3.3V direct),
+# I2C isolator, MCP4725 DAC (set output), MCP3221 ADC (readback),
+# series resistor to output.
+
+import Electrical
+import ElectricPower
+import I2C
+import Resistor
+import Capacitor
+
+from "atopile/ti-iso1640x/ti-iso1640x.ato" import TI_ISO1640BDR
+from "atopile/ylptech-byyxx/ylptech-byyxx.ato" import YLPTEC_B2403S_3WR2
+from "atopile/microchip-mcp4725/microchip-mcp4725.ato" import Microchip_MCP4725_driver
+from "atopile/microchip-mcp3221/microchip-mcp3221.ato" import Microchip_MCP3221_driver
+
+module Thermistor:
+    "Single isolated thermistor emulation channel"
+
+    # === External interfaces ===
+    i2c = new I2C
+    power_24v = new ElectricPower
+    power_3v3_mcu = new ElectricPower
+    output = new Electrical
+
+    # === Internal isolated 3.3V rail ===
+    _power_3v3_iso = new ElectricPower
+
+    # ========================================
+    # 1. I2C Isolation (ISO1640)
+    # ========================================
+    isolator = new TI_ISO1640BDR
+    i2c ~ isolator.i2cs[0]
+    isolator.power_rails[0] ~ power_3v3_mcu
+    isolator.power_rails[1] ~ _power_3v3_iso
+
+    _iso_i2c = new I2C
+    isolator.i2cs[1] ~ _iso_i2c
+
+    # ========================================
+    # 2. Isolated DC-DC (24V → 3.3V direct)
+    # ========================================
+    iso_dcdc = new YLPTEC_B2403S_3WR2
+    power_24v ~ iso_dcdc.power_in
+    iso_dcdc.power_out ~ _power_3v3_iso
+
+    # ========================================
+    # 3. DAC (MCP4725) — sets output voltage
+    # ========================================
+    dac = new Microchip_MCP4725_driver
+    dac.power ~ _power_3v3_iso
+    dac.i2c ~ _iso_i2c
+
+    # ========================================
+    # 4. ADC (MCP3221) — reads back output
+    # ========================================
+    adc = new Microchip_MCP3221_driver
+    adc.power ~ _power_3v3_iso
+    adc.i2c ~ _iso_i2c
+
+    # ========================================
+    # 5. Output: DAC → series resistor → output
+    # ADC tapped at output for readback
+    # ========================================
+    output_resistor = new Resistor
+    output_resistor.resistance = 100ohm +/- 5%
+    output_resistor.package = "0402"
+    dac.output.line ~> output_resistor ~> output
+    adc.ain ~ output

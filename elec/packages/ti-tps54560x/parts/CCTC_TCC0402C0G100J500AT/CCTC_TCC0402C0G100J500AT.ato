@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component CCTC_TCC0402C0G100J500AT_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C466222", date="2026-03-10T03:53:46.346118+00:00", checksum="a71fb446d91939bf3402f4534ebb020f7f759823285310592df0307e5b53e8b0">
+
+    trait is_atomic_part<manufacturer="CCTC", partnumber="TCC0402C0G100J500AT", footprint="C0402.kicad_mod", symbol="TCC0402C0G100J500AT.kicad_sym", model="C0402_L1.0-W0.5-H0.5.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C466222", manufacturer="CCTC", partno="TCC0402C0G100J500AT">
+    trait has_designator_prefix<prefix="C">
+    trait has_datasheet<datasheet="https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2304140030_CCTC-TCC0402C0G100J500AT_C466222.pdf">
+
+    # pins
+    pin 2
+    pin 1

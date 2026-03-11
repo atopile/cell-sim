@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component PSA_FMF06FTHR010_LH_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C105362", date="2026-01-21T11:18:13.237526+00:00", checksum="5ded3737185c273690fee842db6914177d695a69f56f8cd65af362b047e3589d">
+
+    trait is_atomic_part<manufacturer="PSA", partnumber="FMF06FTHR010-LH", footprint="R1206.kicad_mod", symbol="FMF06FTHR010-LHL.kicad_sym", model="R1206_L3.2-W1.6-H0.6.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C105362", manufacturer="PSA", partno="FMF06FTHR010-LH">
+    trait has_designator_prefix<prefix="R">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_PSA-Prosperity-Dielectrics-FMF06FTHR010-LH_C105362.pdf">
+
+    # pins
+    pin 2
+    pin 1

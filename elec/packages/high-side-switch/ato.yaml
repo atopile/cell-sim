@@ -11,3 +11,13 @@ builds:
         entry: high-side-switch.ato:Example
 
 dependencies: []
+
+package:
+    identifier: atopile/high-side-switch
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Logic-level high-side power switch helper
+    license: MIT

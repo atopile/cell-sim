@@ -1,0 +1,24 @@
+(fp_lib_table
+	(version 7)
+	(lib
+		(name "Texas_Instruments_INA185A1IDRLR")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Texas_Instruments_INA185A1IDRLR")
+		(options "")
+		(descr "atopile: part lib: Texas_Instruments_INA185A1IDRLR")
+	)
+	(lib
+		(name "Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+		(options "")
+		(descr "atopile: part lib: Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+	)
+	(lib
+		(name "PSA_FMF06FTHR010_LH")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/PSA_FMF06FTHR010_LH")
+		(options "")
+		(descr "atopile: part lib: PSA_FMF06FTHR010_LH")
+	)
+)

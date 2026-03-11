@@ -1,0 +1,159 @@
+(kicad_symbol_lib
+    (version 20241229)
+    (generator "cell-sim")
+    (symbol "ISO1640BDR"
+        (property "Reference" "U"
+            (id 0)
+            (at 0 8.89 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+            )
+        )
+        (property "Value" "ISO1640BDR"
+            (id 1)
+            (at 0 -8.89 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+            )
+        )
+        (property "Footprint" "C5122339:SOIC-8_L5.0-W4.0-P1.27-LS6.0-BL"
+            (id 2)
+            (at 0 -11.43 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+            )
+        )
+        (property "Datasheet" "https://www.ti.com/lit/gpn/iso1640"
+            (id 3)
+            (at 0 -13.97 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+            )
+        )
+        (property "LCSC Part" "C5122339"
+            (id 5)
+            (at 0 -16.51 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+            )
+        )
+        (in_bom yes)
+        (on_board yes)
+        (symbol "ISO1640BDR_0_1"
+            (circle
+                (center -7.62 5.08)
+                (end -7.24 5.08)
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+            )
+            (rectangle
+                (start -8.89 6.35)
+                (end 8.89 -6.35)
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type background)
+                )
+            )
+            (pin unspecified line
+                (at -11.43 3.81 0)
+                (length 2.54)
+                (name "GND1"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "1"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at -11.43 1.27 0)
+                (length 2.54)
+                (name "VCC1"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "2"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at -11.43 -1.27 0)
+                (length 2.54)
+                (name "SDA1"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "3"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at -11.43 -3.81 0)
+                (length 2.54)
+                (name "SCL1"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "4"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at 11.43 -3.81 180)
+                (length 2.54)
+                (name "GND2"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "5"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at 11.43 -1.27 180)
+                (length 2.54)
+                (name "SCL2"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "6"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at 11.43 1.27 180)
+                (length 2.54)
+                (name "SDA2"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "7"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+            (pin unspecified line
+                (at 11.43 3.81 180)
+                (length 2.54)
+                (name "VCC2"
+                    (effects (font (size 1.27 1.27)))
+                )
+                (number "8"
+                    (effects (font (size 1.27 1.27)))
+                )
+            )
+        )
+    )
+)

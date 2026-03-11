@@ -1,0 +1,172 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+import USB2_0
+import ElectricPower
+import ElectricSignal
+import Electrical
+import Resistor
+import Capacitor
+import can_bridge_by_name
+import Fuse
+
+from "parts/BHFUSE_BSMD0805_050_15V/BHFUSE_BSMD0805_050_15V.ato" import BHFUSE_BSMD0805_050_15V_package
+from "parts/Jing_Extension_of_the_Electronic_Co_918_418K2022Y40000/Jing_Extension_of_the_Electronic_Co_918_418K2022Y40000.ato" import Jing_Extension_of_the_Electronic_Co_918_418K2022Y40000_package
+from "parts/SHOU_HAN_TYPE_C_16PIN_2MD_073/SHOU_HAN_TYPE_C_16PIN_2MD_073.ato" import SHOU_HAN_TYPE_C_16PIN_2MD_073_package
+from "parts/STMicroelectronics_USBLC6_2SC6/STMicroelectronics_USBLC6_2SC6.ato" import STMicroelectronics_USBLC6_2SC6_package
+
+module USB2_0TypeCVerticalConnector from USBTypeCConnector_driver:
+    """
+    USB 2.0 Type-C connector
+    - 5V PD compatible
+    - ESD protection
+    - Fuse [500mA(hold), 1A(trip)]
+    - Vertical USB Type-C connector
+    """
+    # specialize package
+    connector -> VerticalUSBTypeCConnector_model
+
+module USB2_0TypeCHorizontalConnector from USBTypeCConnector_driver:
+    """
+    USB 2.0 Type-C connector
+    - 5V PD compatible
+    - ESD protection
+    - Fuse [500mA(hold), 1A(trip)]
+    - Horizontal USB Type-C connector
+    """
+    # specialize package
+    connector -> HorizontalUSBTypeCConnector_model
+
+module USBTypeCConnector_driver:
+    """
+    USB 2.0 Type-C connector
+    - 5V PD compatible
+    - ESD protection
+    - Fuse [500mA(hold), 1A(trip)]
+
+    Choose between vertical or horizontal connector
+    connector -> VerticalUSBTypeCConnector_model
+    connector -> HorizontalUSBTypeCConnector_model
+    """
+
+    # external interfaces
+    usb = new USB2_0
+
+    # components
+    connector = new UniversalUSBTypeCConnector_model
+    cc_resistors = new Resistor[2]
+    for res in cc_resistors:
+        res.resistance = 5.1kohm +/- 1%
+        res.package = "R0402"
+    esd_protection = new TECH_PUBLIC_USBLC6_2SC6_model
+    fused_usb = new FusedUSB2_0
+
+    # connections
+    connector.usb ~> fused_usb ~> esd_protection ~> usb
+
+    # Connect grounds through
+    connector.power_vbus.lv ~ fused_usb.usb_in.usb_if.buspower.lv;
+    fused_usb.usb_out.usb_if.buspower.lv ~ esd_protection.usb_in.usb_if.buspower.lv;
+    esd_protection.usb_out.usb_if.buspower.lv ~ usb.usb_if.buspower.lv
+    connector.shield ~ usb.usb_if.buspower.lv
+    # esd_protection.usb_in.usb_if.buspower.lv ~ connector.power_vbus.lv`
+
+    connector.cc[0].line ~> cc_resistors[0] ~> usb.usb_if.buspower.lv
+    connector.cc[1].line ~> cc_resistors[1] ~> usb.usb_if.buspower.lv
+
+module FusedUSB2_0:
+    """Connects two USB2_0 interfaces with a fuse in between"""
+
+    usb_in = new USB2_0
+    usb_out = new USB2_0
+    fuse = new BHFUSE_BSMD0805_050_15V_model
+
+    # connections
+    usb_in.usb_if.buspower.hv ~> fuse ~> usb_out.usb_if.buspower.hv
+    usb_in.usb_if.buspower.lv ~ usb_out.usb_if.buspower.lv
+    usb_in.usb_if.d ~ usb_out.usb_if.d
+
+    trait can_bridge_by_name<input_name = "usb_in", output_name = "usb_out">
+
+module UniversalUSBTypeCConnector_model:
+    """USB type-C connector driver"""
+    # external interfaces
+    usb = new USB2_0
+    power_vbus = new ElectricPower
+    cc = new ElectricSignal[2]
+    sbu = new ElectricSignal[2]
+    shield = new Electrical
+
+    power_vbus ~ usb.usb_if.buspower
+
+module HorizontalUSBTypeCConnector_model from UniversalUSBTypeCConnector_model:
+    """Horizontal 14 pin USB type-C connector"""
+    package = new SHOU_HAN_TYPE_C_16PIN_2MD_073_package
+
+    # connections to package
+    usb.usb_if.buspower.lv ~ package.GND
+    cc[0].line ~ package.CC1
+    cc[1].line ~ package.CC2
+    sbu[0].line ~ package.SBU1
+    sbu[1].line ~ package.SBU2
+    shield ~ package.SHELL
+    usb.usb_if.d.p.line ~ package.DP1
+    usb.usb_if.d.n.line ~ package.DN1
+    usb.usb_if.d.p.line ~ package.DP2
+    usb.usb_if.d.n.line ~ package.DN2
+    power_vbus.hv ~ package.VBUS
+    power_vbus.lv ~ package.GND
+
+module VerticalUSBTypeCConnector_model from UniversalUSBTypeCConnector_model:
+    """Vertical 14 pin USB type-C connector"""
+    package = new Jing_Extension_of_the_Electronic_Co_918_418K2022Y40000_package
+
+    # connections to package
+    usb.usb_if.buspower.lv ~ package.G
+    cc[0].line ~ package.CC1
+    cc[1].line ~ package.CC2
+    shield ~ package.0
+    shield ~ package.15
+    shield ~ package.16
+    shield ~ package.17
+    usb.usb_if.d.p.line ~ package.Dpos
+    usb.usb_if.d.n.line ~ package.Dneg
+    power_vbus.hv ~ package.V
+    power_vbus.lv ~ package.G
+
+module BHFUSE_BSMD0805_050_15V_model from Fuse:
+    package = new BHFUSE_BSMD0805_050_15V_package
+
+    # parameters
+    trip_current = 1A to 1.1A
+
+    # pins
+    unnamed[0] ~ package.1
+    unnamed[1] ~ package.2
+
+module TECH_PUBLIC_USBLC6_2SC6_model:
+    package = new STMicroelectronics_USBLC6_2SC6_package
+
+    # --- External interfaces ---
+    usb_in = new USB2_0
+    usb_out = new USB2_0
+
+    # --- Package connections ---
+    usb_in.usb_if.buspower.hv ~> package.5
+    usb_in.usb_if.buspower.lv ~> package.2
+    usb_in.usb_if.d.p.line ~> package.3
+    usb_in.usb_if.d.n.line ~> package.1
+    usb_out.usb_if.d.p.line ~> package.4
+    usb_out.usb_if.d.n.line ~> package.6
+
+    usb_in ~ usb_out
+
+    trait can_bridge_by_name<input_name = "usb_in", output_name = "usb_out">
+
+    # decoupling capacitor
+    decoupling_capacitor = new Capacitor
+    decoupling_capacitor.capacitance = 100nF +/- 10%
+    assert decoupling_capacitor.max_voltage >= 10V
+    decoupling_capacitor.package = "C0402"
+    usb_in.usb_if.buspower.hv ~> decoupling_capacitor ~> usb_in.usb_if.buspower.lv
+    usb_in.usb_if.buspower.lv ~ usb_out.usb_if.buspower.lv

@@ -1,0 +1,170 @@
+(footprint "Microchip_Tech_MCP4725A0T_E_CH:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL"
+    (layer "F.Cu")
+    (descr "")
+    (version 20241229)
+    (generator "faebryk")
+    (generator_version "v5")
+    (tedit "5DC5F6A4")
+    (property "Reference" "REF**"
+        (at 0 -5.15 0)
+        (layer "F.SilkS")
+        (hide no)
+        (uuid "953339cb-76db-45c3-87ce-d5c37bb38cbd")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "Value" "SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL"
+        (at 0 5.15 0)
+        (layer "F.Fab")
+        (hide no)
+        (uuid "c613b684-e36b-4825-b2e3-724a8e1ad3be")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "checksum" "5635722fc3cf791be219881820b3610adee80e72f02f6319c915612550893676"
+        (at 0 0 0)
+        (layer "User.9")
+        (hide no)
+        (uuid "7a0ccdb7-9455-4918-8401-867386aaf7d2")
+        (effects
+            (font
+                (size 0.125 0.125)
+                (thickness 0.01875)
+            )
+            (hide yes)
+        )
+    )
+    (attr smd)
+    (fp_line
+        (start 1.54 0.89)
+        (end 1.54 -0.89)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "25f8bd8e-8062-4661-abf2-a2793232d34d")
+    )
+    (fp_line
+        (start -1.54 0.89)
+        (end -1.54 -0.89)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "4d2269bf-a129-4cd1-b672-b8c1391db8f7")
+    )
+    (fp_circle
+        (center -1.46 1.4)
+        (end -1.43 1.4)
+        (stroke
+            (width 0.06)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.Fab")
+        (uuid "ab052675-f942-4998-9d5f-ba1858f79928")
+    )
+    (fp_circle
+        (center -0.92 1.68)
+        (end -0.82 1.68)
+        (stroke
+            (width 0.2)
+            (type solid)
+        )
+        (fill no)
+        (layer "Cmts.User")
+        (uuid "580c65b6-8e9b-4fa6-8335-f698cc25d5f9")
+    )
+    (fp_circle
+        (center -1.67 1.3)
+        (end -1.52 1.3)
+        (stroke
+            (width 0.3)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.SilkS")
+        (uuid "c3ce4f91-50cd-4727-8bf2-934fade7d5be")
+    )
+    (fp_text user "%R"
+        (at 0 0 0)
+        (layer "F.Fab")
+        (uuid "8868e0d3-56a4-47a7-99ed-885bb283366f")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (fp_text user "${REFERENCE}"
+        (at 0 -5.15 0)
+        (layer "F.SilkS")
+        (uuid "953339cb-76db-45c3-87ce-d5c37bb38cbd")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (pad "1" smd rect
+        (at -0.95 1.15 0)
+        (size 0.53 1.07)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "2fd34d39-9815-4358-8974-d84bce564968")
+    )
+    (pad "2" smd rect
+        (at 0 1.15 0)
+        (size 0.53 1.07)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "2d29f7e5-c4b2-4916-abba-5c294c8eaea2")
+    )
+    (pad "3" smd rect
+        (at 0.95 1.15 0)
+        (size 0.53 1.07)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "2c250cdd-8388-4dbd-9c0c-c94a807a2d37")
+    )
+    (pad "4" smd rect
+        (at 0.95 -1.15 0)
+        (size 0.53 1.07)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "19aa7148-1269-4a1b-b043-d3ee7aedc9b6")
+    )
+    (pad "5" smd rect
+        (at 0 -1.15 0)
+        (size 0.53 1.07)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "1dffd131-c349-46f5-96bb-313def690e1d")
+    )
+    (pad "6" smd rect
+        (at -0.95 -1.15 0)
+        (size 0.53 1.07)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "e7f9cd68-6f12-44cf-aa01-0e153e2be99b")
+    )
+    (model "${KIPRJMOD}/../../parts/Microchip_Tech_MCP4725A0T_E_CH/SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step"
+        (offset
+            (xyz 0 0 0)
+        )
+        (scale
+            (xyz 1 1 1)
+        )
+        (rotate
+            (xyz 0 0 270)
+        )
+    )
+)

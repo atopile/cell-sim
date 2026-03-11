@@ -1,0 +1,41 @@
+import Electrical
+import Resistor
+import Capacitor
+
+
+module VoltageDividerToGround:
+    "Simple two-resistor divider from input to ground."
+
+    input = new Electrical
+    ground = new Electrical
+    output = new Electrical
+
+    r_top = new Resistor
+    r_bottom = new Resistor
+
+    r_top.package = "0402"
+    r_bottom.package = "0402"
+
+    input ~> r_top ~> r_bottom ~> ground
+    r_top.unnamed[1] ~ output
+
+
+module FilteredVoltageDividerToGround:
+    "Divider tap followed by a series RC low-pass to the ADC input."
+
+    input = new Electrical
+    ground = new Electrical
+    output = new Electrical
+
+    divider = new VoltageDividerToGround
+    r_filter = new Resistor
+    c_filter = new Capacitor
+
+    r_filter.package = "0402"
+    c_filter.package = "0402"
+
+    input ~ divider.input
+    ground ~ divider.ground
+
+    divider.output ~> r_filter ~> c_filter ~> ground
+    r_filter.unnamed[1] ~ output

@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component TDPOWER_TDK20_24S24WH_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C3033163", date="2025-06-03T19:40:58.382933+00:00", checksum="bbe0a8e844ef6e1d0f8705d09eb9ba39aa48fdb722a8e408d30215c9c0fe7432">
+
+    trait is_atomic_part<manufacturer="TDPOWER", partnumber="TDK20-24S24WH", footprint="PWRM-TH_TDPOWER_TDK20-XXSXXWH.kicad_mod", symbol="TDK20-24S24WH.kicad_sym", model="PWRM-TH_TDPOWER_TDK20-XXSXXWH.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C3033163", manufacturer="TDPOWER", partno="TDK20-24S24WH">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal CNT ~ pin 3
+    signal NP ~ pin 5
+    signal VINneg ~ pin 2
+    signal VINpos ~ pin 1
+    signal VOneg ~ pin 4
+    signal VOpos ~ pin 6

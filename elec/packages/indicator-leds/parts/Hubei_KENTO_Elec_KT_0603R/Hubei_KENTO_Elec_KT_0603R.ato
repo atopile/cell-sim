@@ -1,0 +1,31 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+import LED
+
+component Hubei_KENTO_Elec_KT_0603R_package:
+    """0603"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system = "ato_part", source = "easyeda:C2286", date = "2025-06-03T19:14:15.484739+00:00", checksum = "17d20f6ac62f00005ffb5131660f8b8834f9fb52bb252c4de3721ac81ae29927">
+
+    trait is_atomic_part<manufacturer = "Hubei KENTO Elec", partnumber = "KT-0603R", footprint = "LED0603-RD.kicad_mod", symbol = "KT-0603R.kicad_sym", model = "LED0603-RD-YELLOW.STEP">
+    trait has_part_picked::by_supplier<supplier_id = "lcsc", supplier_partno = "C2286", manufacturer = "Hubei KENTO Elec", partno = "KT-0603R">
+    trait has_designator_prefix<prefix = "LED">
+
+    # pins
+    signal A ~ pin 2
+    signal K ~ pin 1
+
+module Hubei_KENTO_Elec_KT_0603R_driver from LED:
+    """Driver for the Hubei KENTO Elec KT-0603R LED"""
+
+    package = new Hubei_KENTO_Elec_KT_0603R_package
+
+    diode.anode ~ package.A
+    diode.cathode ~ package.K
+    diode.forward_voltage = 2V +/- 10%
+    diode.max_current = 20mA +/- 20%

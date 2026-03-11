@@ -8,6 +8,7 @@ import SPI
 import Resistor
 import Capacitor
 import DifferentialPair
+import ElectricSignal
 
 from "parts/Texas_Instruments_ADS131M04IPWR/Texas_Instruments_ADS131M04IPWR.ato" import Texas_Instruments_ADS131M04IPWR_package
 
@@ -198,3 +199,38 @@ module TI_ADS131M04:
     cap_bypass.capacitance = 1uF +/- 20%
     cap_bypass.package = "0402"
     package.CAP ~> cap_bypass ~> power_analog.lv
+
+
+module ADS131M04_driver:
+    """
+    Compatibility wrapper preserving the original CellSim-side ADS131M04 interface.
+    """
+
+    power = new ElectricPower
+    power.required = True
+
+    spi = new SPI
+    spi_cs = new ElectricLogic
+    ain = new ElectricSignal[4]
+    drdy = new ElectricLogic
+
+    core = new TI_ADS131M04
+
+    power ~ core.power_analog
+    power ~ core.power_digital
+
+    spi ~ core.spi
+    spi_cs ~ core.cs
+    drdy ~ core.drdy
+
+    ain[0].line ~ core.input[0].p.line
+    ain[1].line ~ core.input[1].p.line
+    ain[2].line ~ core.input[2].p.line
+    ain[3].line ~ core.input[3].p.line
+
+    core.input[0].n.line ~ power.lv
+    core.input[1].n.line ~ power.lv
+    core.input[2].n.line ~ power.lv
+    core.input[3].n.line ~ power.lv
+
+    core.clkin ~ power.lv

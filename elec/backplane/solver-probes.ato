@@ -1,0 +1,120 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+import ElectricPower
+import ElectricLogic
+import I2C
+import UART_Base
+
+from "atopile/ti-tpsm84209/ti-tpsm84209.ato" import TI_TPSM84209
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+from "atopile/ti-ina228/ti-ina228.ato" import TI_INA228
+from "atopile/microchip-mcp23017/microchip-mcp23017.ato" import Microchip_MCP23017
+from "atopile/ti-ina3221/ti-ina3221.ato" import TI_INA3221
+from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
+from "atopile/ti-cd74hc4067sm/ti-cd74hc4067sm.ato" import TI_CD74HC4067SM
+from "atopile/relays/relays.ato" import LogicLevelRelaySPSTNO10A24V
+
+
+module BackplanePowerProbe:
+    power_24v = new ElectricPower
+    power_5v = new ElectricPower
+    power_3v3 = new ElectricPower
+    i2c = new I2C
+
+    bus_monitor = new TI_INA228
+    buck = new TI_TPSM84209
+    ldo = new LDK220M_R
+
+    bus_monitor.power ~ power_3v3
+    bus_monitor.i2c ~ i2c
+    bus_monitor.power_in ~ power_24v
+    bus_monitor.power_out.lv ~ power_24v.lv
+    bus_monitor.power_out ~> buck ~> power_5v
+    power_5v ~> ldo ~> power_3v3
+
+
+module SlotManagerProbe:
+    i2c = new I2C
+    power_24v_bus = new ElectricPower
+    power_24v_coil = new ElectricPower
+    power_3v3 = new ElectricPower
+    power_slot = new ElectricPower[3]
+
+    gpio = new Microchip_MCP23017
+    mux = new TI_TCA9548A
+    ina = new TI_INA3221
+    relays = new LogicLevelRelaySPSTNO10A24V[3]
+
+    gpio.power ~ power_3v3
+    gpio.i2c ~ i2c
+    mux.power ~ power_3v3
+    mux.i2c ~ i2c
+    ina.power ~ power_3v3
+    ina.i2c ~ mux.i2cs[0]
+
+    for relay in relays:
+        relay.coil_power ~ power_24v_coil
+        relay.enable.reference ~ power_3v3
+        relay.relay.switch_no.common ~ power_24v_bus.hv
+
+
+module SlotMuxProbe:
+    power_3v3 = new ElectricPower
+    uart_host = new UART_Base
+    nrst_host = new ElectricLogic
+    boot0_host = new ElectricLogic
+    sel = new ElectricLogic[4]
+    bank_sel = new ElectricLogic
+
+    mux_uart_tx = new TI_CD74HC4067SM[2]
+    mux_uart_rx = new TI_CD74HC4067SM[2]
+    mux_nrst = new TI_CD74HC4067SM[2]
+    mux_boot0 = new TI_CD74HC4067SM[2]
+
+    for mux in mux_uart_tx:
+        mux.power ~ power_3v3
+    for mux in mux_uart_rx:
+        mux.power ~ power_3v3
+    for mux in mux_nrst:
+        mux.power ~ power_3v3
+    for mux in mux_boot0:
+        mux.power ~ power_3v3
+
+    for mux in mux_uart_tx:
+        mux.selects[0] ~ sel[0]
+        mux.selects[1] ~ sel[1]
+        mux.selects[2] ~ sel[2]
+        mux.selects[3] ~ sel[3]
+        mux.common.reference ~ power_3v3
+    for mux in mux_uart_rx:
+        mux.selects[0] ~ sel[0]
+        mux.selects[1] ~ sel[1]
+        mux.selects[2] ~ sel[2]
+        mux.selects[3] ~ sel[3]
+        mux.common.reference ~ power_3v3
+    for mux in mux_nrst:
+        mux.selects[0] ~ sel[0]
+        mux.selects[1] ~ sel[1]
+        mux.selects[2] ~ sel[2]
+        mux.selects[3] ~ sel[3]
+        mux.common.reference ~ power_3v3
+    for mux in mux_boot0:
+        mux.selects[0] ~ sel[0]
+        mux.selects[1] ~ sel[1]
+        mux.selects[2] ~ sel[2]
+        mux.selects[3] ~ sel[3]
+        mux.common.reference ~ power_3v3
+
+    mux_uart_tx[1].enable ~ bank_sel
+    mux_uart_rx[1].enable ~ bank_sel
+    mux_nrst[1].enable ~ bank_sel
+    mux_boot0[1].enable ~ bank_sel
+
+    uart_host.tx.line ~ mux_uart_tx[0].common.line
+    uart_host.tx.line ~ mux_uart_tx[1].common.line
+    uart_host.rx.line ~ mux_uart_rx[0].common.line
+    uart_host.rx.line ~ mux_uart_rx[1].common.line
+    nrst_host.line ~ mux_nrst[0].common.line
+    nrst_host.line ~ mux_nrst[1].common.line
+    boot0_host.line ~ mux_boot0[0].common.line
+    boot0_host.line ~ mux_boot0[1].common.line

@@ -1,0 +1,32 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  default:
+    entry: microchip-lan8742a.ato:Microchip_LAN8742A
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+
+dependencies:
+  - type: file
+    identifier: atopile/network-interfaces
+    path: /home/np/projects/cell-sim/elec/packages/network-interfaces
+
+package:
+  identifier: atopile/microchip-lan8742a
+  repository: https://github.com/atopile/packages
+  homepage: 
+    https://github.com/atopile/packages/blob/main/packages/microchip-lan8742a/README.md
+  version: 0.3.0
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: Microchip; LAN8742A; 10/100 PHY; RMII; Ethernet; MCU; WoL
+  license: MIT

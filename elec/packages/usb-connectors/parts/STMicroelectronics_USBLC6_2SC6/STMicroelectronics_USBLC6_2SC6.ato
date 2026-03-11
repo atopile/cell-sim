@@ -1,0 +1,26 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component STMicroelectronics_USBLC6_2SC6_package:
+    """USBLC6-2SC6"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C7519", date="2026-01-19T06:30:08.355376+00:00", checksum="bf8f53fe018042f228371747d39ea1cf74a033d57262eee7d6e37a10018f4e48">
+
+    trait is_atomic_part<manufacturer="STMicroelectronics", partnumber="USBLC6-2SC6", footprint="SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL.kicad_mod", symbol="USBLC6-2SC6.kicad_sym", model="SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C7519", manufacturer="STMicroelectronics", partno="USBLC6-2SC6">
+    trait has_designator_prefix<prefix="D">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2410121836_STMicroelectronics-USBLC6-2SC6_C7519.pdf">
+
+    # pins
+    pin 1
+    pin 2
+    pin 3
+    pin 4
+    pin 5
+    pin 6

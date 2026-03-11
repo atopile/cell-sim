@@ -1,0 +1,99 @@
+#pragma experiment("FOR_LOOP")
+
+import ElectricPower
+import ElectricLogic
+import ElectricSignal
+import Capacitor
+import Resistor
+
+from "parts/Texas_Instruments_CD74HC4067SM96/Texas_Instruments_CD74HC4067SM96.ato" import Texas_Instruments_CD74HC4067SM96_package
+
+module TI_CD74HC4067SM:
+    """
+    CD74HC4067SM96 multiplexer with 16 inputs and 4 select lines
+    E is the enable pin.
+    E is low: the multiplexer is enabled and the selected input is passed to the output.
+    E is high: the multiplexer is disabled and the output is high-impedance.
+    A pulldown resistor by default enables the multiplexer.
+
+    Truth table:
+    S3 S2 S1 S0 | Selected Input
+    0 0 0 0 | I0
+    0 0 0 1 | I1
+    0 0 1 0 | I2
+    0 0 1 1 | I3
+    0 1 0 0 | I4
+    0 1 0 1 | I5
+    0 1 1 0 | I6
+    0 1 1 1 | I7
+    1 0 0 0 | I8
+    1 0 0 1 | I9
+    1 0 1 0 | I10
+    1 0 1 1 | I11
+    1 1 0 0 | I12
+    1 1 0 1 | I13
+    1 1 1 0 | I14
+    1 1 1 1 | I15
+    """
+    package = new Texas_Instruments_CD74HC4067SM96_package
+
+    power = new ElectricPower
+    power.required = True
+    assert power.voltage within 2V to 6V
+
+    enable = new ElectricLogic
+    enable.reference ~ power
+
+    selects = new ElectricLogic[4]
+    for select in selects:
+        select.required = True
+        select.reference ~ power
+
+    common = new ElectricSignal
+    common.required = True
+    # assert common.reference.voltage <= power.voltage.max
+
+    ios = new ElectricSignal[16]
+    for io in ios:
+        io.reference ~ common.reference
+        io.reference.lv ~ power.lv
+
+    decoupling_capacitor = new Capacitor
+    decoupling_capacitor.capacitance = 100nF +/- 20%
+    decoupling_capacitor.package = "0402"
+    power.hv ~> decoupling_capacitor ~> power.lv
+
+    pulldown_resistor = new Resistor
+    pulldown_resistor.resistance = 10kohm +/- 5%
+    pulldown_resistor.package = "0402"
+    power.lv ~> pulldown_resistor ~> enable.line
+
+    # package connections
+    power.hv ~ package.VCC
+    power.lv ~ package.GND
+
+    enable.line ~ package.nE
+
+    selects[0].line ~ package.S0
+    selects[1].line ~ package.S1
+    selects[2].line ~ package.S2
+    selects[3].line ~ package.S3
+
+    common.line ~ package.COMMONINOUT_OUTPUT
+
+    ios[0].line ~ package.I0
+    ios[1].line ~ package.I1
+    ios[2].line ~ package.I2
+    ios[3].line ~ package.I3
+    ios[4].line ~ package.I4
+    ios[5].line ~ package.I5
+    ios[6].line ~ package.I6
+    ios[7].line ~ package.I7
+    ios[8].line ~ package.I8
+    ios[9].line ~ package.I9
+    ios[10].line ~ package.I10
+    ios[11].line ~ package.I11
+    ios[12].line ~ package.I12
+    ios[13].line ~ package.I13
+    ios[14].line ~ package.I14
+    ios[15].line ~ package.I15

@@ -1,0 +1,30 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: ./
+  layout: ./layouts
+
+builds:
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  VerticalButton:
+    entry: buttons.ato:VerticalButton
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  HorizontalButton:
+    entry: buttons.ato:HorizontalButton
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+
+package:
+  identifier: atopile/buttons
+  repository: https://github.com/atopile/packages
+  homepage: https://github.com/atopile/packages/blob/main/packages/buttons/README.md
+  version: "0.4.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: "Tags: Buttons; Momentary Switch; Bridgeable; Vertical; Horizontal; Alps Alpine; SKRPACE010; SKTDLDE010; Simple"
+  license: MIT

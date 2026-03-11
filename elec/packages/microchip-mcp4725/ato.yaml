@@ -1,0 +1,32 @@
+requires-atopile: ^0.14.0
+paths:
+  src: ./
+  layout: ./layouts
+builds:
+  default:
+    entry: microchip-mcp4725.ato:Microchip_MCP4725_driver
+    hide_designators: true
+    exclude_checks:
+    - I2C.requires_pulls
+    - PCB.requires_drc_check
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks:
+    - I2C.requires_pulls
+    - PCB.requires_drc_check
+  test:
+    entry: microchip-mcp4725.ato:Test
+    hide_designators: true
+    exclude_checks:
+    - I2C.requires_pulls
+    - PCB.requires_drc_check
+package:
+  identifier: atopile/microchip-mcp4725
+  repository: https://github.com/atopile/packages
+  version: 0.2.0
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: Microchip MCP4725 DAC 12-Bit I2C
+  license: MIT

@@ -1,0 +1,48 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+
+import ElectricPower
+import I2C
+import has_part_removed
+
+from "atopile/ti-ina3221/ti-ina3221.ato" import TI_INA3221
+
+module Sink:
+    """
+    mock sink device for testing
+    """
+    power = new ElectricPower
+    trait has_part_removed
+
+module Usage:
+    """
+    Minimal usage example for TI INA3221 triple-channel current and power monitor.
+    Shows how to connect power supply, I2C bus, and three monitored power rails.
+    """
+
+    # Create current monitor instance
+    current_monitor = new TI_INA3221
+    sinks = new Sink[3]
+
+    # Main power supply for the IC (3.3V or 5V)
+    power_3v3 = new ElectricPower
+    power_3v3.voltage = 3.3V +/- 5%
+
+    # External I2C bus
+    i2c_bus = new I2C
+
+    # Example monitored power rails
+    power_5v = new ElectricPower
+    power_5v.voltage = 5V +/- 5%
+
+    # Connect interfaces
+    power_3v3 ~ current_monitor.power
+    i2c_bus ~ current_monitor.i2c
+
+    # Connect monitored channels (bridgeable)
+    power_5v ~> current_monitor.channels[0] ~> sinks[0].power
+    power_5v ~> current_monitor.channels[1] ~> sinks[1].power
+    power_5v ~> current_monitor.channels[2] ~> sinks[2].power
+
+    # Set I2C address (default 0x40 with A0 pin low)
+    current_monitor.i2c.address = 0x40

@@ -1,0 +1,85 @@
+# HX1198NLT — 10/100BASE-TX Single Port SMD Ethernet Transformer
+# Provides galvanic isolation between PHY and line (cable/backplane)
+
+import Ethernet
+import ElectricPower
+import Electrical
+import Capacitor
+import Resistor
+
+from "parts/Pulse_Elec_HX1198NLT/Pulse_Elec_HX1198NLT.ato" import Pulse_Elec_HX1198NLT_package
+
+
+module HX1198_driver:
+    """
+    Pulse Electronics HX1198NLT — 10/100BASE-TX Ethernet magnetics.
+    - Single port SMD transformer
+    - PHY side: TDpos/TDneg (TX), RDpos/RDneg (RX)
+    - Line side: TXpos/TXneg (TX), RXpos/RXneg (RX)
+    - Center taps: TCT (TX), RTC (RX) — bias from PHY supply
+    - Common mode termination: CMT (pins 10, 15)
+    """
+
+    # --- External interfaces ---
+    # PHY side (card-isolated domain)
+    phy_ethernet = new Ethernet
+    phy_txp = new Electrical
+    phy_txn = new Electrical
+    phy_rxp = new Electrical
+    phy_rxn = new Electrical
+
+    # Line side (backplane / cable)
+    line_ethernet = new Ethernet
+    line_txp = new Electrical
+    line_txn = new Electrical
+    line_rxp = new Electrical
+    line_rxn = new Electrical
+
+    # PHY power supply (for center tap biasing)
+    phy_power = new ElectricPower
+
+    # --- Package ---
+    package = new Pulse_Elec_HX1198NLT_package
+
+    # --- PHY side connections ---
+    phy_ethernet.pairs[1].p.line ~ package.TDpos
+    phy_ethernet.pairs[1].n.line ~ package.TDneg
+    phy_ethernet.pairs[0].p.line ~ package.RDpos
+    phy_ethernet.pairs[0].n.line ~ package.RDneg
+
+    phy_txp ~ phy_ethernet.pairs[1].p.line
+    phy_txn ~ phy_ethernet.pairs[1].n.line
+    phy_rxp ~ phy_ethernet.pairs[0].p.line
+    phy_rxn ~ phy_ethernet.pairs[0].n.line
+
+    # --- Line side connections ---
+    line_ethernet.pairs[1].p.line ~ package.TXpos
+    line_ethernet.pairs[1].n.line ~ package.TXneg
+    line_ethernet.pairs[0].p.line ~ package.RXpos
+    line_ethernet.pairs[0].n.line ~ package.RXneg
+
+    line_txp ~ line_ethernet.pairs[1].p.line
+    line_txn ~ line_ethernet.pairs[1].n.line
+    line_rxp ~ line_ethernet.pairs[0].p.line
+    line_rxn ~ line_ethernet.pairs[0].n.line
+
+    # --- Center tap biasing ---
+    # TX center tap: connect to PHY VDD through 49.9 ohm termination
+    ct_tx_res = new Resistor
+    ct_tx_res.resistance = 49.9ohm +/- 1%
+    ct_tx_res.package = "0402"
+    package.TCT ~> ct_tx_res ~> phy_power.hv
+
+    # RX center tap: connect to PHY VDD through 49.9 ohm termination
+    ct_rx_res = new Resistor
+    ct_rx_res.resistance = 49.9ohm +/- 1%
+    ct_rx_res.package = "0402"
+    package.RTC ~> ct_rx_res ~> phy_power.hv
+
+    # --- Common mode termination ---
+    # CMT pins (10, 15) already tied together in package
+    # Connect through capacitor to ground
+    cmt_cap = new Capacitor
+    cmt_cap.capacitance = 100nF +/- 20%
+    cmt_cap.package = "0402"
+    package.CMT ~> cmt_cap ~> phy_power.lv

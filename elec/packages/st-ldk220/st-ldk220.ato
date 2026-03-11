@@ -1,0 +1,88 @@
+#pragma experiment("TRAITS")
+#pragma experiment("MODULE_TEMPLATING")
+import ElectricLogic
+import ElectricPower
+import has_single_electric_reference
+import can_bridge_by_name
+
+import Capacitor
+import Resistor
+from "atopile/cellsim-regulators/cellsim-regulators.ato" import AdjustableLDO
+from "parts/STMicroelectronics_LDK220M_R/STMicroelectronics_LDK220M_R.ato" import STMicroelectronics_LDK220M_R_package
+
+
+module LDK220M_R from AdjustableLDO:
+    """Adjustable LDO with 1.185V reference voltage,
+    max 200mA output current and max 13.2V input voltage"""
+
+    # LDO parameters
+    dropout_voltage = 100mV to 350mV
+    assert power_in.voltage within 2.5V to 13.2V
+    assert power_out.voltage within 1.2V to 12V
+    # assert power_out.voltage within power_in.voltage - dropout_voltage # TODO: fix
+    assert reference_voltage within 1.185V +/- 2%
+
+    # Package
+    package = new STMicroelectronics_LDK220M_R_package
+    power_in.hv ~ package.IN
+    power_in.lv ~ package.GND
+    power_in.hv ~ package.EN
+    power_out.hv ~ package.OUT
+
+    # input cap
+    input_decoupling_capacitor = new Capacitor
+    power_in ~ input_decoupling_capacitor.power
+    input_decoupling_capacitor.capacitance = 1uF +/- 20%
+    input_decoupling_capacitor.package = "0402"
+
+    # output cap
+    output_decoupling_capacitor = new Capacitor
+    power_out ~ output_decoupling_capacitor.power
+    output_decoupling_capacitor.capacitance = 1uF +/- 20%
+    output_decoupling_capacitor.package = "0402"
+
+    # voltage divider
+    # Base class (AdjustableLDO) already connects: power_out ~ feedback_divider.ref_in
+    feedback_divider.ref_out.hv ~ package.ADJ_NC
+    feedback_divider.chain.resistors[0].package = "0402"
+    feedback_divider.chain.resistors[1].package = "0402"
+
+    trait has_single_electric_reference<ground_only=True>
+
+
+module LDK220M_R_3V3:
+    """Fixed 3.3V wrapper for board rails where the feedback ratio is not runtime-adjusted."""
+
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+
+    package = new STMicroelectronics_LDK220M_R_package
+    power_in.hv ~ package.IN
+    power_in.lv ~ package.GND
+    power_in.hv ~ package.EN
+    power_out.hv ~ package.OUT
+
+    trait can_bridge_by_name<input_name="power_in", output_name="power_out">
+
+    input_decoupling_capacitor = new Capacitor
+    power_in ~ input_decoupling_capacitor.power
+    input_decoupling_capacitor.capacitance = 1uF +/- 20%
+    input_decoupling_capacitor.package = "0402"
+
+    output_decoupling_capacitor = new Capacitor
+    power_out ~ output_decoupling_capacitor.power
+    output_decoupling_capacitor.capacitance = 1uF +/- 20%
+    output_decoupling_capacitor.package = "0402"
+
+    r_top = new Resistor
+    r_top.resistance = 18kohm +/- 1%
+    r_top.package = "0402"
+
+    r_bottom = new Resistor
+    r_bottom.resistance = 10kohm +/- 1%
+    r_bottom.package = "0402"
+
+    power_out.hv ~> r_top ~> package.ADJ_NC
+    package.ADJ_NC ~> r_bottom ~> power_out.lv
+
+    trait has_single_electric_reference<ground_only=True>

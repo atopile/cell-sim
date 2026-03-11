@@ -1,0 +1,25 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: "."
+  layout: ./layouts
+
+builds:
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  default:
+    entry: mounting-holes.ato:MountingHole_3_2_M3_Pad
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+
+package:
+  identifier: atopile/mounting-holes
+  repository: https://github.com/atopile/packages
+  version: "0.2.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.com
+  summary: Various mounting holes
+  license: MIT

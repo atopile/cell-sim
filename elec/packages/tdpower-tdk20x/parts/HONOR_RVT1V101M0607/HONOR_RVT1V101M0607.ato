@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component HONOR_RVT1V101M0607_package:
+    """100uF 35V"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C3339", date="2025-05-29T09:50:39.318856+00:00", checksum="a0aabd9c8f19b26941b1500bb7405b4a916480cda52e4e2b129c3671733ccdb5">
+
+    trait is_atomic_part<manufacturer="HONOR", partnumber="RVT1V101M0607", footprint="CAP-SMD_BD6.3-L6.6-W6.6-FD.kicad_mod", symbol="RVT1V101M0607-C3339.kicad_sym", model="CAP-SMD_BD6.3-L6.6-W6.6-FD.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C3339", manufacturer="HONOR", partno="RVT1V101M0607">
+    trait has_designator_prefix<prefix="C">
+
+    # pins
+    pin 1
+    pin 2

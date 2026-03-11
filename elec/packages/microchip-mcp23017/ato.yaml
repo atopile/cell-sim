@@ -1,0 +1,25 @@
+requires-atopile: ^0.14.0
+paths:
+  src: ./
+  layout: ./layouts
+builds:
+  default:
+    entry: microchip-mcp23017.ato:Microchip_MCP23017
+    hide_designators: true
+    exclude_checks:
+    - PCB.requires_drc_check
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks:
+    - PCB.requires_drc_check
+package:
+  identifier: atopile/microchip-mcp23017
+  repository: https://github.com/atopile/packages
+  homepage: https://github.com/atopile/packages/blob/main/packages/microchip-mcp23017/README.md
+  version: 0.2.0
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: Microchip; MCP23017; GPIO Expander; I2C; IC; QWIIC; STEMMA; 5346
+  license: MIT

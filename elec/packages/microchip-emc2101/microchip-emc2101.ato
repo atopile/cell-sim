@@ -1,0 +1,106 @@
+#pragma experiment("TRAITS")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+
+import Capacitor
+import ElectricLogic
+import ElectricPower
+import I2C
+import Resistor
+from "parts/Microchip_Tech_EMC2101_R_ACZL_TR/Microchip_Tech_EMC2101_R_ACZL_TR.ato" import Microchip_Tech_EMC2101_R_ACZL_TR_package
+
+module Microchip_EMC2101:
+    """
+    Driver for Microchip EMC2101 temperature sensor and fan controller.
+
+    The EMC2101 is an SMBus-compliant temperature monitor and PWM fan controller
+    with support for external temperature sensing and automatic fan speed control.
+
+    Features:
+    - Internal temperature sensor (±2°C accuracy)
+    - External temperature sensing via remote diode (DP/DN pins)
+    - PWM fan control with tachometer feedback
+    - I2C/SMBus interface (3.3V)
+    - Alert output for thermal limits (shared with tachometer)
+    """
+
+    # --- Package ---
+    package = new Microchip_Tech_EMC2101_R_ACZL_TR_package
+
+    # --- External interfaces ---
+    power = new ElectricPower
+    """
+    Primary power supply for the EMC2101 (3.0V to 3.6V typical)
+    """
+    power.required = True
+    assert power.voltage within 3.0V to 3.6V
+
+    i2c = new I2C
+    """
+    I²C bus interface for communication (7-bit address 0x4C default)
+    """
+    i2c.required = True
+    i2c.has_single_electric_reference.reference ~ power
+
+    # Fan control interface
+    pwm_out = new ElectricLogic
+    """
+    PWM output for fan speed control
+    """
+    pwm_out.required = True
+    pwm_out.reference ~ power
+
+    # Combined alert and tachometer interface
+    alert_tach = new ElectricLogic
+    """
+    Combined alert output and tachometer input (nALERT_TACH pin)
+    """
+    alert_tach.reference ~ power
+
+    # External temperature sensing
+    temp_diode_p = new ElectricLogic
+    """
+    Positive terminal of external temperature sensing diode (DP pin)
+    """
+    temp_diode_p.reference ~ power
+
+    temp_diode_n = new ElectricLogic
+    """
+    Negative terminal of external temperature sensing diode (DN pin)
+    """
+    temp_diode_n.reference ~ power
+
+    # --- Package connections ---
+    # Power connections
+    package.VDD ~ power.hv
+    package.GND ~ power.lv
+
+    # I2C connections
+    package.SMCLK ~ i2c.scl.line
+    package.SMDATA ~ i2c.sda.line
+
+    # Fan control connection
+    package.FAN ~ pwm_out.line
+
+    # Alert/Tachometer connection
+    package.nALERT_TACH ~ alert_tach.line
+
+    # External temperature diode connections
+    package.DP ~ temp_diode_p.line
+    package.DN ~ temp_diode_n.line
+
+    # --- Power supply decoupling ---
+    # Power supply decoupling capacitor
+    power_cap = new Capacitor
+    power_cap.capacitance = 100nF +/- 20%
+    power_cap.package = "0402"
+    power.hv ~> power_cap ~> power.lv
+
+    # --- I²C pull-up resistors ---
+    # I2C pull-up resistors (optional - may be provided externally)
+    i2c_pullups = new Resistor[2]
+    for r in i2c_pullups:
+        r.resistance = 10kohm +/- 5%
+        r.package = "0402"
+    i2c.scl.line ~> i2c_pullups[0] ~> i2c.scl.reference.hv
+    i2c.sda.line ~> i2c_pullups[1] ~> i2c.sda.reference.hv

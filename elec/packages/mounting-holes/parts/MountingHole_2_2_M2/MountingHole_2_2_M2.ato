@@ -1,0 +1,19 @@
+#pragma experiment("TRAITS")
+import has_part_removed
+import is_atomic_part
+import is_auto_generated
+import has_designator_prefix
+
+component MountingHole_2_2_M2_package:
+    """M2 mounting hole with  pad configuration"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="mounting_hole_generator", date="2026-01-14T04:03:47.336496+00:00", checksum="a2be538b3737d9dfc3d31fe7b7adaf317151a294ca1ff8d720318c686a942ae8">
+
+    trait is_atomic_part<manufacturer="Atopile", partnumber="", footprint="MountingHole_2.2_M2.kicad_mod", symbol="MountingHole_2.2_M2.kicad_sym">
+    trait has_part_removed
+    trait has_designator_prefix<prefix="H">
+
+    # pins
+    signal contact ~ pin 1

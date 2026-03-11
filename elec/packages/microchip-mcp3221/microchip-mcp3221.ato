@@ -1,0 +1,46 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+import Electrical
+import ElectricPower
+import I2C
+import Capacitor
+
+from "parts/Microchip_Tech_MCP3221A5T_I_OT/Microchip_Tech_MCP3221A5T_I_OT.ato" import Microchip_Tech_MCP3221A5T_I_OT_package
+
+module Microchip_MCP3221_driver:
+    """
+    Microchip MCP3221 12-bit SAR ADC
+    - Single-channel, single-ended input
+    - I2C interface (fixed address 0x4D for A5 variant)
+    - 2.7V to 5.5V supply
+    - SOT-23-5 package
+    """
+    package = new Microchip_Tech_MCP3221A5T_I_OT_package
+
+    # Power
+    power = new ElectricPower
+    power.hv ~ package.VDD
+    power.lv ~ package.VSS
+    assert power.voltage within 2.7V to 5.5V
+
+    # Decoupling capacitor
+    decoupling_capacitor = new Capacitor
+    decoupling_capacitor.capacitance = 100nF +/- 20%
+    decoupling_capacitor.package = "0402"
+    power.hv ~> decoupling_capacitor ~> power.lv
+
+    # I2C
+    i2c = new I2C
+    i2c.scl.line ~ package.SCL
+    i2c.sda.line ~ package.SDA
+
+    # Set required interfaces
+    power.required = True
+    i2c.required = True
+
+    # Analog input
+    ain = new Electrical
+    ain ~ package.AIN
+
+    # Fixed I2C address for A5 variant
+    i2c.address.default = 0x4D

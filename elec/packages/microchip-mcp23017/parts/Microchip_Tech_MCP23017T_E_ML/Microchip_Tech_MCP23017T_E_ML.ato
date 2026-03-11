@@ -1,0 +1,43 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Microchip_Tech_MCP23017T_E_ML_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C629439", date="2025-07-09T02:22:28.566680+00:00", checksum="8ceed498cf21ccd398f93642b3653893c8593514a366f05ba73f5553b5dfe412">
+
+    trait is_atomic_part<manufacturer="Microchip Tech", partnumber="MCP23017T-E/ML", footprint="QFN-28_L6.0-W6.0-P0.65-BL-EP3.7.kicad_mod", symbol="MCP23017T-E_ML.kicad_sym", model="QFN-28_L6.0-W6.0-P0.65-BL-EP3.7.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C629439", manufacturer="Microchip Tech", partno="MCP23017T-E/ML">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal A0 ~ pin 11
+    signal A1 ~ pin 12
+    signal A2 ~ pin 13
+    signal EP ~ pin 29
+    signal GPA0 ~ pin 17
+    signal GPA1 ~ pin 18
+    signal GPA2 ~ pin 19
+    signal GPA3 ~ pin 20
+    signal GPA4 ~ pin 21
+    signal GPA5 ~ pin 22
+    signal GPA6 ~ pin 23
+    signal GPA7 ~ pin 24
+    signal GPB0 ~ pin 25
+    signal GPB1 ~ pin 26
+    signal GPB2 ~ pin 27
+    signal GPB3 ~ pin 28
+    signal GPB4 ~ pin 1
+    signal GPB5 ~ pin 2
+    signal GPB6 ~ pin 3
+    signal GPB7 ~ pin 4
+    signal INTA ~ pin 16
+    signal INTB ~ pin 15
+    signal SCK ~ pin 8
+    signal SDA ~ pin 9
+    signal VDD ~ pin 5
+    signal VSS ~ pin 6
+    signal nRESET ~ pin 14

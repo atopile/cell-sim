@@ -1,0 +1,31 @@
+# TDPOWER TDK20 20W Isolated DC-DC Converter
+
+## Usage
+
+```ato
+#pragma experiment("BRIDGE_CONNECT")
+
+import ElectricPower
+from "atopile/tdpower-tdk20x/tdpower-tdk20x.ato" import TDPOWER_TDK20_driver
+
+module Usage:
+    # Create converter (default 24V in, 24V out)
+    converter = new TDPOWER_TDK20_driver
+
+    # Create power rails
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+
+    # connect power to converter
+    power_in ~ converter.power_in
+    converter.power_out ~ power_out
+
+```
+
+## Contributing
+
+Contributions to this package are welcome via pull requests on the GitHub repository.
+
+## License
+
+This atopile package is provided under the [MIT License](https://opensource.org/license/mit/).

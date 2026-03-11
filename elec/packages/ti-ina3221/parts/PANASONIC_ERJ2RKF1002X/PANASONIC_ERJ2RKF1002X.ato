@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet_defined
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component PANASONIC_ERJ2RKF1002X_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C191123", date="2025-07-10T00:48:33.566520+00:00", checksum="8abfa6c3af4e67791a132e05804dd5ccb15ad35ed35c41831e7819cb21c8a355">
+
+    trait is_atomic_part<manufacturer="PANASONIC", partnumber="ERJ2RKF1002X", footprint="R0402.kicad_mod", symbol="ERJ-2RKF1002X.kicad_sym", model="R0402_L1.0-W0.5-H0.4.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C191123", manufacturer="PANASONIC", partno="ERJ2RKF1002X">
+    trait has_designator_prefix<prefix="R">
+    trait has_datasheet_defined<datasheet="https://lcsc.com/datasheet/lcsc_datasheet_2410121702_PANASONIC-ERJ2RKF1002X_C191123.pdf">
+
+    # pins
+    pin 2
+    pin 1

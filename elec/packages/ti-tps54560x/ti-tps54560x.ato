@@ -1,0 +1,26 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+import ElectricPower
+import ElectricLogic
+
+from "atopile/ti-tpsm84209/ti-tpsm84209.ato" import TI_TPSM84209
+
+module TI_TPS54560:
+    """
+    Compatibility wrapper for the legacy TPS54560 package name.
+
+    CellSim has standardized on the smaller TPSM84209 module for the 24V->5V
+    rail. Keep this module around so any historical imports still resolve, but
+    back it with the working local TPSM implementation.
+    """
+
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+    enable = new ElectricLogic
+
+    regulator = new TI_TPSM84209
+
+    power_in ~ regulator.power_in
+    regulator.power_out ~ power_out
+    enable.reference ~ power_in
+    enable.line ~ regulator.enable.line

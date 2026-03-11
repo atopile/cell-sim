@@ -1,0 +1,23 @@
+requires-atopile: "^0.14.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: ti-iso7721.ato:ISO7721_UART_driver
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []
+
+package:
+    identifier: atopile/ti-iso7721
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Texas Instruments ISO7721 dual-channel digital isolator
+    license: MIT

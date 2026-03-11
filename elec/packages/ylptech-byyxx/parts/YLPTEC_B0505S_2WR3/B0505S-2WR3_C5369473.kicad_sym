@@ -1,0 +1,163 @@
+(kicad_symbol_lib
+    (version 1)
+    (generator "faebryk")
+    (symbol "B0505S-2WR3_C5369473"
+        (property "Reference" "U"
+            (id 0)
+            (at 0 10.16 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide no)
+            )
+        )
+        (property "Value" "B0505S-2WR3_C5369473"
+            (id 1)
+            (at 0 -7.62 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide no)
+            )
+        )
+        (property "Footprint" "C5369473:PWRM-TH_BXXXXS-2WR3"
+            (id 2)
+            (at 0 -10.16 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide yes)
+            )
+        )
+        (property "LCSC Part" "C5369473"
+            (id 5)
+            (at 0 -12.7 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide yes)
+            )
+        )
+        (property "checksum" "1d4ab4133bb4ca2eb90692e776c04cf455d1af8406e3443c4ad811b6310fe4fb"
+            (at 0 0 0)
+            (effects
+                (font
+                    (size 0 0)
+                )
+                (hide yes)
+            )
+        )
+        (in_bom yes)
+        (on_board yes)
+        (symbol "B0505S-2WR3_C5369473_0_1"
+            (circle
+                (center -1.27 6.35)
+                (end -0.89 6.35)
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+            )
+            (rectangle
+                (start -2.54 7.62)
+                (end 7.62 -5.08)
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type background)
+                )
+            )
+            (pin unspecified line
+                (at -5.08 -2.54 0)
+                (length 2.54)
+                (name "+Vo"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+                (number "6"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+            )
+            (pin unspecified line
+                (at -5.08 0 0)
+                (length 2.54)
+                (name "-Vo"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+                (number "4"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+            )
+            (pin unspecified line
+                (at -5.08 2.54 0)
+                (length 2.54)
+                (name "GND"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+                (number "2"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+            )
+            (pin unspecified line
+                (at -5.08 5.08 0)
+                (length 2.54)
+                (name "+VIN"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+                (number "1"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+            )
+        )
+    )
+)

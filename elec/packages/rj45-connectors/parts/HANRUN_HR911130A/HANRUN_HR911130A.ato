@@ -1,0 +1,40 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component HANRUN_HR911130A_package:
+    # This file was auto-generated but manually fixed for syntax errors
+
+    trait is_atomic_part<manufacturer="HANRUN", partnumber="HR911130A", footprint="RJ45-TH_HR911130A.kicad_mod", symbol="HR911130A.kicad_sym", model="RJ45-TH_HR911130A.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C54408", manufacturer="HANRUN", partno="HR911130A">
+    trait has_designator_prefix<prefix="RJ">
+
+    # pins
+    pin 14
+    pin 13
+    pin 11
+    pin 12
+    pin P1
+    pin P2
+    pin P3
+    pin P4
+    pin P5
+    pin P6
+    pin P7
+    pin P8
+    pin P9
+    pin P10
+    pin SHIELD0
+    pin SHIELD1
+
+    # Signal mappings based on CM5 implementation pinmap
+    signal MDI0pos ~ pin P2
+    signal MDI0neg ~ pin P3
+    signal MDI1pos ~ pin P4
+    signal MDI1neg ~ pin P7
+    signal MDI2pos ~ pin P5
+    signal MDI2neg ~ pin P6
+    signal MDI3pos ~ pin P8
+    signal MDI3neg ~ pin P9

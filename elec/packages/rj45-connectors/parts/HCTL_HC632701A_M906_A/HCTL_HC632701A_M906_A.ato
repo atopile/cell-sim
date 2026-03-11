@@ -1,0 +1,29 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component HCTL_HC632701A_M906_A_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C5341217", date="2025-09-19T16:42:18.217053+00:00", checksum="1dba33890baa1bad3e2b2ec31b51fa1bdcc1179635ffe3ffa67608cb2e2d6ca8">
+
+    trait is_atomic_part<manufacturer="HCTL", partnumber="HC632701A-M906-A", footprint="RJ45-SMD_BS-R250210.kicad_mod", symbol="HC961160C-906-A.kicad_sym", model="CTZD118-08Q3B001C1AD.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C5341217", manufacturer="HCTL", partno="HC632701A-M906-A">
+    trait has_designator_prefix<prefix="RJ">
+
+    # pins
+    signal CT ~ pin 3
+    CT ~ pin 4
+    signal GND ~ pin 8
+    signal L_LED_Gneg ~ pin 11
+    signal L_LED_Gpos ~ pin 12
+    signal RDneg ~ pin 6
+    signal RDpos ~ pin 5
+    signal R_LEDYneg ~ pin 10
+    signal R_LEDYpos ~ pin 9
+    signal SHELL ~ pin 13
+    SHELL ~ pin 14
+    signal TDneg ~ pin 2
+    signal TDpos ~ pin 1

@@ -1,0 +1,24 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Microchip_Tech_EMC2101_R_ACZL_TR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C626968", date="2025-07-10T22:29:38.222401+00:00", checksum="bb2db91a88a0a23e24103dc270694d35807b3f55299585b01a8aded10d520fca">
+
+    trait is_atomic_part<manufacturer="Microchip Tech", partnumber="EMC2101-R-ACZL-TR", footprint="MSOP-8_L3.0-W3.0-P0.65-LS4.9-BL.kicad_mod", symbol="EMC2101-R-ACZL-TR.kicad_sym", model="MSOP-8_L3.0-W3.0-H1.1-LS4.9-P0.65.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C626968", manufacturer="Microchip Tech", partno="EMC2101-R-ACZL-TR">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal DN ~ pin 3
+    signal DP ~ pin 2
+    signal FAN ~ pin 4
+    signal GND ~ pin 5
+    signal SMCLK ~ pin 8
+    signal SMDATA ~ pin 7
+    signal VDD ~ pin 1
+    signal nALERT_TACH ~ pin 6

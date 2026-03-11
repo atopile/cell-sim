@@ -11,3 +11,13 @@ builds:
         entry: usage.ato:Usage
 
 dependencies: []
+
+package:
+    identifier: atopile/ti-ads131m04
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Texas Instruments ADS131M04 4-channel simultaneous-sampling ADC
+    license: MIT

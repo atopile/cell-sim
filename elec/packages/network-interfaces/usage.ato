@@ -1,0 +1,12 @@
+from "network-interfaces.ato" import RMII
+from "network-interfaces.ato" import MDIO
+
+
+module Usage:
+    rmii_a = new RMII
+    rmii_b = new RMII
+    mdio_a = new MDIO
+    mdio_b = new MDIO
+
+    rmii_a ~ rmii_b
+    mdio_a ~ mdio_b

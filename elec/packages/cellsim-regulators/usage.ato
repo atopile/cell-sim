@@ -1,0 +1,17 @@
+import ElectricPower
+
+from "cellsim-regulators.ato" import AdjustableLDO
+
+
+module Usage:
+    vin = new ElectricPower
+    vout = new ElectricPower
+
+    ldo = new AdjustableLDO
+    vin ~> ldo ~> vout
+
+    vin.voltage = 5V +/- 5%
+    vout.voltage = 3.3V +/- 5%
+    ldo.reference_voltage = 1.2V +/- 5%
+    ldo.feedback_divider.chain.resistors[0].resistance = 18kohm +/- 1%
+    ldo.feedback_divider.chain.resistors[1].resistance = 10kohm +/- 1%

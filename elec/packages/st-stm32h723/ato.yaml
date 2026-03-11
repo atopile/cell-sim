@@ -1,0 +1,32 @@
+requires-atopile: ^0.11.5
+
+paths:
+  src: ./
+  layout: ./layouts
+
+builds:
+  default:
+    entry: st-stm32h723.ato:ST_STM32H723
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+
+dependencies:
+  - type: file
+    identifier: atopile/network-interfaces
+    path: /home/np/projects/cell-sim/elec/packages/network-interfaces
+
+package:
+  identifier: atopile/st-stm32h723
+  repository: https://github.com/atopile/packages
+  homepage: 
+    https://github.com/atopile/packages/blob/main/packages/st-stm32h723/README.md
+  version: 0.1.2
+  authors:
+  - name: atopile
+    email: hi@atopile.io
+  summary: ST; STM32H723; MCU; Cortex-M7; 550MHz; RMII; I2C; SPI; UART; USB
+  license: MIT

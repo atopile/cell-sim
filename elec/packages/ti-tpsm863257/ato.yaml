@@ -1,13 +1,19 @@
-requires-atopile: "^0.9.0"
-
+requires-atopile: ^0.14.1004
 paths:
-    src: "."
-    layout: ./layouts
-
+  src: .
+  layout: ./layouts
 builds:
-    default:
-        entry: ti-tpsm863257.ato:TI_TPSM863257
-    usage:
-        entry: usage.ato:Usage
-
+  default:
+    entry: ti-tpsm863257.ato:TI_TPSM863257
+  usage:
+    entry: usage.ato:Usage
 dependencies: []
+package:
+  identifier: atopile/ti-tpsm863257
+  repository: https://github.com/np/projects/cell-sim
+  version: 0.1.0
+  authors:
+  - name: cell-sim
+    email: noreply@cellsim.local
+  summary: Texas Instruments TPSM863257 buck power module
+  license: MIT

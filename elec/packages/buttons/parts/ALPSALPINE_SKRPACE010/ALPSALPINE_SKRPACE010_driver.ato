@@ -1,0 +1,12 @@
+# Moved to buttons.ato temporarily
+
+# from "parts/ALPSALPINE_SKRPACE010/ALPSALPINE_SKRPACE010.ato" import ALPSALPINE_SKRPACE010_package
+# from "buttons.ato" import Button
+
+# module ALPSALPINE_SKRPACE010_button_driver from Button:
+#     package = new ALPSALPINE_SKRPACE010_package
+#     # pins
+#     input ~ package.1
+#     input ~ package.2
+#     output ~ package.3
+#     output ~ package.4

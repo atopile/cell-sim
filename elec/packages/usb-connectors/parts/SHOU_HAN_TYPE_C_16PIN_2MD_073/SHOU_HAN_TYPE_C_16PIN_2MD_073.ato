@@ -1,0 +1,32 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component SHOU_HAN_TYPE_C_16PIN_2MD_073_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    # trait is_auto_generated<system="ato_part", source="easyeda:C2765186", date="2025-07-29T13:31:44.393322+00:00", checksum="da73374ef02e5e52eee3b5e4ce19f964f2cf8c0c623d9e0b4c568ef66251e2d8">
+
+    trait is_atomic_part<manufacturer="SHOU HAN", partnumber="TYPE-C 16PIN 2MD(073)", footprint="USB-C-SMD_TYPE-C-6PIN-2MD-073.kicad_mod", symbol="TYPE-C16PIN2MD(073).kicad_sym", model="USB-C-SMD_TYPE-C-6PIN-2MD-073.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2765186", manufacturer="SHOU HAN", partno="TYPE-C 16PIN 2MD(073)">
+    trait has_designator_prefix<prefix="USB">
+
+    # pins
+    signal CC1 ~ pin 4
+    signal CC2 ~ pin 10
+    signal DN1 ~ pin 7
+    signal DN2 ~ pin 5
+    signal DP1 ~ pin 6
+    signal DP2 ~ pin 8
+    signal GND ~ pin 1
+    GND ~ pin 12
+    signal SBU1 ~ pin 9
+    signal SBU2 ~ pin 3
+    signal SHELL ~ pin 13
+    SHELL ~ pin 14
+    SHELL ~ pin 15
+    SHELL ~ pin 16
+    signal VBUS ~ pin 2
+    VBUS ~ pin 11

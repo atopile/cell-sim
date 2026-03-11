@@ -1,0 +1,23 @@
+requires-atopile: "^0.14.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: microchip-mcp3221.ato:Microchip_MCP3221_driver
+    usage:
+        entry: usage.ato:Usage
+
+dependencies: []
+
+package:
+    identifier: atopile/microchip-mcp3221
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Microchip MCP3221 12-bit I2C ADC
+    license: MIT

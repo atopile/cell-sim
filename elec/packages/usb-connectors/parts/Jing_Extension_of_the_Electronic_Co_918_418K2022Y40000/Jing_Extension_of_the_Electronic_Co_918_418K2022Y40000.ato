@@ -1,0 +1,36 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Jing_Extension_of_the_Electronic_Co_918_418K2022Y40000_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    # trait is_auto_generated<system="ato_part", source="easyeda:C168704", date="2025-07-29T13:31:08.050028+00:00", checksum="ab1680471dcef5fb6fa1f65953ce0d152cc26b71c882cb447b293c96ebee5cbc">
+
+    trait is_atomic_part<manufacturer = "Jing Extension of the Electronic Co.", partnumber = "918-418K2022Y40000", footprint = "USB-C-TH_TYPE-C-USB-14P.kicad_mod", symbol = "TYPE-C-14PIN_c168704.kicad_sym", model = "TYPE-C-TH_L8.9-W3.1-H10.0.step">
+    trait has_part_picked::by_supplier<supplier_id = "lcsc", supplier_partno = "C168704", manufacturer = "Jing Extension of the Electronic Co.", partno = "918-418K2022Y40000">
+    trait has_designator_prefix<prefix = "USBC">
+    trait has_datasheet<datasheet = "https://lcsc.com/datasheet/lcsc_datasheet_2411220040_Jing-Extension-of-the-Electronic-Co--918-418K2022Y40000_C168704.pdf">
+
+    # pins
+    pin 0
+    pin 15
+    pin 16
+    pin 17
+    signal CC1 ~ pin 12
+    signal CC2 ~ pin 5
+    signal Dneg ~ pin 3
+    Dneg ~ pin 10
+    signal Dpos ~ pin 4
+    Dpos ~ pin 11
+    signal G ~ pin 1
+    G ~ pin 7
+    G ~ pin 8
+    G ~ pin 14
+    signal V ~ pin 2
+    V ~ pin 6
+    V ~ pin 9
+    V ~ pin 13

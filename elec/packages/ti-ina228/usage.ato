@@ -1,0 +1,32 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+import ElectricPower
+import ElectricLogic
+import I2C
+import Resistor
+from "atopile/ti-ina228/ti-ina228.ato" import TI_INA228
+
+module Usage:
+    """
+    Minimal solvable usage example for the TI INA228 power monitor.
+    """
+
+    supply_3v3 = new ElectricPower
+    supply_3v3.voltage = 3.3V +/- 5%
+
+    i2c = new I2C
+    rail_in = new ElectricPower
+    rail_out = new ElectricPower
+    rail_in.voltage = 12V +/- 5%
+
+    monitor = new TI_INA228
+    monitor.max_current = 1A
+    monitor.power ~ supply_3v3
+    monitor.i2c ~ i2c
+    monitor.i2c.address = 0x40
+
+    rail_in ~> monitor ~> rail_out
+
+    mcu_interrupt = new ElectricLogic
+    mcu_interrupt ~ monitor.alert

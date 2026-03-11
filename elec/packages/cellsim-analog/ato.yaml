@@ -1,0 +1,21 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: [PCB.requires_drc_check]
+
+package:
+  identifier: atopile/cellsim-analog
+  repository: https://github.com/np/projects/cell-sim
+  version: 0.1.0
+  authors:
+  - name: cell-sim
+    email: noreply@cellsim.local
+  summary: Local analog helper modules for sensing dividers and RC filters
+  license: MIT

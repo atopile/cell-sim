@@ -1,0 +1,420 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+
+import Ethernet
+import ElectricPower
+import ElectricLogic
+import Electrical
+import Resistor
+
+from "parts/HCTL_HC_RJ45_055_7/HCTL_HC_RJ45_055_7.ato" import HCTL_HC_RJ45_055_7_package
+from "parts/HANRUN_HR911130A/HANRUN_HR911130A.ato" import HANRUN_HR911130A_package
+from "parts/Ckmtw_R_RJ45S08P_C000/Ckmtw_R_RJ45S08P_C000.ato" import Ckmtw_R_RJ45S08P_C000_package
+from "parts/HCTL_HC_RJ45_059C_2_4_1/HCTL_HC_RJ45_059C_2_4_1.ato" import HCTL_HC_RJ45_059C_2_4_1_package
+from "parts/HCTL_HC632701A_M906_A/HCTL_HC632701A_M906_A.ato" import HCTL_HC632701A_M906_A_package
+
+module RJ45_Recessed_SMD:
+    """
+    Vertical SMD RJ45 connector without magnetics (HCTL HC-RJ45-055-7)
+
+    Standard 8P8C RJ45 jack for Ethernet connections. This is a basic connector
+    without integrated magnetics, suitable for use with external transformers
+    or direct PHY connections.
+    """
+
+    # --- External interfaces ---
+    ethernet = new Ethernet
+    """
+    Ethernet interface (100BASE-TX uses 2 pairs, 1000BASE-T uses all 4)
+    """
+
+    shield = new Electrical
+    """
+    Shield connection for EMI protection
+    """
+
+    # --- Package ---
+    package = new HCTL_HC_RJ45_055_7_package
+
+    # --- Package connections ---
+    # Standard T568B wiring
+    ethernet.pairs[0].p.line ~ package.1  # TX+ (Orange/White)
+    ethernet.pairs[0].n.line ~ package.2  # TX- (Orange)
+    ethernet.pairs[1].p.line ~ package.3  # RX+ (Green/White)
+    ethernet.pairs[2].p.line ~ package.4  # Unused+ (Blue)
+    ethernet.pairs[2].n.line ~ package.5  # Unused- (Blue/White)
+    ethernet.pairs[1].n.line ~ package.6  # RX- (Green)
+    ethernet.pairs[3].p.line ~ package.7  # Unused+ (Brown/White)
+    ethernet.pairs[3].n.line ~ package.8  # Unused- (Brown)
+
+    # Shield connections (grounded via LED reference)
+    shield ~ package.9
+    shield ~ package.10
+    ethernet.led_link.reference.lv ~ shield
+
+module RJ45_Vertical_SMD:
+    """
+    Vertical SMD RJ45 connector without magnetics (HCTL HC-RJ45-055-7)
+
+    Standard 8P8C RJ45 jack for Ethernet connections. This is a basic connector
+    without integrated magnetics, suitable for use with external transformers
+    or direct PHY connections.
+    """
+
+    # --- External interfaces ---
+    ethernet = new Ethernet
+    """
+    Ethernet interface (100BASE-TX uses 2 pairs, 1000BASE-T uses all 4)
+    """
+
+    shield = new Electrical
+    """
+    Shield connection for EMI protection
+    """
+
+    # --- Package ---
+    package = new Ckmtw_R_RJ45S08P_C000_package
+
+
+    # --- Internal components ---
+    led_link_resistor = new Resistor
+    """
+    Current limiting resistor for link LED
+    """
+
+    led_activity_resistor = new Resistor
+    """
+    Current limiting resistor for activity LED
+    """
+
+    # --- Package connections ---
+    # Standard T568B wiring
+    ethernet.pairs[0].p.line ~ package.1  # TX+ (Orange/White)
+    ethernet.pairs[0].n.line ~ package.2  # TX- (Orange)
+    ethernet.pairs[1].p.line ~ package.3  # RX+ (Green/White)
+    ethernet.pairs[2].p.line ~ package.4  # Unused+ (Blue)
+    ethernet.pairs[2].n.line ~ package.5  # Unused- (Blue/White)
+    ethernet.pairs[1].n.line ~ package.6  # RX- (Green)
+    ethernet.pairs[3].p.line ~ package.7  # Unused+ (Brown/White)
+    ethernet.pairs[3].n.line ~ package.8  # Unused- (Brown)
+
+    # LED connections with current limiting resistors (based on CM5 implementation)
+    # Link LED: logic -> resistor -> anode(pin 11), cathode(pin 12) -> ground
+    # Activity LED: logic -> resistor -> anode(pin 14), cathode(pin 13) -> ground
+    ethernet.led_link.line ~> led_link_resistor ~> package.Gpos       # Link LED with resistor
+    ethernet.led_speed.line ~> led_activity_resistor ~> package.Ypos   # Activity LED with resistor
+
+    # Connect LED ground references to LED cathodes
+    ethernet.led_link.reference.lv ~ package.Gneg     # Link LED cathode
+    ethernet.led_speed.reference.lv ~ package.Yneg # Activity LED cathode
+
+    # Shield connections (grounded via LED reference)
+    shield ~ package.S
+    shield ~ package.S
+    ethernet.led_link.reference.lv ~ shield
+
+
+module RJ45_Horizontal_TH_Magnetics:
+    """
+    Horizontal through-hole RJ45 connector with integrated magnetics (HANRUN HR911130A)
+
+    RJ45 jack with built-in isolation transformers and common mode chokes.
+    Includes status LEDs and center-tap connections. Suitable for direct
+    connection to Ethernet PHY chips.
+    """
+
+    # --- External interfaces ---
+    ethernet = new Ethernet
+    """
+    Ethernet interface with magnetically isolated differential pairs
+    """
+
+    shield = new Electrical
+    """
+    Shield connection for EMI protection
+    """
+
+    # --- Internal components ---
+    led_link_resistor = new Resistor
+    """
+    Current limiting resistor for link LED
+    """
+
+    led_activity_resistor = new Resistor
+    """
+    Current limiting resistor for activity LED
+    """
+
+    # --- Internal configuration ---
+    # LED resistor values (based on CM5 implementation)
+    led_link_resistor.resistance = 470ohm +/- 5%
+    led_link_resistor.package = "0402"
+    led_activity_resistor.resistance = 470ohm +/- 5%
+    led_activity_resistor.package = "0402"
+
+    # --- Package ---
+    package = new HANRUN_HR911130A_package
+
+    # --- Package connections ---
+    # Connect Ethernet differential pairs to magnetics side (based on CM5 implementation)
+    ethernet.pairs[0].p.line ~ package.MDI0pos  # Pair 0 positive
+    ethernet.pairs[0].n.line ~ package.MDI0neg  # Pair 0 negative
+    ethernet.pairs[1].p.line ~ package.MDI1pos  # Pair 1 positive
+    ethernet.pairs[1].n.line ~ package.MDI1neg  # Pair 1 negative
+    ethernet.pairs[2].p.line ~ package.MDI2pos  # Pair 2 positive
+    ethernet.pairs[2].n.line ~ package.MDI2neg  # Pair 2 negative
+    ethernet.pairs[3].p.line ~ package.MDI3pos  # Pair 3 positive
+    ethernet.pairs[3].n.line ~ package.MDI3neg  # Pair 3 negative
+
+    # LED connections with current limiting resistors (based on CM5 implementation)
+    # Link LED: logic -> resistor -> anode(pin 11), cathode(pin 12) -> ground
+    # Activity LED: logic -> resistor -> anode(pin 14), cathode(pin 13) -> ground
+    ethernet.led_link.line ~> led_link_resistor ~> package.11       # Link LED with resistor
+    ethernet.led_speed.line ~> led_activity_resistor ~> package.14   # Activity LED with resistor
+
+    # Connect LED ground references to LED cathodes
+    ethernet.led_link.reference.lv ~ package.12     # Link LED cathode
+    ethernet.led_speed.reference.lv ~ package.13 # Activity LED cathode
+
+    # Shield connections (grounded via LED reference)
+    shield ~ package.SHIELD0
+    shield ~ package.SHIELD1
+    ethernet.led_link.reference.lv ~ shield
+
+    # Center tap connections (typically left floating or connected to power reference)
+    # package pins 11, 12, 13, 14 are center taps - leaving unconnected for flexibility
+
+module RJ45_Horizontal_SMD_Magnetics:
+    """
+    Horizontal SMD RJ45 connector with integrated magnetics (HCTL HC632701A-M906-A)
+
+    RJ45 jack with built-in isolation transformers and status LEDs.
+    Supports 100BASE-T and 1000BASE-T. (only two pairs)
+    """
+
+    # --- External interfaces ---
+    ethernet = new Ethernet
+    """
+    Ethernet interface with magnetically isolated differential pairs
+    """
+
+    shield = new Electrical
+    """
+    Shield connection for EMI protection
+    """
+
+    # --- Internal components ---
+    led_link_resistor = new Resistor
+    """
+    Current limiting resistor for link LED (green)
+    """
+
+    led_activity_resistor = new Resistor
+    """
+    Current limiting resistor for activity/speed LED (yellow)
+    """
+
+    # --- Internal configuration ---
+    led_link_resistor.resistance = 470ohm +/- 5%
+    led_link_resistor.package = "0402"
+    led_activity_resistor.resistance = 470ohm +/- 5%
+    led_activity_resistor.package = "0402"
+
+    # --- Package ---
+    package = new HCTL_HC632701A_M906_A_package
+
+    # --- Package connections ---
+    # PHY side differential pairs
+    ethernet.pairs[0].p.line ~ package.TDpos
+    ethernet.pairs[0].n.line ~ package.TDneg
+    ethernet.pairs[1].p.line ~ package.RDpos
+    ethernet.pairs[1].n.line ~ package.RDneg
+
+    # LED connections with current limiting resistors
+    ethernet.led_link.line ~> led_link_resistor ~> package.L_LED_Gpos
+    ethernet.led_speed.line ~> led_activity_resistor ~> package.R_LEDYpos
+
+    # LED cathodes to reference low
+    ethernet.led_link.reference.lv ~ package.L_LED_Gneg
+    ethernet.led_speed.reference.lv ~ package.R_LEDYneg
+
+    # Tie LED reference to shield as common ground
+    ethernet.led_link.reference.lv ~ shield
+    ethernet.led_speed.reference.lv ~ shield
+
+    # Shield connections
+    shield ~ package.SHELL
+    shield ~ package.GND
+
+module RJ45_Horizontal_TH_Magnetics_8Port:
+    """
+    Horizontal through-hole RJ45 connector with integrated magnetics (HANRUN HR911130A)
+
+    RJ45 jack with built-in isolation transformers and common mode chokes.
+    Includes status LEDs and center-tap connections. Suitable for direct
+    connection to Ethernet PHY chips.
+    """
+
+    # --- External interfaces ---
+    ethernet = new Ethernet[8]
+    """
+    Ethernet interface with magnetically isolated differential pairs
+    """
+
+    shield = new Electrical
+    """
+    Shield connection for EMI protection
+    """
+
+    # --- Internal components ---
+    led_link_resistors = new Resistor[8]
+    """
+    Current limiting resistor for link LED
+    """
+
+    led_activity_resistors = new Resistor[8]
+    """
+    Current limiting resistor for activity LED
+    """
+
+    # --- Internal configuration ---
+    # LED resistor values (based on CM5 implementation)
+    for resistor in led_link_resistors:
+        resistor.resistance = 470ohm +/- 5%
+        resistor.package = "0402"
+    for resistor in led_activity_resistors:
+        resistor.resistance = 470ohm +/- 5%
+        resistor.package = "0402"
+
+    # --- Package ---
+    package = new HCTL_HC_RJ45_059C_2_4_1_package
+
+    # --- Package connections ---
+    # Standard T568B wiring for all 8 ports
+
+    # Port 1: Pins 1-8 (ethernet), 9 (LED G-), 10 (LED G+), 11 (LED Y-), 12 (LED Y+)
+    ethernet[0].pairs[0].p.line ~ package.1  # TX+ (Orange/White)
+    ethernet[0].pairs[0].n.line ~ package.2  # TX- (Orange)
+    ethernet[0].pairs[1].p.line ~ package.3  # RX+ (Green/White)
+    ethernet[0].pairs[2].p.line ~ package.4  # Unused+ (Blue)
+    ethernet[0].pairs[2].n.line ~ package.5  # Unused- (Blue/White)
+    ethernet[0].pairs[1].n.line ~ package.6  # RX- (Green)
+    ethernet[0].pairs[3].p.line ~ package.7  # Unused+ (Brown/White)
+    ethernet[0].pairs[3].n.line ~ package.8  # Unused- (Brown)
+    ethernet[0].led_link.line ~> led_link_resistors[0] ~> package.10      # Link LED (Green+)
+    ethernet[0].led_speed.line ~> led_activity_resistors[0] ~> package.12 # Activity LED (Yellow+)
+    ethernet[0].led_link.reference.lv ~ package.9   # Link LED (Green-)
+    ethernet[0].led_speed.reference.lv ~ package.11 # Activity LED (Yellow-)
+
+    # Port 2: Pins 13-20 (ethernet), 21 (LED G-), 22 (LED G+), 23 (LED Y-), 24 (LED Y+)
+    ethernet[1].pairs[0].p.line ~ package.13  # TX+ (Orange/White)
+    ethernet[1].pairs[0].n.line ~ package.14  # TX- (Orange)
+    ethernet[1].pairs[1].p.line ~ package.15  # RX+ (Green/White)
+    ethernet[1].pairs[2].p.line ~ package.16  # Unused+ (Blue)
+    ethernet[1].pairs[2].n.line ~ package.17  # Unused- (Blue/White)
+    ethernet[1].pairs[1].n.line ~ package.18  # RX- (Green)
+    ethernet[1].pairs[3].p.line ~ package.19  # Unused+ (Brown/White)
+    ethernet[1].pairs[3].n.line ~ package.20  # Unused- (Brown)
+    ethernet[1].led_link.line ~> led_link_resistors[1] ~> package.22      # Link LED (Green+)
+    ethernet[1].led_speed.line ~> led_activity_resistors[1] ~> package.24 # Activity LED (Yellow+)
+    ethernet[1].led_link.reference.lv ~ package.21   # Link LED (Green-)
+    ethernet[1].led_speed.reference.lv ~ package.23  # Activity LED (Yellow-)
+
+    # Port 3: Pins 25-32 (ethernet), 33 (LED G-), 34 (LED G+), 35 (LED Y-), 36 (LED Y+)
+    ethernet[2].pairs[0].p.line ~ package.25  # TX+ (Orange/White)
+    ethernet[2].pairs[0].n.line ~ package.26  # TX- (Orange)
+    ethernet[2].pairs[1].p.line ~ package.27  # RX+ (Green/White)
+    ethernet[2].pairs[2].p.line ~ package.28  # Unused+ (Blue)
+    ethernet[2].pairs[2].n.line ~ package.29  # Unused- (Blue/White)
+    ethernet[2].pairs[1].n.line ~ package.30  # RX- (Green)
+    ethernet[2].pairs[3].p.line ~ package.31  # Unused+ (Brown/White)
+    ethernet[2].pairs[3].n.line ~ package.32  # Unused- (Brown)
+    ethernet[2].led_link.line ~> led_link_resistors[2] ~> package.34      # Link LED (Green+)
+    ethernet[2].led_speed.line ~> led_activity_resistors[2] ~> package.36 # Activity LED (Yellow+)
+    ethernet[2].led_link.reference.lv ~ package.33   # Link LED (Green-)
+    ethernet[2].led_speed.reference.lv ~ package.35  # Activity LED (Yellow-)
+
+    # Port 4: Pins 37-44 (ethernet), 45 (LED G-), 46 (LED G+), 47 (LED Y-), 48 (LED Y+)
+    ethernet[3].pairs[0].p.line ~ package.37  # TX+ (Orange/White)
+    ethernet[3].pairs[0].n.line ~ package.38  # TX- (Orange)
+    ethernet[3].pairs[1].p.line ~ package.39  # RX+ (Green/White)
+    ethernet[3].pairs[2].p.line ~ package.40  # Unused+ (Blue)
+    ethernet[3].pairs[2].n.line ~ package.41  # Unused- (Blue/White)
+    ethernet[3].pairs[1].n.line ~ package.42  # RX- (Green)
+    ethernet[3].pairs[3].p.line ~ package.43  # Unused+ (Brown/White)
+    ethernet[3].pairs[3].n.line ~ package.44  # Unused- (Brown)
+    ethernet[3].led_link.line ~> led_link_resistors[3] ~> package.46      # Link LED (Green+)
+    ethernet[3].led_speed.line ~> led_activity_resistors[3] ~> package.48 # Activity LED (Yellow+)
+    ethernet[3].led_link.reference.lv ~ package.45   # Link LED (Green-)
+    ethernet[3].led_speed.reference.lv ~ package.47  # Activity LED (Yellow-)
+
+    # Port 5: Pins 49-56 (ethernet), 60 (LED G-), 59 (LED G+), 58 (LED Y-), 57 (LED Y+)
+    ethernet[4].pairs[0].p.line ~ package.49  # TX+ (Orange/White)
+    ethernet[4].pairs[0].n.line ~ package.50  # TX- (Orange)
+    ethernet[4].pairs[1].p.line ~ package.51  # RX+ (Green/White)
+    ethernet[4].pairs[2].p.line ~ package.52  # Unused+ (Blue)
+    ethernet[4].pairs[2].n.line ~ package.53  # Unused- (Blue/White)
+    ethernet[4].pairs[1].n.line ~ package.54  # RX- (Green)
+    ethernet[4].pairs[3].p.line ~ package.55  # Unused+ (Brown/White)
+    ethernet[4].pairs[3].n.line ~ package.56  # Unused- (Brown)
+    ethernet[4].led_link.line ~> led_link_resistors[4] ~> package.59      # Link LED (Green+)
+    ethernet[4].led_speed.line ~> led_activity_resistors[4] ~> package.57 # Activity LED (Yellow+)
+    ethernet[4].led_link.reference.lv ~ package.60   # Link LED (Green-)
+    ethernet[4].led_speed.reference.lv ~ package.58  # Activity LED (Yellow-)
+
+    # Port 6: Pins 61-68 (ethernet), 72 (LED G-), 71 (LED G+), 70 (LED Y-), 69 (LED Y+)
+    ethernet[5].pairs[0].p.line ~ package.61  # TX+ (Orange/White)
+    ethernet[5].pairs[0].n.line ~ package.62  # TX- (Orange)
+    ethernet[5].pairs[1].p.line ~ package.63  # RX+ (Green/White)
+    ethernet[5].pairs[2].p.line ~ package.64  # Unused+ (Blue)
+    ethernet[5].pairs[2].n.line ~ package.65  # Unused- (Blue/White)
+    ethernet[5].pairs[1].n.line ~ package.66  # RX- (Green)
+    ethernet[5].pairs[3].p.line ~ package.67  # Unused+ (Brown/White)
+    ethernet[5].pairs[3].n.line ~ package.68  # Unused- (Brown)
+    ethernet[5].led_link.line ~> led_link_resistors[5] ~> package.71      # Link LED (Green+)
+    ethernet[5].led_speed.line ~> led_activity_resistors[5] ~> package.69 # Activity LED (Yellow+)
+    ethernet[5].led_link.reference.lv ~ package.72   # Link LED (Green-)
+    ethernet[5].led_speed.reference.lv ~ package.70  # Activity LED (Yellow-)
+
+    # Port 7: Pins 73-80 (ethernet), 84 (LED G-), 83 (LED G+), 82 (LED Y-), 81 (LED Y+)
+    ethernet[6].pairs[0].p.line ~ package.73  # TX+ (Orange/White)
+    ethernet[6].pairs[0].n.line ~ package.74  # TX- (Orange)
+    ethernet[6].pairs[1].p.line ~ package.75  # RX+ (Green/White)
+    ethernet[6].pairs[2].p.line ~ package.76  # Unused+ (Blue)
+    ethernet[6].pairs[2].n.line ~ package.77  # Unused- (Blue/White)
+    ethernet[6].pairs[1].n.line ~ package.78  # RX- (Green)
+    ethernet[6].pairs[3].p.line ~ package.79  # Unused+ (Brown/White)
+    ethernet[6].pairs[3].n.line ~ package.80  # Unused- (Brown)
+    ethernet[6].led_link.line ~> led_link_resistors[6] ~> package.83      # Link LED (Green+)
+    ethernet[6].led_speed.line ~> led_activity_resistors[6] ~> package.81 # Activity LED (Yellow+)
+    ethernet[6].led_link.reference.lv ~ package.84   # Link LED (Green-)
+    ethernet[6].led_speed.reference.lv ~ package.82  # Activity LED (Yellow-)
+
+    # Port 8: Pins 85-92 (ethernet), 96 (LED G-), 95 (LED G+), 94 (LED Y-), 93 (LED Y+)
+    ethernet[7].pairs[0].p.line ~ package.85  # TX+ (Orange/White)
+    ethernet[7].pairs[0].n.line ~ package.86  # TX- (Orange)
+    ethernet[7].pairs[1].p.line ~ package.87  # RX+ (Green/White)
+    ethernet[7].pairs[2].p.line ~ package.88  # Unused+ (Blue)
+    ethernet[7].pairs[2].n.line ~ package.89  # Unused- (Blue/White)
+    ethernet[7].pairs[1].n.line ~ package.90  # RX- (Green)
+    ethernet[7].pairs[3].p.line ~ package.91  # Unused+ (Brown/White)
+    ethernet[7].pairs[3].n.line ~ package.92  # Unused- (Brown)
+    ethernet[7].led_link.line ~> led_link_resistors[7] ~> package.95      # Link LED (Green+)
+    ethernet[7].led_speed.line ~> led_activity_resistors[7] ~> package.93 # Activity LED (Yellow+)
+    ethernet[7].led_link.reference.lv ~ package.96   # Link LED (Green-)
+    ethernet[7].led_speed.reference.lv ~ package.94  # Activity LED (Yellow-)
+
+    # Shield connections for EMI protection
+    # Connect all LED references to shield for common ground
+    for port in ethernet:
+        port.led_link.reference.lv ~ shield
+        port.led_speed.reference.lv ~ shield
+
+    # Connect shell pins to shield
+    shield ~ package.97   # Shell connection
+    shield ~ package.98   # Shell connection
+    shield ~ package.99   # Shell connection
+    shield ~ package.100  # Shell connection
+    shield ~ package.101  # Shell connection
+    shield ~ package.102  # Shell connection

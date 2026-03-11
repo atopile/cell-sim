@@ -1,0 +1,39 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+import Electrical
+from "../../helpers.ato" import RelaySPSTNO
+
+component Omron_Electronics_G5Q_1A4_DC24_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C89311", date="2026-02-27T23:30:17.580188+00:00", checksum="f776cf953d65a1a3fbb07e7f87604aff8c445cf72b4e1c4704946e03c3eb4fe1">
+
+    trait is_atomic_part<manufacturer="Omron Electronics", partnumber="G5Q-1A4 DC24", footprint="RELAY-TH_G5Q-1A4.kicad_mod", symbol="G5Q-1A4DC24.kicad_sym", model="RELAY-TH_G5Q-1A4.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C89311", manufacturer="Omron Electronics", partno="G5Q-1A4 DC24">
+    trait has_designator_prefix<prefix="K">
+
+    # pins
+    signal COIL1 ~ pin 5
+    signal COIL2 ~ pin 1
+    signal MAIN ~ pin 2
+    signal NO ~ pin 3
+
+module RelaySPSTNO10A24V from RelaySPSTNO:
+    """
+    Omron G5Q-1A4 DC24 — SPST-NO power relay
+    10A @ 30VDC, 24V coil, 200mW, cadmium-free Ag alloy contacts
+    LCSC C89311
+    """
+    package = new Omron_Electronics_G5Q_1A4_DC24_package
+    package.COIL1 ~> coil ~> package.COIL2
+
+    com = new Electrical
+    com ~ package.MAIN
+    com ~> switch_no ~> package.NO
+
+    assert coil.voltage within 24V +/- 10%
+    assert coil.resistance within 2880ohm +/- 10%

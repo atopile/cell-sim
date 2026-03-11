@@ -1,0 +1,149 @@
+(footprint "FOJAN_FRL1206FR150TS:R1206"
+	(version 20241229)
+	(generator "faebryk_convert")
+	(generator_version "v5")
+	(layer "F.Cu")
+	(tedit "5DC5F6A4")
+	(uuid "29fa7535-e472-41eb-bc72-6d3578bfcfaa")
+	(property "Reference" "REF**"
+		(at 0 -4)
+		(layer "F.SilkS")
+		(uuid "afceec6c-318e-4a1d-a4bf-3c41f50920c0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "R1206"
+		(at 0 4)
+		(layer "F.Fab")
+		(uuid "3f461d4a-73a0-4735-bd8a-2379d15422e5")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_circle
+		(center -1.55 0.79)
+		(end -1.52 0.79)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(locked no)
+		(uuid "8ffaacf3-cecd-41a9-858b-96dc46e75314")
+	)
+	(fp_line
+		(start 0.95 1.08)
+		(end 2.31 1.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "80756396-71e7-4b69-a6ce-57b4253ff85b")
+	)
+	(fp_line
+		(start 2.31 1.08)
+		(end 2.31 -1.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "38e63708-be73-4807-81e6-11ad3cc4b839")
+	)
+	(fp_line
+		(start 2.31 -1.08)
+		(end 0.95 -1.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "f39bc3c0-19c9-4704-9f08-bcd2300634a6")
+	)
+	(fp_line
+		(start -0.95 1.08)
+		(end -2.31 1.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "5f16f412-8fce-4ade-a8ca-6c6bbed2b4f6")
+	)
+	(fp_line
+		(start -2.31 1.08)
+		(end -2.31 -1.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "ccf731e6-b2e7-497c-adfc-ff7b30174d30")
+	)
+	(fp_line
+		(start -2.31 -1.08)
+		(end -0.95 -1.08)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "ece83410-3f57-4b13-b87e-a7061f1fec5a")
+	)
+	(fp_text user "%R"
+		(at 0 0)
+		(layer "F.Fab")
+		(uuid "7783d266-9c86-4c48-aa96-cda1da34abe1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "2" smd rect
+		(at 1.48 0 0)
+		(size 1.21 1.7)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "2ca7c45a-a2c2-4986-a25f-750477548176")
+	)
+	(pad "1" smd rect
+		(at -1.48 0 0)
+		(size 1.21 1.7)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "17fc0bc1-ec0f-42f0-bf07-970428531268")
+	)
+	(model "${KIPRJMOD}/../../parts/FOJAN_FRL1206FR150TS/R1206_L3.2-W1.6-H0.6.step"
+		(offset
+			(xyz -2.39 0.89 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+	(embedded_fonts no)
+)

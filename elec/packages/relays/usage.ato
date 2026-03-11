@@ -1,0 +1,19 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+import ElectricPower
+import ElectricLogic
+import Electrical
+
+from "relays.ato" import LogicLevelRelaySPSTNO10A24V
+
+module Usage:
+    relay = new LogicLevelRelaySPSTNO10A24V
+    coil_power = new ElectricPower
+    enable = new ElectricLogic
+    contact_a = new Electrical
+    contact_b = new Electrical
+
+    relay.coil_power ~ coil_power
+    relay.enable ~ enable
+    relay.relay.switch_no.common ~ contact_a
+    relay.relay.switch_no.normally_open ~ contact_b

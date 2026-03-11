@@ -1,0 +1,18 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Tag_Connect_TC2030_IDC_NL_2x03_P1_27mm_Vertical_package:
+    trait is_atomic_part<manufacturer="Tag-Connect", partnumber="TC2030", footprint="Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical.kicad_mod", symbol="tc2030.kicad_sym">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="", manufacturer="Tag-Connect", partno="TC2030">
+    trait has_designator_prefix<prefix="J">
+
+    # pins
+    pin 1
+    pin 2
+    pin 3
+    pin 4
+    pin 5
+    pin 6

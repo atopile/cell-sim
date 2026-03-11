@@ -1,0 +1,17 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+from "microchip-mcp3221.ato" import Microchip_MCP3221_driver
+
+import Electrical
+import ElectricPower
+import I2C
+
+module Usage:
+    power = new ElectricPower
+    i2c = new I2C
+    ain = new Electrical
+
+    adc = new Microchip_MCP3221_driver
+    adc.power ~ power
+    adc.i2c ~ i2c
+    adc.ain ~ ain

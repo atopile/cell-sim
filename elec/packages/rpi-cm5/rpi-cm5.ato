@@ -1,0 +1,346 @@
+#pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+
+import ElectricPower
+import I2C
+import SPI
+import I2S
+
+import USB2_0
+import ElectricLogic
+import ElectricSignal
+import USB3
+import UART
+import Ethernet
+import HDMI
+import has_single_electric_reference
+
+from "parts/HRS_DF40C_100DS_0_4V_51/HRS_DF40C_100DS_0_4V_51.ato" import HRS_DF40C_100DS_0_4V_51_package
+from "parts/Sinhoo_SMTSO2515CTJ/Sinhoo_SMTSO2515CTJ.ato" import Sinhoo_SMTSO2515CTJ_package
+from "parts/cm5/cm5.ato" import CM5_package
+
+module RPI_CM5:
+    """
+    Raspberry Pi CM5 module
+    """
+    # Power
+    power_5v = new ElectricPower  # Input
+    power_3v3 = new ElectricPower  # Output
+    power_1v8 = new ElectricPower  # Output
+    gpio_ref = new ElectricPower  # Connect to either power_1v8 or power_3v3
+
+    power_5v.required = True
+
+    # Communications
+    i2cs = new I2C[4]
+    spis = new SPI[1]
+    spi0_cs = new ElectricLogic[2]
+    usb2 = new USB2_0
+    usb_cc = new ElectricSignal[2]
+    usb3 = new USB3[2]
+    uart0 = new UART
+    ethernet = new Ethernet
+    hdmis = new HDMI[2]
+    # TODO: add MIPI CSI/DSI
+
+    # I2S
+    i2s_output = new I2S
+    i2s_input = new I2S
+    i2s_output.has_single_electric_reference.reference ~ gpio_ref
+    i2s_input.has_single_electric_reference.reference ~ gpio_ref
+
+    # Control
+    power_button = new ElectricLogic
+    boot_mode = new ElectricLogic
+    activity_led = new ElectricLogic
+    power_led = new ElectricLogic
+    fan_tacho = new ElectricLogic
+    fan_pwm = new ElectricLogic
+    ethernet_sync = new ElectricLogic
+    eeprom_wp = new ElectricLogic
+
+    # CM5 model
+    cm5_package = new CM5_package
+
+    # GPIO
+    gpios = new ElectricLogic[28]
+
+    # Mounting studs - M2.5
+    studs = new Sinhoo_SMTSO2515CTJ_package[4]
+
+    for stud in studs:
+        stud.pad ~ power_3v3.lv
+
+    # Components
+    hdi_a = new HRS_DF40C_100DS_0_4V_51_package
+    hdi_b = new HRS_DF40C_100DS_0_4V_51_package
+
+    # SPI
+    # SPI0 signals (Pi default): SCLK=GPIO11, MOSI=GPIO10, MISO=GPIO9, CS0=GPIO8, CS1=GPIO7
+    gpios[11] ~ spis[0].sclk
+    gpios[10] ~ spis[0].mosi
+    gpios[9] ~ spis[0].miso
+    gpios[8] ~ spi0_cs[0]
+    gpios[7] ~ spi0_cs[1]
+    # Reference domains for SPI
+    spis[0].sclk.reference ~ gpio_ref
+    spis[0].mosi.reference ~ gpio_ref
+    spis[0].miso.reference ~ gpio_ref
+    for cs in spi0_cs:
+        cs.reference ~ gpio_ref
+    # I2S wiring
+    # Output: SCK=GPIO18, WS=GPIO19, SD=GPIO21
+    gpios[18] ~ i2s_output.sck
+    gpios[19] ~ i2s_output.ws
+    gpios[21] ~ i2s_output.sd
+
+    # Input: SCK=GPIO18, WS=GPIO19, SD=GPIO20
+    gpios[18] ~ i2s_input.sck
+    gpios[19] ~ i2s_input.ws
+    gpios[20] ~ i2s_input.sd
+
+    # UART0
+    gpios[14] ~ uart0.base_uart.tx
+    gpios[15] ~ uart0.base_uart.rx
+    gpios[16] ~ uart0.cts
+    gpios[17] ~ uart0.rts
+    uart0.base_uart.tx.reference ~ gpio_ref
+    uart0.base_uart.rx.reference ~ gpio_ref
+    uart0.cts.reference ~ gpio_ref
+    uart0.rts.reference ~ gpio_ref
+
+    # I2C (four buses)
+    # i2c0: SDA=GPIO0, SCL=GPIO1
+    gpios[0] ~ i2cs[0].sda
+    gpios[1] ~ i2cs[0].scl
+    # i2c1: SDA=GPIO2, SCL=GPIO3
+    gpios[2] ~ i2cs[1].sda
+    gpios[3] ~ i2cs[1].scl
+    # i2c2: SDA=GPIO12, SCL=GPIO13
+    gpios[12] ~ i2cs[2].sda
+    gpios[13] ~ i2cs[2].scl
+    # i2c3: SDA=GPIO22, SCL=GPIO23
+    gpios[22] ~ i2cs[3].sda
+    gpios[23] ~ i2cs[3].scl
+    # Reference domains for I2C buses
+    for i2c in i2cs:
+        i2c.scl.reference ~ gpio_ref
+        i2c.sda.reference ~ gpio_ref
+
+    for io in gpios:
+        io.reference ~ gpio_ref
+    # Reference domains for control signals
+    power_button.reference ~ gpio_ref
+    boot_mode.reference ~ gpio_ref
+    activity_led.reference ~ gpio_ref
+    power_led.reference ~ gpio_ref
+    fan_tacho.reference ~ gpio_ref
+    fan_pwm.reference ~ gpio_ref
+    ethernet_sync.reference ~ gpio_ref
+    eeprom_wp.reference ~ gpio_ref
+
+    trait has_single_electric_reference<ground_only = True>
+
+    # HDI-A Pinout (based on cm5.py)
+    hdi_a.pins[0] ~ power_5v.lv  # GND
+    hdi_a.pins[1] ~ power_5v.lv  # GND
+    hdi_a.pins[2] ~ ethernet.pairs[3].p.line  # Ethernet pair 3 P
+    hdi_a.pins[3] ~ ethernet.pairs[1].p.line  # Ethernet pair 1 P
+    hdi_a.pins[4] ~ ethernet.pairs[3].n.line  # Ethernet pair 3 N
+    hdi_a.pins[5] ~ ethernet.pairs[1].n.line  # Ethernet pair 1 N
+    hdi_a.pins[6] ~ power_5v.lv  # GND
+    hdi_a.pins[7] ~ power_5v.lv  # GND
+    hdi_a.pins[8] ~ ethernet.pairs[2].n.line  # Ethernet pair 2 N
+    hdi_a.pins[9] ~ ethernet.pairs[0].n.line  # Ethernet pair 0 N
+    hdi_a.pins[10] ~ ethernet.pairs[2].p.line  # Ethernet pair 2 P
+    hdi_a.pins[11] ~ ethernet.pairs[0].p.line  # Ethernet pair 0 P
+    hdi_a.pins[12] ~ power_5v.lv  # GND
+    hdi_a.pins[13] ~ power_5v.lv  # GND
+    hdi_a.pins[14] ~ ethernet.led_link.line  # Ethernet LED link
+    hdi_a.pins[15] ~ fan_tacho.line  # Fan tacho
+    hdi_a.pins[16] ~ ethernet.led_speed.line  # Ethernet LED speed
+    hdi_a.pins[17] ~ ethernet_sync.line  # Ethernet sync
+    hdi_a.pins[18] ~ fan_pwm.line  # Fan PWM
+    hdi_a.pins[19] ~ eeprom_wp.line  # EEPROM write protect
+    hdi_a.pins[20] ~ activity_led.line  # Activity LED
+    hdi_a.pins[21] ~ power_5v.lv  # GND
+    hdi_a.pins[22] ~ power_5v.lv  # GND
+    hdi_a.pins[23] ~ gpios[26].line  # GPIO 26
+    hdi_a.pins[24] ~ gpios[21].line  # GPIO 21
+    hdi_a.pins[25] ~ gpios[19].line  # GPIO 19
+    hdi_a.pins[26] ~ gpios[20].line  # GPIO 20
+    hdi_a.pins[27] ~ gpios[13].line  # GPIO 13
+    hdi_a.pins[28] ~ gpios[16].line  # GPIO 16
+    hdi_a.pins[29] ~ gpios[6].line  # GPIO 6
+    hdi_a.pins[30] ~ gpios[12].line  # GPIO 12
+    hdi_a.pins[31] ~ power_5v.lv  # GND
+    hdi_a.pins[32] ~ power_5v.lv  # GND
+    hdi_a.pins[33] ~ gpios[5].line  # GPIO 5
+    hdi_a.pins[34] ~ gpios[1].line  # GPIO 1
+    hdi_a.pins[35] ~ gpios[0].line  # GPIO 0
+    hdi_a.pins[36] ~ gpios[7].line  # GPIO 7
+    hdi_a.pins[37] ~ gpios[11].line  # GPIO 11
+    hdi_a.pins[38] ~ gpios[8].line  # GPIO 8
+    hdi_a.pins[39] ~ gpios[9].line  # GPIO 9
+    hdi_a.pins[40] ~ gpios[25].line  # GPIO 25
+    hdi_a.pins[41] ~ power_5v.lv  # GND
+    hdi_a.pins[42] ~ power_5v.lv  # GND
+    hdi_a.pins[43] ~ gpios[10].line  # GPIO 10
+    hdi_a.pins[44] ~ gpios[24].line  # GPIO 24
+    hdi_a.pins[45] ~ gpios[22].line  # GPIO 22
+    hdi_a.pins[46] ~ gpios[23].line  # GPIO 23
+    hdi_a.pins[47] ~ gpios[27].line  # GPIO 27
+    hdi_a.pins[48] ~ gpios[18].line  # GPIO 18
+    hdi_a.pins[49] ~ gpios[17].line  # GPIO 17
+    hdi_a.pins[50] ~ gpios[15].line  # GPIO 15
+    hdi_a.pins[51] ~ power_5v.lv  # GND
+    hdi_a.pins[52] ~ power_5v.lv  # GND
+    hdi_a.pins[53] ~ gpios[4].line  # GPIO 4
+    hdi_a.pins[54] ~ gpios[14].line  # GPIO 14
+    hdi_a.pins[55] ~ gpios[3].line  # GPIO 3
+    # hdi_a.pins[56] ~ sd_
+    hdi_a.pins[57] ~ gpios[2].line  # GPIO 2
+    hdi_a.pins[58] ~ power_5v.lv  # GND
+    hdi_a.pins[59] ~ power_5v.lv  # GND
+    # hdi_a.pins[60] ~ # Unknown
+    # hdi_a.pins[61] ~ # Unknown
+    # hdi_a.pins[62] ~ # Unknown
+    # hdi_a.pins[63] ~ # Unknown
+    hdi_a.pins[64] ~ power_5v.lv  # GND
+    hdi_a.pins[65] ~ power_5v.lv  # GND
+    # hdi_a.pins[66] ~ # Unknown
+    # hdi_a.pins[67] ~ # Unknown
+    # hdi_a.pins[68] ~ # Unknown
+    # hdi_a.pins[69] ~ # Unknown
+    hdi_a.pins[70] ~ power_5v.lv  # GND
+    # hdi_a.pins[71] ~ # Unknown
+    # hdi_a.pins[72] ~ # Unknown
+    hdi_a.pins[73] ~ power_5v.lv  # GND
+    # hdi_a.pins[74] ~ # Unknown
+    # hdi_a.pins[75] ~ # Unknown
+    hdi_a.pins[76] ~ power_5v.hv  # +5V
+    hdi_a.pins[77] ~ gpio_ref.hv  # GPIO ref voltage (1.8V or 3.3V)
+    hdi_a.pins[78] ~ power_5v.hv  # +5V
+    # hdi_a.pins[79] ~ # Unknown
+    hdi_a.pins[80] ~ power_5v.hv  # +5V
+    # hdi_a.pins[81] ~ # Unknown
+    hdi_a.pins[82] ~ power_5v.hv  # +5V
+    hdi_a.pins[83] ~ power_3v3.hv  # +3.3V
+    hdi_a.pins[84] ~ power_5v.hv  # +5V
+    hdi_a.pins[85] ~ power_3v3.hv  # +3.3V
+    hdi_a.pins[86] ~ power_5v.hv  # +5V
+    hdi_a.pins[87] ~ power_1v8.hv  # +1.8V
+    # hdi_a.pins[88] ~ # Unknown
+    hdi_a.pins[89] ~ power_1v8.hv  # +1.8V
+    # hdi_a.pins[90] ~ # Unknown
+    hdi_a.pins[91] ~ power_button.line  # Power button
+    hdi_a.pins[92] ~ boot_mode.line  # Boot mode
+    hdi_a.pins[93] ~ usb_cc[0].line  # USB CC1
+    hdi_a.pins[94] ~ power_led.line  # Power LED buffer input
+    hdi_a.pins[95] ~ usb_cc[1].line  # USB CC2
+    # hdi_a.pins[96] ~ # Unknown
+    hdi_a.pins[97] ~ power_5v.lv  # GND
+    # hdi_a.pins[98] ~ # Unknown
+    # hdi_a.pins[99] ~ # Unknown
+
+    # HDI-B Pinout
+    # hdi_b.pins[0] ~ # Unknown
+    # hdi_b.pins[1] ~ # Unknown
+    hdi_b.pins[2] ~ usb2.usb_if.d.n.line  # USB2 D-
+    # hdi_b.pins[3] ~ # Unknown
+    hdi_b.pins[4] ~ usb2.usb_if.d.p.line  # USB2 D+
+    # hdi_b.pins[5] ~ # Unknown
+    hdi_b.pins[6] ~ power_5v.lv  # GND
+    hdi_b.pins[7] ~ power_5v.lv  # GND
+    # hdi_b.pins[8] ~ # Unknown
+    # hdi_b.pins[9] ~ # Unknown
+    # hdi_b.pins[10] ~ # Unknown
+    # hdi_b.pins[11] ~ # Unknown
+    hdi_b.pins[12] ~ power_5v.lv  # GND
+    hdi_b.pins[13] ~ power_5v.lv  # GND
+    # hdi_b.pins[14] ~ # Unknown
+    # hdi_b.pins[15] ~ # Unknown
+    # hdi_b.pins[16] ~ # Unknown
+    # hdi_b.pins[17] ~ # Unknown
+    hdi_b.pins[18] ~ power_5v.lv  # GND
+    hdi_b.pins[19] ~ power_5v.lv  # GND
+    # hdi_b.pins[20] ~ # Unknown
+    # hdi_b.pins[21] ~ # Unknown
+    # hdi_b.pins[22] ~ # Unknown
+    # hdi_b.pins[23] ~ # Unknown
+    hdi_b.pins[24] ~ power_5v.lv  # GND
+    hdi_b.pins[25] ~ power_5v.lv  # GND
+    # hdi_b.pins[26] ~ # Unknown
+    # hdi_b.pins[27] ~ # Unknown
+    # hdi_b.pins[28] ~ # Unknown
+    hdi_b.pins[29] ~ usb3[0].usb3_if.rx.p.line  # USB3_0 RX P
+    hdi_b.pins[30] ~ power_5v.lv  # GND
+    hdi_b.pins[31] ~ power_5v.lv  # GND
+    # hdi_b.pins[32] ~ # Unknown
+    hdi_b.pins[33] ~ usb3[0].usb3_if.usb_if.d.p.line  # USB3_0 USB2 D+
+    # hdi_b.pins[34] ~ # Unknown
+    hdi_b.pins[35] ~ usb3[0].usb3_if.usb_if.d.n.line  # USB3_0 USB2 D-
+    hdi_b.pins[36] ~ power_5v.lv  # GND
+    hdi_b.pins[37] ~ usb3[0].usb3_if.rx.n.line  # USB3_0 RX N
+    # hdi_b.pins[38] ~ # Unknown
+    hdi_b.pins[39] ~ usb3[0].usb3_if.tx.n.line  # USB3_0 TX N
+    # hdi_b.pins[40] ~ # Unknown
+    hdi_b.pins[41] ~ usb3[0].usb3_if.tx.p.line  # USB3_0 TX P
+    hdi_b.pins[42] ~ hdmis[1].hotplug.line  # HDMI1 hotplug
+    hdi_b.pins[43] ~ power_5v.lv  # GND
+    hdi_b.pins[44] ~ hdmis[1].i2c.sda.line  # HDMI1 I2C SDA
+    hdi_b.pins[45] ~ hdmis[1].data[2].p.line  # HDMI1 data 2 P
+    hdi_b.pins[46] ~ hdmis[1].i2c.scl.line  # HDMI1 I2C SCL
+    hdi_b.pins[47] ~ hdmis[1].data[2].n.line  # HDMI1 data 2 N
+    hdi_b.pins[48] ~ hdmis[1].cec.line  # HDMI1 CEC
+    # hdi_b.pins[49] ~ # Unknown
+    hdi_b.pins[50] ~ hdmis[0].cec.line  # HDMI0 CEC
+    hdi_b.pins[51] ~ hdmis[1].data[1].p.line  # HDMI1 data 1 P
+    hdi_b.pins[52] ~ hdmis[0].hotplug.line  # HDMI0 hotplug
+    hdi_b.pins[53] ~ hdmis[1].data[1].n.line  # HDMI1 data 1 N
+    hdi_b.pins[54] ~ power_5v.lv  # GND
+    hdi_b.pins[55] ~ power_5v.lv  # GND
+    hdi_b.pins[56] ~ usb3[1].usb3_if.rx.n.line  # USB3_1 RX N
+    hdi_b.pins[57] ~ hdmis[1].data[0].p.line  # HDMI1 data 0 P
+    hdi_b.pins[58] ~ usb3[1].usb3_if.rx.p.line  # USB3_1 RX P
+    hdi_b.pins[59] ~ hdmis[1].data[0].n.line  # HDMI1 data 0 N
+    hdi_b.pins[60] ~ power_5v.lv  # GND
+    hdi_b.pins[61] ~ power_5v.lv  # GND
+    hdi_b.pins[62] ~ usb3[1].usb3_if.usb_if.d.p.line  # USB3_1 USB2 D+
+    hdi_b.pins[63] ~ hdmis[1].clock.p.line  # HDMI1 clock P
+    hdi_b.pins[64] ~ usb3[1].usb3_if.usb_if.d.n.line  # USB3_1 USB2 D-
+    hdi_b.pins[65] ~ hdmis[1].clock.n.line  # HDMI1 clock N
+    hdi_b.pins[66] ~ power_5v.lv  # GND
+    hdi_b.pins[67] ~ power_5v.lv  # GND
+    hdi_b.pins[68] ~ usb3[1].usb3_if.tx.n.line  # USB3_1 TX N
+    hdi_b.pins[69] ~ hdmis[0].data[2].p.line  # HDMI0 data 2 P
+    hdi_b.pins[70] ~ usb3[1].usb3_if.tx.p.line  # USB3_1 TX P
+    hdi_b.pins[71] ~ hdmis[0].data[2].n.line  # HDMI0 data 2 N
+    hdi_b.pins[72] ~ power_5v.lv  # GND
+    hdi_b.pins[73] ~ power_5v.lv  # GND
+    # hdi_b.pins[74] ~ # Unknown
+    hdi_b.pins[75] ~ hdmis[0].data[1].p.line  # HDMI0 data 1 P
+    # hdi_b.pins[76] ~ # Unknown
+    hdi_b.pins[77] ~ hdmis[0].data[1].n.line  # HDMI0 data 1 N
+    hdi_b.pins[78] ~ power_5v.lv  # GND
+    hdi_b.pins[79] ~ power_5v.lv  # GND
+    # hdi_b.pins[80] ~ # Unknown
+    hdi_b.pins[81] ~ hdmis[0].data[0].p.line  # HDMI0 data 0 P
+    # hdi_b.pins[82] ~ # Unknown
+    hdi_b.pins[83] ~ hdmis[0].data[0].n.line  # HDMI0 data 0 N
+    hdi_b.pins[84] ~ power_5v.lv  # GND
+    hdi_b.pins[85] ~ power_5v.lv  # GND
+    # hdi_b.pins[86] ~ # Unknown
+    hdi_b.pins[87] ~ hdmis[0].clock.p.line  # HDMI0 clock P
+    # hdi_b.pins[88] ~ # Unknown
+    hdi_b.pins[89] ~ hdmis[0].clock.n.line  # HDMI0 clock N
+    hdi_b.pins[90] ~ power_5v.lv  # GND
+    hdi_b.pins[91] ~ power_5v.lv  # GND
+    # hdi_b.pins[92] ~ # Unknown
+    # hdi_b.pins[93] ~ # Unknown
+    # hdi_b.pins[94] ~ # Unknown
+    # hdi_b.pins[95] ~ # Unknown
+    hdi_b.pins[96] ~ power_5v.lv  # GND
+    hdi_b.pins[97] ~ power_5v.lv  # GND
+    hdi_b.pins[98] ~ hdmis[0].i2c.sda.line  # HDMI0 I2C SDA
+    hdi_b.pins[99] ~ hdmis[0].i2c.scl.line  # HDMI0 I2C SCL

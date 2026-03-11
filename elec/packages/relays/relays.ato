@@ -1,0 +1,27 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+#pragma experiment("FOR_LOOP")
+
+from "helpers.ato" import LogicLevelRelayBase
+
+from "parts/Omron_Electronics_G5Q_1A4_DC24/Omron_Electronics_G5Q_1A4_DC24.ato" import RelaySPSTNO10A24V
+from "parts/Omron_Electronics_G6K_2F_Y_TR_DC3/Omron_Electronics_G6K_2F_Y_TR_DC3.ato" import RelayDPDT1A3V
+
+# SPST-NO Power Relays
+module LogicLevelRelaySPSTNO10A24V from LogicLevelRelayBase:
+    """
+    Omron G5Q-1A4 DC24 — SPST-NO, 10A @ 30VDC, 24V coil
+    Ideal for per-slot power switching (3.5A @ 24V per card slot)
+    """
+    relay = new RelaySPSTNO10A24V
+    coil_power.hv ~> relay.coil ~> coil_switch ~> coil_power.lv
+    assert coil_power.voltage is relay.coil.voltage
+
+module LogicLevelRelayDPDT1A3V from LogicLevelRelayBase:
+    """
+    Omron G6K-2F-Y-TR DC3 — DPDT, 1A signal relay with 3V coil
+    Used on the cell card Kelvin output path.
+    """
+    relay = new RelayDPDT1A3V
+    coil_power.hv ~> relay.coil ~> coil_switch ~> coil_power.lv
+    assert coil_power.voltage is relay.coil.voltage

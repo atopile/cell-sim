@@ -11,3 +11,13 @@ builds:
         entry: usage.ato:Usage
 
 dependencies: []
+
+package:
+    identifier: atopile/microchip-24aa025e48
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Microchip 24AA025E48 I2C EEPROM with preprogrammed EUI-48
+    license: MIT

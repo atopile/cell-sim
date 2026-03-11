@@ -1,5 +1,7 @@
 #pragma experiment("BRIDGE_CONNECT")
 #pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+#pragma experiment("MODULE_TEMPLATING")
 
 # TI TPSM84209 — 2.5A Synchronous Buck Module with Integrated Inductor
 # =====================================================================
@@ -19,6 +21,7 @@ import Resistor
 import Capacitor
 import ElectricPower
 import ElectricLogic
+import can_bridge_by_name
 
 from "parts/Texas_Instruments_TPSM84209RKHR/Texas_Instruments_TPSM84209RKHR.ato" import Texas_Instruments_TPSM84209RKHR_package
 
@@ -57,6 +60,8 @@ module TI_TPSM84209:
     power_in.lv ~ ic.GND
     power_out.hv ~ ic.VOUT
     power_out.lv ~ ic.GND
+
+    trait can_bridge_by_name<input_name="power_in", output_name="power_out">
 
     # --- Input decoupling capacitors ---
     # Datasheet: 2x 10uF ceramic (0805) + 1x 100nF (0402)

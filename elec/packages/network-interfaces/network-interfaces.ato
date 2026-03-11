@@ -1,0 +1,15 @@
+import ElectricLogic
+
+
+interface RMII:
+    ref_clk = new ElectricLogic
+    txd = new ElectricLogic[2]
+    tx_en = new ElectricLogic
+    rxd = new ElectricLogic[2]
+    crs_dv = new ElectricLogic
+    rx_er = new ElectricLogic
+
+
+interface MDIO:
+    mdc = new ElectricLogic
+    mdio = new ElectricLogic

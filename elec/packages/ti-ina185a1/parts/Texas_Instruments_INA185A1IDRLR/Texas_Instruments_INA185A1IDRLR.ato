@@ -1,0 +1,24 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_INA185A1IDRLR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2059314", date="2026-01-21T11:14:10.554548+00:00", checksum="de59b380a57c8b0c981fbe14224c1cf35972872da403b4d95f3d67f1b9bbf8a3">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="INA185A1IDRLR", footprint="SOT-563_L1.6-W1.2-P0.50-LS1.6-BL.kicad_mod", symbol="INA185A1IDRLR.kicad_sym", model="SOT-563-6P_L1.6-W1.2-H0.6-LS1.6-P0.50.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2059314", manufacturer="Texas Instruments", partno="INA185A1IDRLR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2303012200_Texas-Instruments-INA185A1IDRLR_C2059314.pdf">
+
+    # pins
+    signal GND ~ pin 2
+    signal INneg ~ pin 4
+    signal INpos ~ pin 3
+    signal OUT ~ pin 1
+    signal REF ~ pin 5
+    signal VS ~ pin 6

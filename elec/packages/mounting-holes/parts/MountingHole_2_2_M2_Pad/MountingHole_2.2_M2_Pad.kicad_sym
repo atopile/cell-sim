@@ -1,0 +1,37 @@
+(kicad_symbol_lib
+	(version 20241229)
+	(generator "mounting_hole_generator")
+	(symbol "MountingHole_2.2_M2_Pad"
+		(property "Reference" "H"
+			(at 0 0 0)
+		)
+		(property "Value" "MountingHole_2.2_M2_Pad"
+			(at 0 2.54 0)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(symbol "MountingHole_2.2_M2_Pad"
+			(pin passive line
+				(at 0 2.54 270)
+				(length 2.54)
+				(name "contact"
+					(effects
+						(font
+							(size 1 1)
+							(thickness 0.15)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1 1)
+							(thickness 0.15)
+						)
+					)
+				)
+			)
+		)
+	)
+)

@@ -1,0 +1,19 @@
+#pragma experiment("TRAITS")
+import has_part_removed
+import is_atomic_part
+import is_auto_generated
+import has_designator_prefix
+
+component MountingHole_8_4_M8_Pad_TopBottom_package:
+    """M8 mounting hole with Pad_TopBottom pad configuration"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="mounting_hole_generator", date="2026-01-14T04:03:47.353112+00:00", checksum="0e6f848808b466c9eb39f7c6002548b75b8766e0e66689450ec78fc6424402ca">
+
+    trait is_atomic_part<manufacturer="Atopile", partnumber="", footprint="MountingHole_8.4_M8_Pad_TopBottom.kicad_mod", symbol="MountingHole_8.4_M8_Pad_TopBottom.kicad_sym">
+    trait has_part_removed
+    trait has_designator_prefix<prefix="H">
+
+    # pins
+    signal contact ~ pin 1

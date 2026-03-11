@@ -1,0 +1,30 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Ckmtw_R_RJ45S08P_C000_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    # trait is_auto_generated<system="ato_part", source="easyeda:C386764", date="2025-09-11T00:20:02.352417+00:00", checksum="63c2bbd1114a46b783f524f31ac89eb1a8ab4e46e333ee35665cd3dc7158537b">
+
+    trait is_atomic_part<manufacturer="Ckmtw", partnumber="R-RJ45S08P-C000", footprint="RJ45-TH_R-RJ45S08P-C000.kicad_mod", symbol="R-RJ45S08P-C000.kicad_sym", model="RJ45-TH_R-RJ45S08P-C000.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C386764", manufacturer="Ckmtw", partno="R-RJ45S08P-C000">
+    trait has_designator_prefix<prefix="RJ">
+
+    # pins
+    pin 1
+    pin 2
+    pin 3
+    pin 4
+    pin 5
+    pin 6
+    pin 7
+    pin 8
+    signal Gneg ~ pin 12
+    signal Gpos ~ pin 11
+    signal S ~ pin 13
+    S ~ pin 14
+    signal Yneg ~ pin 10
+    signal Ypos ~ pin 9

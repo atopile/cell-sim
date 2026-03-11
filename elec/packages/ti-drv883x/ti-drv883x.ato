@@ -1,0 +1,115 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+
+import ElectricPower
+import ElectricLogic
+import Electrical
+import Capacitor
+
+from "parts/Texas_Instruments_DRV8838DSGR/Texas_Instruments_DRV8838DSGR.ato" import Texas_Instruments_DRV8838DSGR_package
+from "parts/Texas_Instruments_DRV8837DSGR/Texas_Instruments_DRV8837DSGR.ato" import Texas_Instruments_DRV8837DSGR_package
+
+module TI_DRV8837 from TI_DRV883x:
+    """
+    Texas Instruments DRV8837 DC Motor Driver with IN0/IN1 control
+    """
+    package = new Texas_Instruments_DRV8837DSGR_package
+
+    # external interfaces
+    inputs = new ElectricLogic[2]
+    """
+    Motor inputs (IN0/IN1)
+
+    Truth table:
+    nSLEEP IN1 IN2 OUT1 OUT2 FUNCTION (DC MOTOR)
+    0 X X Z Z Coast
+    1 0 0 Z Z Coast
+    1 0 1 L H Reverse
+    1 1 0 H L Forward
+    1 1 1 L L Brake
+    """
+    for input in inputs:
+        input.reference ~ logic_power
+
+    # package connections
+    package.IN1 ~ inputs[0].line
+    package.IN2 ~ inputs[1].line
+    package.OUT1 ~ motor_outs[0]
+    package.OUT2 ~ motor_outs[1]
+    package.VCC ~ logic_power.hv
+    package.GND ~ logic_power.lv
+    package.VM ~ motor_power.hv
+    package.nSPLEEP ~ sleep.line
+    package.EP ~ motor_power.lv
+
+module TI_DRV8838 from TI_DRV883x:
+    """
+    Texas Instruments DRV8838 DC Motor Driver with PH/EN control
+
+    Truth table:
+    nSLEEP PH EN OUT1 OUT2 FUNCTION (DC MOTOR)
+    0 X X Z Z Coast
+    1 X 0 L L Brake
+    1 1 1 L H Reverse
+    1 0 1 H L Forward
+    """
+    package = new Texas_Instruments_DRV8838DSGR_package
+
+    # external interfaces
+    phase = new ElectricLogic
+    phase.required = True
+    phase.reference ~ logic_power
+
+    enable = new ElectricLogic
+    enable.required = True
+    enable.reference ~ logic_power
+
+    # package connections
+    package.PH ~ phase.line
+    package.EN ~ enable.line
+    package.OUT1 ~ motor_outs[0]
+    package.OUT2 ~ motor_outs[1]
+    package.VCC ~ logic_power.hv
+    package.GND ~ logic_power.lv
+    package.VM ~ motor_power.hv
+    package.nSLEEP ~ sleep.line
+    package.PAD ~ motor_power.lv
+
+module TI_DRV883x:
+    """
+    Texas Instruments DRV883x base module
+    """
+    # external interfaces
+    logic_power = new ElectricPower
+    """Logic power supply (1.8V to 7V)"""
+    logic_power.required = True
+    logic_power.voltage = 1.8V to 7V
+
+    motor_power = new ElectricPower
+    """Motor power supply (0V to 11V)"""
+    motor_power.required = True
+    motor_power.voltage = 0V to 11V
+
+    sleep = new ElectricLogic
+    """Device sleep control (sleep = low)"""
+    sleep.required = True
+    sleep.reference ~ logic_power
+
+    motor_outs = new Electrical[2]
+    """H-bridge outputs"""
+
+    logic_power.lv ~ motor_power.lv
+
+    # decoupling capacitors
+    logic_power_decoupling_capacitor = new Capacitor
+    logic_power_decoupling_capacitor.capacitance = 100nF +/- 20%
+    assert logic_power_decoupling_capacitor.max_voltage >= logic_power.voltage * 1.5
+    logic_power_decoupling_capacitor.package = "0402"
+    logic_power.hv ~> logic_power_decoupling_capacitor ~> logic_power.lv
+
+    motor_power_decoupling_capacitor = new Capacitor
+    motor_power_decoupling_capacitor.capacitance = 100nF +/- 20%
+    assert motor_power_decoupling_capacitor.max_voltage >= motor_power.voltage * 1.5
+    motor_power_decoupling_capacitor.package = "0402"
+    motor_power.hv ~> motor_power_decoupling_capacitor ~> motor_power.lv

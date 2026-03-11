@@ -1,0 +1,18 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+from "ti-iso7721.ato" import ISO7721_UART_driver
+
+import ElectricPower
+import UART_Base
+
+module Usage:
+    power_card = new ElectricPower
+    power_bp = new ElectricPower
+    uart_card = new UART_Base
+    uart_bp = new UART_Base
+
+    isolator = new ISO7721_UART_driver
+    isolator.power_card ~ power_card
+    isolator.power_bp ~ power_bp
+    isolator.uart_card ~ uart_card
+    isolator.uart_bp ~ uart_bp

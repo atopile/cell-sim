@@ -1,0 +1,26 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+from "ti-cd74hc4052.ato" import CD74HC4052_driver
+
+import Electrical
+import ElectricPower
+import ElectricLogic
+
+module Usage:
+    power = new ElectricPower
+    common = new Electrical
+    channels = new Electrical[4]
+    sel_0 = new ElectricLogic
+    sel_1 = new ElectricLogic
+    enable = new ElectricLogic
+
+    mux = new CD74HC4052_driver
+    mux.power ~ power
+    mux.a_common ~ common
+    mux.a_ch[0] ~ channels[0]
+    mux.a_ch[1] ~ channels[1]
+    mux.a_ch[2] ~ channels[2]
+    mux.a_ch[3] ~ channels[3]
+    mux.sel_0 ~ sel_0
+    mux.sel_1 ~ sel_1
+    mux.enable ~ enable

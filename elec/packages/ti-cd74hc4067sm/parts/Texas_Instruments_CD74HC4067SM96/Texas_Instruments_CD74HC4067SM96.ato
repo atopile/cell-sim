@@ -1,0 +1,42 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_CD74HC4067SM96_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C98457", date="2026-01-21T08:26:28.590705+00:00", checksum="94ae4ee5386da7117d1764a257636550cc1aa53c1d09afeb33fe94b485713cd8">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="CD74HC4067SM96", footprint="SSOP-24_L8.1-W5.3-P0.65-LS7.8-BL.kicad_mod", symbol="CD74HC4067SM96.kicad_sym", model="SSOP-24_L8.2-W5.3-H1.8-LS7.8-P0.65.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C98457", manufacturer="Texas Instruments", partno="CD74HC4067SM96">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_1810010611_Texas-Instruments-CD74HC4067SM96_C98457.pdf">
+
+    # pins
+    signal COMMONINOUT_OUTPUT ~ pin 1
+    signal GND ~ pin 12
+    signal I0 ~ pin 9
+    signal I1 ~ pin 8
+    signal I2 ~ pin 7
+    signal I3 ~ pin 6
+    signal I4 ~ pin 5
+    signal I5 ~ pin 4
+    signal I6 ~ pin 3
+    signal I7 ~ pin 2
+    signal I8 ~ pin 23
+    signal I9 ~ pin 22
+    signal I10 ~ pin 21
+    signal I11 ~ pin 20
+    signal I12 ~ pin 19
+    signal I13 ~ pin 18
+    signal I14 ~ pin 17
+    signal I15 ~ pin 16
+    signal S0 ~ pin 10
+    signal S1 ~ pin 11
+    signal S2 ~ pin 14
+    signal S3 ~ pin 13
+    signal VCC ~ pin 24
+    signal nE ~ pin 15

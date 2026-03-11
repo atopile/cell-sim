@@ -1,0 +1,21 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Sinhoo_SMTSO2515CTJ_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    # trait is_auto_generated<system="ato_part", source="easyeda:C2915629", date="2025-05-30T18:37:06.948487+00:00", checksum="ab3c11deae6142ab6031e475792a61f8dc2d3bd3ac636a47aa6ff59a5b62573c">
+
+    trait is_atomic_part<manufacturer="Sinhoo", partnumber="SMTSO2515CTJ", footprint="SMD_BD5.6-D4.1.kicad_mod", symbol="SMTSO2515CTJ.kicad_sym">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2915629", manufacturer="Sinhoo", partno="SMTSO2515CTJ">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal pad ~ pin 1
+    pad ~ pin 2
+    pad ~ pin 3
+    pad ~ pin 4
+    pad ~ pin 5

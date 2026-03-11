@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component YLPTEC_B2403S_3WR2_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C5369514", date="2026-02-28T04:32:28.375514+00:00", checksum="7022a27c21e6c6a13e516d24883e4667743640593ea212069ccfbe9234c02f2c">
+
+    trait is_atomic_part<manufacturer="YLPTEC", partnumber="B2403S-3WR2", footprint="PWRM-TH_7P-L19.7-W7.0-P2.54-PE3_5_7.kicad_mod", symbol="B2403S-3WR2.kicad_sym", model="PWRM-TH_7P-L19.7-W7.0-H10.16-P2.54-PE3_5_7.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C5369514", manufacturer="YLPTEC", partno="B2403S-3WR2">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2304171800_YLPTEC-B2403S-3WR2_C5369514.pdf">
+
+    # pins
+    signal GND ~ pin 2
+    signal P0V ~ pin 4
+    signal VIN ~ pin 1
+    signal VOpos ~ pin 6

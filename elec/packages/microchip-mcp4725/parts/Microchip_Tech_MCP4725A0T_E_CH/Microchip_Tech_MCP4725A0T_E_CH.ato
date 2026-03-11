@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Microchip_Tech_MCP4725A0T_E_CH_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C144198", date="2025-05-31T01:20:36.550503+00:00", checksum="cadf083e0c742e16aa12fd334555293c96fa4032bb80d724bb7085f841268496">
+
+    trait is_atomic_part<manufacturer="Microchip Tech", partnumber="MCP4725A0T-E/CH", footprint="SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL.kicad_mod", symbol="MCP4725A0T-E_CH.kicad_sym", model="SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C144198", manufacturer="Microchip Tech", partno="MCP4725A0T-E/CH">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal A0 ~ pin 6
+    signal SCL ~ pin 5
+    signal SDA ~ pin 4
+    signal VDD ~ pin 3
+    signal VOUT ~ pin 1
+    signal VSS ~ pin 2

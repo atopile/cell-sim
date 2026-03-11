@@ -1,0 +1,31 @@
+(fp_lib_table
+	(version 7)
+	(lib
+		(name "Texas_Instruments_ADS131M04IPWR")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Texas_Instruments_ADS131M04IPWR")
+		(options "")
+		(descr "atopile: part lib: Texas_Instruments_ADS131M04IPWR")
+	)
+	(lib
+		(name "Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+		(options "")
+		(descr "atopile: part lib: Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+	)
+	(lib
+		(name "Samsung_Electro_Mechanics_CL05A105KA5NQNC")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Samsung_Electro_Mechanics_CL05A105KA5NQNC")
+		(options "")
+		(descr "atopile: part lib: Samsung_Electro_Mechanics_CL05A105KA5NQNC")
+	)
+	(lib
+		(name "UNI_ROYAL_0402WGF1002TCE")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/UNI_ROYAL_0402WGF1002TCE")
+		(options "")
+		(descr "atopile: part lib: UNI_ROYAL_0402WGF1002TCE")
+	)
+)

@@ -1,0 +1,5357 @@
+(kicad_pcb
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(general
+		(thickness 1.6)
+		(legacy_teardrops no)
+	)
+	(paper "A4")
+	(layers
+		(0 "F.Cu" signal)
+		(2 "B.Cu" signal)
+		(9 "F.Adhes" user "F.Adhesive")
+		(11 "B.Adhes" user "B.Adhesive")
+		(13 "F.Paste" user)
+		(15 "B.Paste" user)
+		(5 "F.SilkS" user "F.Silkscreen")
+		(7 "B.SilkS" user "B.Silkscreen")
+		(1 "F.Mask" user)
+		(3 "B.Mask" user)
+		(17 "Dwgs.User" user "User.Drawings")
+		(19 "Cmts.User" user "User.Comments")
+		(21 "Eco1.User" user "User.Eco1")
+		(23 "Eco2.User" user "User.Eco2")
+		(25 "Edge.Cuts" user)
+		(27 "Margin" user)
+		(31 "F.CrtYd" user "F.Courtyard")
+		(29 "B.CrtYd" user "B.Courtyard")
+		(35 "F.Fab" user)
+		(33 "B.Fab" user)
+		(39 "User.1" user)
+		(41 "User.2" user)
+		(43 "User.3" user)
+		(45 "User.4" user)
+		(47 "User.5" user)
+		(49 "User.6" user)
+		(51 "User.7" user)
+		(53 "User.8" user)
+		(55 "User.9" user)
+	)
+	(setup
+		(stackup
+			(layer "F.SilkS"
+				(type "Top Silk Screen")
+			)
+			(layer "F.Paste"
+				(type "Top Solder Paste")
+			)
+			(layer "F.Mask"
+				(type "Top Solder Mask")
+				(color "Black")
+				(thickness 0.01)
+				(material "Solder mask")
+				(epsilon_r 3.3)
+			)
+			(layer "F.Cu"
+				(type "copper")
+				(thickness 0.035)
+			)
+			(layer "dielectric 1"
+				(type "core")
+				(thickness 1.51)
+				(material "FR4")
+				(epsilon_r 4.5)
+				(loss_tangent 0.02)
+			)
+			(layer "B.Cu"
+				(type "copper")
+				(thickness 0.035)
+			)
+			(layer "B.Mask"
+				(type "Bottom Solder Mask")
+				(color "Black")
+				(thickness 0.01)
+				(material "Solder mask")
+				(epsilon_r 3.3)
+			)
+			(layer "B.Paste"
+				(type "Bottom Solder Paste")
+			)
+			(layer "B.SilkS"
+				(type "Bottom Silk Screen")
+			)
+			(copper_finish "ENIG")
+		)
+		(pad_to_mask_clearance 0)
+		(allow_soldermask_bridges_in_footprints no)
+		(tenting front back)
+		(pcbplotparams
+			(layerselection 0x00000000_00000000_000010fc_ffffffff)
+			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
+			(disableapertmacros no)
+			(usegerberextensions no)
+			(usegerberattributes yes)
+			(usegerberadvancedattributes yes)
+			(creategerberjobfile yes)
+			(dashed_line_dash_ratio 12)
+			(dashed_line_gap_ratio 3)
+			(svgprecision 4)
+			(plotframeref no)
+			(mode 1)
+			(useauxorigin no)
+			(hpglpennumber 1)
+			(hpglpenspeed 20)
+			(hpglpendiameter 15)
+			(pdf_front_fp_property_popups yes)
+			(pdf_back_fp_property_popups yes)
+			(pdf_metadata yes)
+			(pdf_single_document no)
+			(dxfpolygonmode yes)
+			(dxfimperialunits yes)
+			(dxfusepcbnewfont yes)
+			(psnegative no)
+			(psa4output no)
+			(plot_black_and_white yes)
+			(sketchpadsonfab no)
+			(plotpadnumbers no)
+			(hidednponfab no)
+			(sketchdnponfab yes)
+			(crossoutdnponfab yes)
+			(subtractmaskfromsilk no)
+			(outputformat 1)
+			(mirror no)
+			(drillshape 1)
+			(scaleselection 1)
+			(outputdirectory "")
+		)
+	)
+	(net 0 "")
+	(net 1 "mountinghole_43m4padtoponly-contact")
+	(net 2 "mountinghole_43m4padvia-contact")
+	(net 3 "contact")
+	(net 4 "mountinghole_53m5.package-contact")
+	(net 5 "contact-1")
+	(net 6 "mountinghole_53m5pad-contact")
+	(net 7 "mountinghole_2_2_m2_pad_toponly-contact")
+	(net 8 "mountinghole_53m5padtopbottom-contact")
+	(net 9 "mountinghole_2_2_m2_pad_via-contact")
+	(net 10 "mountinghole_53m5padtoponly-contact")
+	(net 11 "mountinghole_2_7_m2_5.package-contact")
+	(net 12 "mountinghole_53m5padvia-contact")
+	(net 13 "mountinghole_2_7_m2_5_pad-contact")
+	(net 14 "mountinghole_64m6.package-contact")
+	(net 15 "mountinghole_2_7_m2_5_pad_topbottom-contact")
+	(net 16 "mountinghole_64m6pad-contact")
+	(net 17 "mountinghole_2_7_m2_5_pad_toponly-contact")
+	(net 18 "mountinghole_64m6padtopbottom-contact")
+	(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+	(net 20 "mountinghole_64m6padtoponly-contact")
+	(net 21 "mountinghole_32m3padtopbottom-contact")
+	(net 22 "mountinghole_64m6padvia-contact")
+	(net 23 "mountinghole_32m3padtoponly-contact")
+	(net 24 "mountinghole_84m8.package-contact")
+	(net 25 "mountinghole_32m3padvia-contact")
+	(net 26 "mountinghole_84m8pad-contact")
+	(net 27 "mountinghole_3_2_m3.package-contact")
+	(net 28 "mountinghole_84m8padtopbottom-contact")
+	(net 29 "mountinghole_3_2_m3_pad-contact")
+	(net 30 "mountinghole_84m8padtoponly-contact")
+	(net 31 "mountinghole_43m4.package-contact")
+	(net 32 "mountinghole_84m8padvia-contact")
+	(net 33 "mountinghole_43m4pad-contact")
+	(net 34 "mountinghole_43m4padtopbottom-contact")
+	(footprint "MountingHole_5_3_M5:MountingHole_5.3_M5"
+		(layer "F.Cu")
+		(uuid "022d19ff-1b69-4e1a-b6fc-1b9f4642524b")
+		(at 200 0)
+		(property "Reference" "H50"
+			(at 0 -6.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "42215935-784e-445b-9a5c-dd92b07ff8ea")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 6.3 0)
+			(layer "F.Fab")
+			(uuid "a0ccb895-5573-4732-86e4-d3db3c9ac715")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "6d130db4-9a64-4939-9015-2ac011bc67c3")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "15f86e6f-6438-4750-b9b9-6d5520c65a38")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "5adb5eb5-9557-43f8-8d5c-de5c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ab6b07b0-7ef0-4851-a30a-b7344642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "965bdc4d-84cf-4cfd-bea4-96c14642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_53m5.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "903834e5-b51c-4431-b415-79764642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 7.42 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "46e7e43e-8132-44b8-b109-0920d71d9fad")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 10.6 10.6)
+			(drill oval 5.3 5.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 4 "mountinghole_53m5.package-contact")
+			(uuid "1e02193a-f49e-4f14-a492-b2ef8034c389")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_4_3_M4_Pad_TopBottom:MountingHole_4.3_M4_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "03fdf8a3-fa72-4cae-99bb-98014642524b")
+		(at 170 0)
+		(property "Reference" "H32"
+			(at 0 -5.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "b6289e1f-15b2-4739-a358-9a7426df43ba")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 5.3 0)
+			(layer "F.Fab")
+			(uuid "546e9cc9-85eb-4fcc-8583-86c3e6e4234c")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "fe021a45-c835-4f3c-8ab6-41d45bae51f7")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "f69b4298-b6a7-4036-b40c-58a4a08f05e5")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ca638df7-4aa6-4528-a30f-6f274642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e9a16ada-a87c-4c79-a893-d5394642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "6bd0f8b6-f380-42fe-8a11-ce204642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_43m4padtopbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "24763f49-05dd-48b2-b3e0-e85e4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 5.16 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "94ba59eb-8a95-46a0-8a04-3f09b64a0ea2")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 6.02 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "ab73d555-7759-4a1f-95db-53b522fc90e1")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 8.6 8.6)
+			(drill oval 4.3 4.3
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 34 "mountinghole_43m4padtopbottom-contact")
+			(uuid "14ae4bf3-1789-4363-8994-bde68da6ebbe")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_6_4_M6_Pad_Via:MountingHole_6.4_M6_Pad_Via"
+		(layer "F.Cu")
+		(uuid "049f17c1-08de-4036-9fe1-34e84642524b")
+		(at 290 0)
+		(property "Reference" "H56"
+			(at 0 -7.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "20bec576-9612-44d9-8aa3-882f2c96bb84")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 7.4 0)
+			(layer "F.Fab")
+			(uuid "ac4dd6bc-b63c-4b1d-9b42-7e530e1ec55b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "63aa73aa-0301-41c0-b5e8-3789d360480d")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "d6112dcb-1285-4240-881c-316f7e2913eb")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "f47de41d-b3f0-4620-9b57-b51f4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "daa9a9aa-1c20-4f26-90ce-315c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "6afd0f1c-ca06-4617-872a-26fc4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_64m6padvia.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "8181379b-afea-4ae4-9dfe-346c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 7.68 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "8ad208a3-8946-4439-97f1-5c0a5bd1924b")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 8.96 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "4892feec-939c-4968-9879-77d7545fa11d")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "33759f38-39b7-450b-8be7-883a57cffda4")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "bd20778f-fd6d-4fb8-a220-95f3ff344aa4")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "4719e7b1-30d8-4db2-90da-50214e4ca756")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "f3a6cb9b-630f-4183-9f1a-d2debb88eb64")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 12.8 12.8)
+			(drill oval 6.4 6.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "d0d0f266-a52e-4a41-b996-398fe5f4f1eb")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "faaa83d0-ed37-4163-a0c3-9627c03e91a3")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "8fb78220-05f2-4375-8b35-7b862a46dde2")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "e71dca5d-db60-4c15-9679-a46a0dcf6583")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 22 "mountinghole_64m6padvia-contact")
+			(uuid "6a827640-fae0-47ff-9e67-0226c24508b4")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_5_3_M5_Pad:MountingHole_5.3_M5_Pad"
+		(layer "F.Cu")
+		(uuid "0c95bec7-c3f3-40a8-8a72-5e944642524b")
+		(at 210 0)
+		(property "Reference" "H48"
+			(at 0 -6.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "8f7ff8f7-4525-4219-89de-81caec3f089d")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 6.3 0)
+			(layer "F.Fab")
+			(uuid "297dc42e-afdf-4543-9038-6cb229cca757")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "11dfbbaf-ebc6-4273-9c0f-7d712a647649")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "368088e3-ef6f-49c6-a9aa-7e525e00d68e")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "9cd2e4ac-0236-4fff-9159-daa64642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e561543c-e59f-482b-aa63-9da74642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "38b0b1ab-17fd-4873-b85c-e0724642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_53m5pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "17c4a93c-8d02-4e24-9755-3e4b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 6.36 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "7a670f9b-72b1-4ce0-9c13-94b0c34f834e")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 7.42 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "107ad35f-ba24-4e20-bd44-bf9013cad648")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 10.6 10.6)
+			(drill oval 5.3 5.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 6 "mountinghole_53m5pad-contact")
+			(uuid "fd2154c8-84b6-4360-b55e-e77dec00181b")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_3_2_M3_Pad_TopBottom:MountingHole_3.2_M3_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "1ae0574f-7b71-4364-a300-68304642524b")
+		(at 120 0)
+		(property "Reference" "H26"
+			(at 0 -4.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "df568a50-dc27-4659-bb20-8af5558305cb")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 4.2 0)
+			(layer "F.Fab")
+			(uuid "b8d58074-5006-4625-9514-aedd63242a65")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "c291df12-8fa7-4aba-83ea-d8f52f02d21e")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "a57524cd-8cc6-4b49-8d47-8feac575eab6")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "db00983f-6bd6-4115-8857-03964642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "254b207a-cb81-4667-82d6-4c254642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "504306c5-73bc-47a6-99a6-c1374642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_32m3padtopbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ecbf82c1-e4e0-4d85-9af9-a1394642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.84 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "d5ec7954-7e15-4b24-8b05-43367f1ca623")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 4.48 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "92e5bad8-333c-4126-b2bb-d9fb36e5057c")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 6.4 6.4)
+			(drill oval 3.2 3.2
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 21 "mountinghole_32m3padtopbottom-contact")
+			(uuid "551794bd-7344-4725-ad66-55fdc6f12146")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_2_M2_Pad_TopBottom:MountingHole_2.2_M2_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "1cb7d027-1644-4db3-8f59-ab9e4642524b")
+		(at 20 0)
+		(property "Reference" "H2"
+			(at 0 -3.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "c65738ce-3f36-4022-bbd6-a63866832468")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.2 0)
+			(layer "F.Fab")
+			(uuid "0ba23f49-dbcc-4e4c-911a-583f71abdae3")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "d8279f8c-a074-4d36-947e-33434f3f120b")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "74d560b0-fd95-4473-8d1a-5fd07cded572")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "2ed8c6bb-3123-44f2-806c-931d4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "4620189c-dc02-4e96-8938-75594642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "c3d6cb4e-2d96-4d5f-ba97-cda74642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_2_m2_pad_topbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "af1d72a2-a865-44a7-9c15-71a44642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 2.64 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "ea1534cf-668e-4371-ae09-cf240c100e3b")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.08 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "5d728e7b-f444-45ab-8cc7-063625278a76")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 4.4 4.4)
+			(drill oval 2.2 2.2
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 5 "contact-1")
+			(uuid "75b59663-e9bc-46e3-bc09-b7bebef24cff")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_5_3_M5_Pad_TopBottom:MountingHole_5.3_M5_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "1d9a6c07-ecc8-4ff0-90fa-f8254642524b")
+		(at 220 0)
+		(property "Reference" "H42"
+			(at 0 -6.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "7c9ecf82-ea34-40b3-879b-21ad851fc251")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 6.3 0)
+			(layer "F.Fab")
+			(uuid "0e6aa15a-29c9-4875-b11d-3f47586e6be3")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "1f728d22-385d-4f62-85c6-7756563a9796")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "61faf085-9b09-4828-9d8c-be94bc4fa3f4")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "0b10ad0d-9d06-4379-89fc-a40d4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "53a563ef-a074-42e1-9d41-5ce54642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ea34592b-ac75-4830-8f90-c6a54642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_53m5padtopbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e4bfbf41-97e5-488b-9b98-4eef4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 6.36 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "e8e27ad8-b62d-4d14-bb3f-4d6a000a8f40")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 7.42 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "237b0568-adc2-4521-bdaa-d2b77f8e22ad")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 10.6 10.6)
+			(drill oval 5.3 5.3
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 8 "mountinghole_53m5padtopbottom-contact")
+			(uuid "b849ab32-1817-48a0-807f-ed3660357703")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_2_M2_Pad:MountingHole_2.2_M2_Pad"
+		(layer "F.Cu")
+		(uuid "1fb4f558-ef46-479b-b7a9-66154642524b")
+		(at 10 0)
+		(property "Reference" "H8"
+			(at 0 -3.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "858c3572-0524-4e6b-8932-9d4a716b92a9")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.2 0)
+			(layer "F.Fab")
+			(uuid "640f7045-8ae9-4549-b927-4acd6120250f")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "be67f6a5-473e-48bb-9478-77f2ed2645f5")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "5ec3008a-23b5-4ae9-8544-eb6c09159c40")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "9c929d13-7e29-4c03-a859-0f4f4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "1f1e5c32-0e77-4278-83a7-71064642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "f921ee11-5bec-43e1-85a2-54db4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_2_m2_pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "986840c4-21d1-4c63-8286-86f54642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 2.64 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "f6934bfa-478c-495d-9572-0ed1a2656365")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.08 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "cfadb203-2910-4693-9623-3d2b1561fd4c")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 4.4 4.4)
+			(drill oval 2.2 2.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 5 "contact-1")
+			(uuid "740eacb7-366f-4bc9-ba20-8ccd34083704")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_2_M2:MountingHole_2.2_M2"
+		(layer "F.Cu")
+		(uuid "33aa26f2-0b20-442d-a717-2c264642524b")
+		(at 0 0)
+		(property "Reference" "H10"
+			(at 0 -3.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "b6f83108-a682-4c98-9ef2-8d12f54f0656")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.2 0)
+			(layer "F.Fab")
+			(uuid "a0808a4a-5a21-4370-8216-3bec832e71ec")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "2cc9ff11-71c9-4a1f-9a97-11c4032824c6")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "95ab9f27-5760-4726-9c83-5d16024b2e81")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "f8ad4f3c-b02f-4a07-b8aa-86614642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "78de02c6-7235-4084-91ad-d9d24642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "55d35bbd-8de2-4813-97b3-a8c34642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_2_m2.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "9afcbfce-2ac4-4a03-bfa7-26f84642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.08 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "823b48f8-fd1a-4b2a-b57e-8fce0e881daf")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 4.4 4.4)
+			(drill oval 2.2 2.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 3 "contact")
+			(uuid "4f59857c-6d4a-47ad-a717-2e82a93f51dd")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_6_4_M6_Pad_TopOnly:MountingHole_6.4_M6_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "3431d04b-0b46-4c82-9c2d-9e314642524b")
+		(at 280 0)
+		(property "Reference" "H54"
+			(at 0 -7.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "c41afaa2-4e5f-482d-9bd0-bcc9e16e4fa9")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 7.4 0)
+			(layer "F.Fab")
+			(uuid "b3317c77-9b48-41cd-98c9-6c802897aa99")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "9cbd6adc-8e55-4575-a6a1-6f5e163c555a")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "7d62f6a7-7016-4087-b93b-1630096325ef")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "d3fd7aa8-388e-42f4-a960-54384642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b49500e4-34ac-44b5-8764-486a4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "03d448ac-43b7-4f1d-9562-7e7e4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_64m6padtoponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b7de1214-b7b4-4a90-9efe-fdcd4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 7.68 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "111211df-e507-4225-a17d-94add9bc646e")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 8.96 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "471fba98-12db-41f6-adcd-c87758a3b6a3")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 12.8 12.8)
+			(drill oval 6.4 6.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 20 "mountinghole_64m6padtoponly-contact")
+			(uuid "95b18f6c-73cc-43bb-9a74-afdfd6b88a24")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_4_3_M4_Pad_Via:MountingHole_4.3_M4_Pad_Via"
+		(layer "F.Cu")
+		(uuid "3bd3016d-6b9b-4772-82e8-ff074642524b")
+		(at 190 0)
+		(property "Reference" "H36"
+			(at 0 -5.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "451050a0-dd98-488e-b51d-15b8e9b04c17")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 5.3 0)
+			(layer "F.Fab")
+			(uuid "b70cf653-e8ae-4ae3-8bf3-abdfc049be1a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "5ded169d-59da-4afa-baea-ce24ee5efbab")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "8bcf7ba9-e7ab-4e32-b233-b0ee99ad470d")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "630053cb-ad25-4a68-b45f-611c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b3d5fc04-3582-4add-95d9-05584642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "1451384d-5d06-45fe-881c-0d724642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_43m4padvia.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "86e86af9-01b8-4fef-a5f4-a5364642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 5.16 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "58ab4300-f285-46db-95a2-779291a484df")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 6.02 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "9e76af77-c7e7-48c7-8ca1-bcee49dc3c19")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "be99066a-8883-48e5-9000-666fd7fa7fa9")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "b0ef49b3-33dc-4152-95ff-984cdd69ade3")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "41b6ab94-8238-4ec3-af12-f9c1451cbd0a")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "96495e5f-bb67-4f1f-ac57-7603fc4628f4")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 8.6 8.6)
+			(drill oval 4.3 4.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "7b2354be-01a7-46ef-8870-234f39480b7e")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "9676fe07-e86d-488b-93d2-673220e590b3")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "a44827a2-d323-4521-bd7b-140420e8255a")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "bf06b7db-dc39-4889-99c5-d5cc8ed561db")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 2 "mountinghole_43m4padvia-contact")
+			(uuid "b35fe9d8-d45c-4f8e-9674-aa506a2180ce")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_8_4_M8_Pad_TopOnly:MountingHole_8.4_M8_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "43f6d184-f543-4e51-b1f4-4c104642524b")
+		(at 330 0)
+		(property "Reference" "H64"
+			(at 0 -9.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "eaefcbf6-283d-4bfa-8517-4b391a4fc2c4")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 9.4 0)
+			(layer "F.Fab")
+			(uuid "fedb6f84-b295-48e2-98d2-bc2673122f8a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "c1669eb4-c743-4647-b208-0a0288ee036b")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "47b16dab-13a1-4e29-a5c5-390ef4936ad5")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e119c2c2-a5c5-4c94-ae6a-e5964642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "0220e726-e384-4a25-9fe4-e44e4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "0e4b0c4f-c647-4e5f-b8aa-9b664642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_84m8padtoponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ac6cbac0-4d58-4dfd-a2b8-d32a4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 10.08 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "e41b6556-ce93-45fe-9c79-6458e887b565")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 11.76 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "70e9a3f4-7b33-4609-827f-5fbef894c5e2")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 16.8 16.8)
+			(drill oval 8.4 8.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 30 "mountinghole_84m8padtoponly-contact")
+			(uuid "d68d3aa8-44b5-423c-b80e-6c6acceb206a")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_3_2_M3:MountingHole_3.2_M3"
+		(layer "F.Cu")
+		(uuid "4a051180-ee15-4da7-971f-d7cd4642524b")
+		(at 100 0)
+		(property "Reference" "H24"
+			(at 0 -4.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "2c27db70-09b9-4059-a24d-4ce23e61efba")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 4.2 0)
+			(layer "F.Fab")
+			(uuid "6390f5fb-dd13-462e-a582-b5635a6976c0")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "6e63e45f-51b1-4ae3-b0a7-233619b777b7")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "9d59c78b-fd9d-4119-9caf-b4c512e68c86")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "eb7778c0-cc11-459e-b70d-504a4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "d675cfcf-989f-457f-a499-3e1a4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "5913e91d-7c05-47d0-888f-569e4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_3_2_m3.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "646e7eb2-e98e-4143-a8d1-ef3b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 4.48 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "b5821025-199e-4a7f-b1fe-37de6e61edf4")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 6.4 6.4)
+			(drill oval 3.2 3.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 27 "mountinghole_3_2_m3.package-contact")
+			(uuid "0825314e-385d-4f39-a4e5-590bfafa48a0")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_7_M2_5:MountingHole_2.7_M2_5"
+		(layer "F.Cu")
+		(uuid "55108b58-bdc6-4294-b53c-0b344642524b")
+		(at 50 0)
+		(property "Reference" "H20"
+			(at 0 -3.7 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "cdd2fd78-d799-4fe8-a0b2-07a5f2187ef5")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.7 0)
+			(layer "F.Fab")
+			(uuid "9ad30fec-1b21-4d51-b0df-637eeea1c2ee")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ae617653-a727-4bb1-9550-98ee38c6d832")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "fe8e274a-1ae0-4a2b-9cc5-a74282c5db7b")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "0a8755b7-9b41-4a6f-b2b1-00894642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "fc82ab3e-ac66-492a-8647-f97e4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e4922234-3477-45ae-aef0-74d14642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_7_m2_5.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "743fb086-8048-4482-9147-4d194642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.78 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "e117d94d-2639-4761-8353-4e8e547c9b1a")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 5.4 5.4)
+			(drill oval 2.7 2.7
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 11 "mountinghole_2_7_m2_5.package-contact")
+			(uuid "ba0e17e1-9c80-4254-a3b7-1517b237c868")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_3_2_M3_Pad_TopOnly:MountingHole_3.2_M3_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "6cc66212-ec5f-406c-b9bd-4c884642524b")
+		(at 130 0)
+		(property "Reference" "H28"
+			(at 0 -4.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "36a5ecad-1dda-4b3b-aec3-0afe3fd00e64")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 4.2 0)
+			(layer "F.Fab")
+			(uuid "03d3c386-10ba-4119-b633-9fc302d09a1d")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "138bda25-b6a6-42fd-aeaf-6024b820febc")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "519059ce-9298-4981-bd50-c121488c91aa")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "12b7a0e1-8f2d-4175-b0d0-4fcd4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "00927403-e2f0-43c2-b83f-51444642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e9cad9e5-396d-4bd3-aeee-594c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_32m3padtoponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "067d367e-961d-4ef1-ba5f-543c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.84 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "22698369-c66f-48b5-b725-a1fc1963d510")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 4.48 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "b7f7d3c8-6545-470d-8f01-e98f15e3dcab")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 6.4 6.4)
+			(drill oval 3.2 3.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 23 "mountinghole_32m3padtoponly-contact")
+			(uuid "417399a8-428a-4fe2-b16a-c25a25fd8706")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_8_4_M8_Pad_TopBottom:MountingHole_8.4_M8_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "7ecd87d4-a156-4e3a-8270-3c954642524b")
+		(at 320 0)
+		(property "Reference" "H62"
+			(at 0 -9.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "bda0aaa9-403e-49d2-a1f6-3f5102c64d27")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 9.4 0)
+			(layer "F.Fab")
+			(uuid "2af3d6f9-1551-4db2-8a98-d1ab66027b9a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "9cd4ac79-057e-4573-bd78-09e1ff285b12")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "68dc6464-79ca-4508-8420-b0719877c848")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "50df6b50-6654-471c-a9e5-6c414642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "a3db498f-4f2f-4ee3-885d-0b504642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "422c6111-45ef-4cda-a474-45814642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_84m8padtopbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "33e7f951-50e9-4f70-8393-76054642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 10.08 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "c9518415-98f3-47d7-a02a-9447b2f872d7")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 11.76 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "ad5da9c0-cdf7-4b14-a038-c9aaa10bb577")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 16.8 16.8)
+			(drill oval 8.4 8.4
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 28 "mountinghole_84m8padtopbottom-contact")
+			(uuid "d52d1301-1dfa-43fb-818d-ebf2b5deeb3b")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_6_4_M6_Pad_TopBottom:MountingHole_6.4_M6_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "83d932ab-538c-4c1a-ac6b-99774642524b")
+		(at 270 0)
+		(property "Reference" "H52"
+			(at 0 -7.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "34d84270-94cf-4586-94f4-622da480ed36")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 7.4 0)
+			(layer "F.Fab")
+			(uuid "d1a43277-f441-47e1-9dc6-26e02d2ea46e")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "3a9a7856-39da-4a8d-ad17-f3a621f95de3")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "b1877e31-179b-43ca-98b1-aff22207f2ac")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "64a0b401-c3ac-4124-880d-59024642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "4cb0762a-fb74-42d5-b1d4-43984642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "918de2d1-8d62-4fb4-8f19-59a34642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_64m6padtopbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b4b69be2-90dd-4886-9b40-6baf4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 7.68 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "8eadd4a9-29fc-4f84-9689-0cd37bde36ff")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 8.96 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "a768d278-bafd-43f7-8698-31960b0ef091")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 12.8 12.8)
+			(drill oval 6.4 6.4
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 18 "mountinghole_64m6padtopbottom-contact")
+			(uuid "aae1afe8-1f3f-4968-8e6c-d33eb67f1e5d")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_5_3_M5_Pad_TopOnly:MountingHole_5.3_M5_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "8785d81c-6b4c-4307-90a5-6af44642524b")
+		(at 230 0)
+		(property "Reference" "H44"
+			(at 0 -6.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "26592bd3-262a-46a1-a6cb-e93be5045607")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 6.3 0)
+			(layer "F.Fab")
+			(uuid "0e568aa5-3597-48e2-9f43-204aa24a8d27")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "191f059b-e2e7-4ebf-9da1-6545a3d89294")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "2e58fdfe-c2a3-400a-8ef9-11a2c845fe42")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "0e7393bb-2cbb-406e-b5ed-5ece4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "2d982eec-6e88-4a18-91b9-08254642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "743a3fc3-52a5-413b-992d-896b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_53m5padtoponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "13767009-fa17-4f64-adaf-ae1f4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 6.36 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "35ea7c6d-8175-4b91-b2b6-5647378aca1e")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 7.42 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "2d00e1d5-f464-4f32-be8a-5bdad259474d")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 10.6 10.6)
+			(drill oval 5.3 5.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 10 "mountinghole_53m5padtoponly-contact")
+			(uuid "3f9ace5d-4948-4e32-87d9-871ecbacd10c")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_6_4_M6_Pad:MountingHole_6.4_M6_Pad"
+		(layer "F.Cu")
+		(uuid "95c9ea4d-93f6-4075-90f2-125c4642524b")
+		(at 260 0)
+		(property "Reference" "H58"
+			(at 0 -7.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "a7f1c2a1-1a4d-4d2c-8a81-6a5990ed504c")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 7.4 0)
+			(layer "F.Fab")
+			(uuid "f4aa28f3-a662-4f5b-9153-c2d5f2c49665")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "33f6097f-85f6-43d4-b532-d5379e666fb4")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "5ca58fc9-ec92-4caf-932b-9f00fa405536")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "9f801175-c409-4eda-8ba5-48ed4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "4f0d4f7d-1f53-4012-a681-69cd4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "dc608ae4-0e79-4fbd-92ce-4a954642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_64m6pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "6d4529ab-a726-41b0-b3d5-9a584642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 7.68 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "07585935-e5a7-4777-87f6-04df8c7a0752")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 8.96 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "6af1c78b-f989-47d5-80f6-cd397c4629a8")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 12.8 12.8)
+			(drill oval 6.4 6.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 16 "mountinghole_64m6pad-contact")
+			(uuid "fb2b9a94-f965-4ce2-adf1-22484aff15f6")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_4_3_M4_Pad_TopOnly:MountingHole_4.3_M4_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "96b18b04-c099-4e4d-a057-aa754642524b")
+		(at 180 0)
+		(property "Reference" "H34"
+			(at 0 -5.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "262a3348-829e-435a-a41c-ae6fb8c21989")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 5.3 0)
+			(layer "F.Fab")
+			(uuid "73290800-ae6b-4bb0-8473-483abf0617d9")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "4a353513-425d-40cf-8103-85031befbfb7")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "1149d6e0-8241-4d7d-b7af-27a85764910a")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "61ba0d28-d758-4b48-8933-08214642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ab0dc2aa-6c3f-4dd6-8d7c-f6f94642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "26a53a35-8de9-4d92-8000-b6424642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_43m4padtoponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "f7862296-4fc2-4d91-ab5b-f1e84642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 5.16 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "007704c3-a688-4767-b9f3-4fbe605c3cc0")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 6.02 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "cda14623-1f5e-434e-866c-5f498c496eb7")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 8.6 8.6)
+			(drill oval 4.3 4.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 1 "mountinghole_43m4padtoponly-contact")
+			(uuid "2dd7b3de-81b5-4d94-99a0-0488bf6c3534")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_4_3_M4_Pad:MountingHole_4.3_M4_Pad"
+		(layer "F.Cu")
+		(uuid "a2887847-ebf7-42b0-8344-35e14642524b")
+		(at 160 0)
+		(property "Reference" "H38"
+			(at 0 -5.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "a028ff48-2b09-4a22-9f5c-e2fd2258a53a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 5.3 0)
+			(layer "F.Fab")
+			(uuid "84479a5a-45c4-4638-bb60-93bce67271d2")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ea765b75-d4a7-4030-af00-3387bbda957e")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "5f97ba37-a09d-4874-bdb9-8b0bb1577287")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "6d6d1e97-212d-415b-9632-b85b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "84ce6b76-5b97-422a-9893-379d4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "785f1705-3053-43ea-9b47-d2054642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_43m4pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "8a557644-6773-4b74-a926-91f44642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 5.16 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "2414314a-696b-4105-9ebe-1325af0e4c14")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 6.02 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "d3097c89-0f36-453e-9268-fe846a02beb1")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 8.6 8.6)
+			(drill oval 4.3 4.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 33 "mountinghole_43m4pad-contact")
+			(uuid "8a7dc05e-3ff0-42be-838e-330f851a9db8")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_4_3_M4:MountingHole_4.3_M4"
+		(layer "F.Cu")
+		(uuid "b667df22-afe5-4ec1-86ca-45374642524b")
+		(at 150 0)
+		(property "Reference" "H40"
+			(at 0 -5.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "0731a5ff-e60f-4ebf-8a19-34ee47f2d980")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 5.3 0)
+			(layer "F.Fab")
+			(uuid "08a5a6bd-fd64-4723-ab9b-7a4adc439f3e")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "6e5766d2-5cfc-4697-bed7-7a1ec844ebc2")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "c596b8bb-21be-4e0c-9a63-ebd45b2faf77")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "c00fb3ae-a8c7-4dae-b70e-576c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b0b36316-92e9-4ac5-b94e-af4a4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "9efc61ae-a84d-45f4-8fd4-98354642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_43m4.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "2ca5a019-a8cc-4fed-8b5d-14094642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 6.02 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "209824b7-4b30-431b-b0a0-c0a79394a64b")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 8.6 8.6)
+			(drill oval 4.3 4.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 31 "mountinghole_43m4.package-contact")
+			(uuid "8f15b375-0dc8-4325-930a-f8d2f112486a")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_6_4_M6:MountingHole_6.4_M6"
+		(layer "F.Cu")
+		(uuid "b93c4354-7f1f-40a6-aca2-b5644642524b")
+		(at 250 0)
+		(property "Reference" "H60"
+			(at 0 -7.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "813700c0-949f-4495-8fa0-73c0f3d33e12")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 7.4 0)
+			(layer "F.Fab")
+			(uuid "43089da2-959c-4260-af1f-2468b94c4cb4")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "5ca8fb2c-5c58-4944-931d-58361d21b8c4")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "a1e15f37-f380-4bb2-ab63-e7369282de3f")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "038615a6-c21c-4c1c-99a0-39de4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "8dc978a1-2b6a-47c7-a01f-9a474642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b64637d4-13c5-4299-81ef-922b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_64m6.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e41ed419-e0d2-4cdd-b13b-57f64642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 8.96 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "8dbc95ac-b8af-41e9-b69d-cc5ce0dc2e89")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 12.8 12.8)
+			(drill oval 6.4 6.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 14 "mountinghole_64m6.package-contact")
+			(uuid "f6dd3f99-e2c3-4182-b475-46ca965f26d5")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_8_4_M8:MountingHole_8.4_M8"
+		(layer "F.Cu")
+		(uuid "c6326272-081a-41ae-9b06-7e694642524b")
+		(at 300 0)
+		(property "Reference" "H70"
+			(at 0 -9.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "b907ecc0-adbb-4def-9c52-748dd49389a9")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 9.4 0)
+			(layer "F.Fab")
+			(uuid "249b316a-0de7-4803-8b7c-f97ee56b9908")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ec0a4705-12fe-487a-b146-a0b8a338edc0")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ef03c489-1dd1-49b2-a92d-8b8b1628cb5c")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "872d3f35-f7d4-4531-94b7-193b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "42f29186-d2ad-498d-9eaa-ee354642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "f0437b21-0f59-4c9c-82f3-9f764642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_84m8.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "77cb15bc-746f-456a-9097-928e4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 11.76 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "3a989630-0182-4d06-9120-76c87ed676a1")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 16.8 16.8)
+			(drill oval 8.4 8.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 24 "mountinghole_84m8.package-contact")
+			(uuid "400d75e5-9360-4aab-8b01-d02ff8e34577")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_7_M2_5_Pad_TopOnly:MountingHole_2.7_M2_5_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "c7cd4429-3be7-4f1b-aee4-2c894642524b")
+		(at 80 0)
+		(property "Reference" "H14"
+			(at 0 -3.7 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "c3e1d402-2cbe-4e19-8565-d7cdc4def96e")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.7 0)
+			(layer "F.Fab")
+			(uuid "15954691-974b-4f50-86ce-88ea15c9305a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "df1eda73-60aa-4b77-8edb-d8dded6c99a0")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "8bbbcb55-3461-476f-a914-fb0e3bd7fd09")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "0b10ae80-3d77-40ff-b7c7-ff974642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "52e235e6-33b0-4c8e-8e23-e5fe4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "b1d9d71d-5c03-4e35-a46a-06df4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_7_m2_5_pad_toponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "8f982b72-9d4d-451c-b582-9c974642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.24 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "3b7ac821-7634-4951-865b-a8bcba43265f")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.78 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "e3d12d9b-a3f3-46e2-abd9-6f83807c6403")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 5.4 5.4)
+			(drill oval 2.7 2.7
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 17 "mountinghole_2_7_m2_5_pad_toponly-contact")
+			(uuid "ce687e9f-0d82-49f3-87db-653fd7c786b0")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_7_M2_5_Pad_TopBottom:MountingHole_2.7_M2_5_Pad_TopBottom"
+		(layer "F.Cu")
+		(uuid "c917199e-f2cd-4991-af0d-af084642524b")
+		(at 70 0)
+		(property "Reference" "H12"
+			(at 0 -3.7 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "31abd2e5-5812-4588-a778-f202ab1b8282")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.7 0)
+			(layer "F.Fab")
+			(uuid "f342d973-f84b-48f7-b106-579adf66722a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "d9354b1d-c7ec-48a5-93e9-470b7970d74c")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "c19839c7-8855-4821-a0d3-57e438a819a2")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "280a7abe-e0fa-4d03-8483-ffd04642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "967d3d3f-ddb1-4c95-a12b-25224642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "8c05bfd5-ae59-49ca-86d0-bddd4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_7_m2_5_pad_topbottom.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "96631c90-e1f5-425c-891f-1ae64642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.24 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "08cde271-bbd8-42fb-8a13-3b3733df8617")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.78 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "a45e3aec-ea92-47a6-8273-2c8f396e13a8")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 5.4 5.4)
+			(drill oval 2.7 2.7
+				(offset 0 0)
+			)
+			(layers "F.Cu" "B.Cu" "F.Mask" "B.Mask")
+			(net 15 "mountinghole_2_7_m2_5_pad_topbottom-contact")
+			(uuid "d39ba6ad-562f-4048-832e-8ab9a24eb730")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_3_2_M3_Pad:MountingHole_3.2_M3_Pad"
+		(layer "F.Cu")
+		(uuid "c923e8d6-8814-48f2-a982-84a94642524b")
+		(at 110 0)
+		(property "Reference" "H22"
+			(at 0 -4.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "ade6c2d1-7008-4ef0-8e27-f90f41d5bfd9")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 4.2 0)
+			(layer "F.Fab")
+			(uuid "f30a9e72-997d-4373-9048-f179dac92d95")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "774217c7-ef00-48ff-8d52-eb5b83b78227")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ec768872-041b-4bae-b6db-8882bce09b8d")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "bb359619-8901-4a15-8619-43b74642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ffe51dea-30e3-4dcd-a3cc-cc0a4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "1c8daa7f-6c53-409f-9e6f-be234642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_3_2_m3_pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "66b866ad-c2f3-4276-a359-6fdd4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_subaddresses" "[layouts/default/default.kicad_pcb:package]"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "d87fcd02-bff0-4920-8405-728d4642524b")
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.84 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "7320a413-f438-4df0-8d30-cd9ad794b758")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 4.48 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "c3fc337f-59c8-4ff2-8e1c-368e9b06f5b3")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 6.4 6.4)
+			(drill oval 3.2 3.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 29 "mountinghole_3_2_m3_pad-contact")
+			(uuid "7228a8ec-954f-4308-b559-fce92f6b3499")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_8_4_M8_Pad:MountingHole_8.4_M8_Pad"
+		(layer "F.Cu")
+		(uuid "da77719d-624a-4ff8-8f5b-c3cf4642524b")
+		(at 310 0)
+		(property "Reference" "H68"
+			(at 0 -9.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "77485bd1-00d2-4611-a883-597429dc14a4")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 9.4 0)
+			(layer "F.Fab")
+			(uuid "24ec6ae5-8825-4604-b161-e727d7d5c4a0")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "7e34b356-ece5-4776-be7b-3246eafd3eb3")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "77677c71-209d-48d7-b024-c10e707cd978")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "ce5b10fb-3a26-43fd-9e53-65ce4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "13f83a48-c12f-418c-b79a-abe94642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "475d36f5-821c-4e26-9e72-236d4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_84m8pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e43bcda8-3b34-48d4-839c-40234642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 10.08 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "c88b068a-565d-488a-9f85-7275a41b5c79")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 11.76 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "0448d752-5e1c-4364-afe5-dfe9a8d26bb2")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 16.8 16.8)
+			(drill oval 8.4 8.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 26 "mountinghole_84m8pad-contact")
+			(uuid "ed337edb-ae2a-4efe-bca1-9b51f415401a")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_5_3_M5_Pad_Via:MountingHole_5.3_M5_Pad_Via"
+		(layer "F.Cu")
+		(uuid "dc232c03-222d-4dd4-8ce8-0fe44642524b")
+		(at 240 0)
+		(property "Reference" "H46"
+			(at 0 -6.3 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "4983a6e9-d573-495c-aecd-0fa754184cc3")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 6.3 0)
+			(layer "F.Fab")
+			(uuid "037df34d-1bd2-4985-a4c8-6cabefa81bdb")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "158c5c8b-f2d0-4ce9-a74b-c5c62ec55938")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "bac452b9-42e9-4b96-bcba-635fdbcf3a40")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "3dd46ec5-aab1-4e2c-9a83-90a34642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "84965223-d8c5-4f5b-a26c-9b464642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e913b93e-c47b-4c00-89d6-fcd44642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_53m5padvia.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "2b9682be-afce-4178-ab8e-93214642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 6.36 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "00d31f83-50fd-4cda-b817-8a9b672d2fd5")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 7.42 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "87eacdf9-34d8-4be1-82bb-3fe711e83afa")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "0486da87-d1f3-432b-9c93-0763de31d8cb")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "4280ba23-a2e7-4ba7-8621-4e6424558da5")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "71a0326b-00f2-41f9-9d07-17953cfe8c07")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "e1b0daac-22dc-4648-93ae-29cf0e588ca4")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 10.6 10.6)
+			(drill oval 5.3 5.3
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "bec52209-24f3-4e90-9b55-41dd3150d8dc")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "9c43538f-358b-48c2-8200-b33ec91bf353")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "dc6eb3d7-d83f-4cb5-aa11-e39cea68f38b")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "65714ff5-ceea-41d6-9ff1-a57be04352c2")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 12 "mountinghole_53m5padvia-contact")
+			(uuid "8de345c9-796e-4a32-853a-79c5c275a2ad")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_2_M2_Pad_Via:MountingHole_2.2_M2_Pad_Via"
+		(layer "F.Cu")
+		(uuid "dc80ad4e-0959-48ff-879b-f04e4642524b")
+		(at 40 0)
+		(property "Reference" "H6"
+			(at 0 -3.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "a02e42e7-69ed-4f2a-9ece-11c7da29b25e")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.2 0)
+			(layer "F.Fab")
+			(uuid "78da0c76-ffaa-47cf-9c2d-f2462a4710a8")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "5725902c-e999-4f32-82a1-dcf1630fd89e")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "0700e6d4-9cb4-4482-b52a-4c4fc706835c")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "a1cd4ec0-c40a-492b-9ad0-f6804642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "7af81207-38ea-459f-84bf-7e304642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "cf9e032b-216a-43e6-afd9-36d74642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_2_m2_pad_via.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "43e26dd4-7395-43f1-ab1d-e7d64642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 2.64 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "04a9c6b2-a778-414c-8fa1-a8645151b4c8")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.08 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "b3eb59fc-cf3d-4084-8bff-fe58b27eab14")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "b8000a69-a88f-4084-9be8-fc25187f22a1")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "3f8338d7-a7c7-4395-a1b2-d72b8ec88fbd")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "0778810a-bc37-4a06-8350-8e0d9ab28c69")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "86368e07-87e9-4448-b08b-d3c51be7b156")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 4.4 4.4)
+			(drill oval 2.2 2.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "dfdd3f91-889c-4b4f-9459-9ffae65a426e")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "22711cf9-f599-4836-b055-c03da6c8fd28")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "4ccb294a-860f-48d9-a1a1-80bdfd9a2e7c")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "8ca1ae11-4332-4c77-a7ea-891c39d34a0d")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 9 "mountinghole_2_2_m2_pad_via-contact")
+			(uuid "9eebd9cc-53b8-4798-bfae-1cf0a2f9f0b6")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_3_2_M3_Pad_Via:MountingHole_3.2_M3_Pad_Via"
+		(layer "F.Cu")
+		(uuid "ebf86fa2-e933-4368-a3df-eb4c4642524b")
+		(at 140 0)
+		(property "Reference" "H30"
+			(at 0 -4.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "0fa4a8fa-e51b-4246-b295-37ccdeddfc7a")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 4.2 0)
+			(layer "F.Fab")
+			(uuid "4eaf4a3b-c7b6-44bb-b78f-84d549bf7284")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "3403e74c-cf29-44d6-9c06-2fa826b0478e")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "052bda0a-38f9-4b20-ae93-0e090d44ca35")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "061e1575-124b-4cfc-9923-d5b44642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "a052c1b8-d84b-4971-8963-40b04642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "cf6d208c-cdc7-4f9a-9210-08324642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_32m3padvia.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "4ab47771-74f6-4649-a232-cad84642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.84 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "674375f0-fef9-4692-b445-9c9e32434dc5")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 4.48 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "7325d3f4-598a-44ff-93c0-e042dbbbaddd")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "87400855-c1fa-4175-a65a-a3b04ed4017f")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "95d17ad4-c0b7-4192-9e45-5e58715923c6")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "1e2a977a-7aa6-4f43-af97-e1541937b3ba")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "1fd2240d-e773-4332-8235-6dd707b70abd")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 6.4 6.4)
+			(drill oval 3.2 3.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "89718a0f-3338-4fba-8e4f-a6a8ad697d7b")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "a3993fc2-5bfc-492c-a92c-664eb40a42f0")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "1069d75e-b99e-45b6-b76c-6f0ab91a2f41")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "2a33bce3-9279-476e-88f0-757fb6ca95e1")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 25 "mountinghole_32m3padvia-contact")
+			(uuid "6ad1b3fe-eaaf-4588-856b-e44d51ff99bf")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_7_M2_5_Pad:MountingHole_2.7_M2_5_Pad"
+		(layer "F.Cu")
+		(uuid "ed2b7fa3-ca6b-4dfe-aa65-2ac64642524b")
+		(at 60 0)
+		(property "Reference" "H18"
+			(at 0 -3.7 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "e0bd145d-92f7-4ef7-a43a-3cd6f2900b0b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.7 0)
+			(layer "F.Fab")
+			(uuid "ee297c00-4292-4399-ac49-84960c615506")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "8ae9dd28-ed3a-4035-870f-8a899d2ce4f6")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "867e91b2-51b9-4372-86d3-52903b44d017")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "34d494cb-a148-42e6-b6d7-25904642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "cf5bab6c-8478-4798-9b2d-a5434642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "89acda3f-1830-4bce-b547-8b4c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_7_m2_5_pad.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e32bfbad-6e44-463f-ae41-e5f04642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.24 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "358d2eef-b8cc-47a1-b748-b348d4f38f0f")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.78 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "59d3d8d4-ab4d-4877-9008-3b5fa2808922")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 5.4 5.4)
+			(drill oval 2.7 2.7
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 13 "mountinghole_2_7_m2_5_pad-contact")
+			(uuid "cd695ee2-d892-4a1f-bf0d-68e5fdc146eb")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_2_M2_Pad_TopOnly:MountingHole_2.2_M2_Pad_TopOnly"
+		(layer "F.Cu")
+		(uuid "ed4d5a9b-ef07-40de-b369-da5d4642524b")
+		(at 30 0)
+		(property "Reference" "H4"
+			(at 0 -3.2 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "4ba3cbb6-e2ee-4810-8144-385684b757ff")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.2 0)
+			(layer "F.Fab")
+			(uuid "0daf7317-526f-4212-8afb-735e81b851c8")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "44481c90-db41-4b69-a930-f3536d7648a8")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "1184ed53-b0fb-49f2-ab0f-456146526688")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "facd7422-4877-4d13-84a8-633d4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "babcae77-e8d5-445c-a010-db8b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "8e9c3f69-42e2-45e5-9d5c-da8c4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_2_m2_pad_toponly.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "3f4609c1-a833-40e6-9aba-45524642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 2.64 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "0d83a4e2-dcec-4b93-82fd-53745d458c54")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.08 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "0a092c4c-d1a9-4621-8db2-72ad3c52943d")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 4.4 4.4)
+			(drill oval 2.2 2.2
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 7 "mountinghole_2_2_m2_pad_toponly-contact")
+			(uuid "af53ff10-404b-4fc6-92f8-17f16d2ff92c")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_8_4_M8_Pad_Via:MountingHole_8.4_M8_Pad_Via"
+		(layer "F.Cu")
+		(uuid "f6e93798-98e8-4554-8052-47ff4642524b")
+		(at 340 0)
+		(property "Reference" "H66"
+			(at 0 -9.4 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "3b9a350f-625c-4807-8f0d-87ee52533867")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 9.4 0)
+			(layer "F.Fab")
+			(uuid "d33b10ea-a59a-4a08-8760-3030a3c688ac")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "aa00385b-b3f6-4359-937b-82432958b2af")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "6b0fa2b2-da7b-4bc4-8aa1-6d4e2b9e68a7")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "1e3972b2-3d80-474f-a858-7cad4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "58ffe280-eaf2-4453-9961-d0164642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "448d5a7e-5608-4a93-b897-35c24642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_84m8padvia.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "e2db5651-bf44-485e-9de8-95764642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 10.08 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "dc4f504c-3d75-4a21-bd4d-2e6ed14eef31")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 11.76 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "e831b7d8-347b-4f4a-bb33-9ad9c3a80cdb")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "f9f31325-2362-406c-922a-2d5795d6431a")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "e2d2c77b-d1e9-4aae-9b9e-6d194ffb7fcc")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "8785297e-4c77-4090-ba01-493ef8c0649f")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "afb5fe74-b936-4e28-9d46-fae08a7cb1eb")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 16.8 16.8)
+			(drill oval 8.4 8.4
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "ac01c014-35f0-4c2c-bf2d-2b7c793b6a7f")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "3253a953-17f3-437b-939b-d290497ed89e")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "e18c6368-eeef-453b-a906-49ec3b6103d7")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "80a644e8-d111-4abc-b3aa-9db810700f22")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 32 "mountinghole_84m8padvia-contact")
+			(uuid "c6ed7c3c-0b5b-4cd7-bb49-1e26af9b6a7d")
+		)
+		(embedded_fonts no)
+	)
+	(footprint "MountingHole_2_7_M2_5_Pad_Via:MountingHole_2.7_M2_5_Pad_Via"
+		(layer "F.Cu")
+		(uuid "f9e31097-d5f7-47d3-93a2-89414642524b")
+		(at 90 0)
+		(property "Reference" "H16"
+			(at 0 -3.7 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "23bb33e4-5285-4ef3-897e-9b74c546f019")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" ""
+			(at 0 3.7 0)
+			(layer "F.Fab")
+			(uuid "21072497-0750-4915-9da3-56fdb1df852b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "8fa79a79-4449-444f-867c-46d5536331ff")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "52924110-c1a8-4f11-b348-d348badbf82a")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "a16bc147-268b-4363-9639-52984642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "Atopile"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "10151e23-258f-4a2f-9c84-de034642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Partnumber" ""
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "af0bfc98-7d84-45f0-b2b9-254b4642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "atopile_address" "mountinghole_2_7_m2_5_pad_via.package"
+			(at 0 0 0)
+			(layer "User.9")
+			(hide yes)
+			(uuid "126cf869-52ff-4eb2-b653-4f614642524b")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr exclude_from_pos_files exclude_from_bom)
+		(fp_circle
+			(center 0 0)
+			(end 3.24 0)
+			(stroke
+				(width 0.15)
+				(type solid)
+			)
+			(fill no)
+			(layer "Cmts.User")
+			(uuid "43a94cfe-36d3-41e7-be43-6092cf2ed2d2")
+		)
+		(fp_circle
+			(center 0 0)
+			(end 3.78 0)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+			(uuid "54b8e554-c9ca-4aa5-a76c-f6454cf0a01e")
+		)
+		(pad "1" thru_hole circle
+			(at -2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "a7c262f4-447a-44a4-9d81-6b23a871d8a5")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "0493ee31-6981-4c2a-94e6-2853afb78805")
+		)
+		(pad "1" thru_hole circle
+			(at -1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "286b482d-ede1-44e1-a346-7ad8ad3306f6")
+		)
+		(pad "1" thru_hole circle
+			(at 0 -2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "42c70ce4-b1c5-4ef0-8b2c-042355881962")
+		)
+		(pad "1" thru_hole circle
+			(at 0 0 0)
+			(size 5.4 5.4)
+			(drill oval 2.7 2.7
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "4642b3e7-98d8-4fc2-9219-938fc6b8289f")
+		)
+		(pad "1" thru_hole circle
+			(at 0 2.025 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "e0a5da58-53b7-4450-8694-9bd01a2069e9")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 -1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "7003ea31-d484-4939-b47a-830da56b7974")
+		)
+		(pad "1" thru_hole circle
+			(at 1.431891 1.431891 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "f67f0d50-2dca-4f4a-94aa-8774445d023d")
+		)
+		(pad "1" thru_hole circle
+			(at 2.025 0 0)
+			(size 0.8 0.8)
+			(drill oval 0.5 0.5
+				(offset 0 0)
+			)
+			(layers "*.Cu" "*.Mask")
+			(net 19 "mountinghole_2_7_m2_5_pad_via-contact")
+			(uuid "54eef778-5b67-433c-9fd8-09fe9e546d0b")
+		)
+		(embedded_fonts no)
+	)
+	(segment
+		(start 10 0)
+		(end 20 0)
+		(width 2)
+		(layer "F.Cu")
+		(net 5)
+		(uuid "a5fca3b9-cfa2-4534-b20f-47c267705b8b")
+	)
+	(group "mountinghole_3_2_m3_pad"
+		(uuid "6d6f756e-7469-6e67-686f-6c655f335f325f6d335f706164")
+		(locked no)
+		(members "c923e8d6-8814-48f2-a982-84a94642524b")
+	)
+	(embedded_fonts no)
+)

@@ -1,0 +1,57 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("TRAITS")
+
+import LED
+import Resistor
+import ElectricPower
+import can_bridge_by_name
+
+from "parts/Hubei_KENTO_Elec_KT_0603G/Hubei_KENTO_Elec_KT_0603G.ato" import Hubei_KENTO_Elec_KT_0603G_driver
+from "parts/Hubei_KENTO_Elec_Blue_light_0603/Hubei_KENTO_Elec_Blue_light_0603.ato" import Hubei_KENTO_Elec_Blue_light_0603_driver
+from "parts/Hubei_KENTO_Elec_KT_0603R/Hubei_KENTO_Elec_KT_0603R.ato" import Hubei_KENTO_Elec_KT_0603R_driver
+from "parts/Hubei_KENTO_Elec_KT_0603Y/Hubei_KENTO_Elec_KT_0603Y.ato" import Hubei_KENTO_Elec_KT_0603Y_driver
+from "parts/Hubei_KENTO_Elec_KT_0603YG/Hubei_KENTO_Elec_KT_0603YG.ato" import Hubei_KENTO_Elec_KT_0603YG_driver
+from "parts/Hubei_KENTO_Elec_KT_0603W/Hubei_KENTO_Elec_KT_0603W.ato" import Hubei_KENTO_Elec_KT_0603W_driver
+
+module LEDIndicator:
+    """
+    Simple indicator LED with a series resistor.
+    Exposes a power rail and can be bridged between `power.hv` and `power.lv`.
+    """
+
+    power = new ElectricPower
+    """
+    Power rail used to drive the LED (hv) and return (lv)
+    """
+    resistor = new Resistor
+    led = new LED
+
+    resistor.package = "0402"
+    resistor.resistance = 2.2kohm +/- 5%
+
+    # Connections
+    power.hv ~> led ~> resistor ~> power.lv
+
+    # Make bridgable
+    signal low ~ power.lv
+    signal high ~ power.hv
+    trait can_bridge_by_name<input_name = "high", output_name = "low">
+
+module LEDIndicatorRed from LEDIndicator:
+    led -> Hubei_KENTO_Elec_KT_0603R_driver
+
+module LEDIndicatorGreen from LEDIndicator:
+    led -> Hubei_KENTO_Elec_KT_0603G_driver
+
+module LEDIndicatorBlue from LEDIndicator:
+    led -> Hubei_KENTO_Elec_Blue_light_0603_driver
+
+module LEDIndicatorYellow from LEDIndicator:
+    led -> Hubei_KENTO_Elec_KT_0603Y_driver
+
+module LEDIndicatorYellowGreen from LEDIndicator:
+    led -> Hubei_KENTO_Elec_KT_0603YG_driver
+
+module LEDIndicatorWhite from LEDIndicator:
+    led -> Hubei_KENTO_Elec_KT_0603W_driver

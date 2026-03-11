@@ -1,0 +1,27 @@
+requires-atopile: "^0.14.0"
+paths:
+  src: ./
+  layout: ./layouts
+
+builds:
+  default:
+    entry: ti-cd74hc4067sm.ato:TI_CD74HC4067SM
+    hide_designators: true
+    exclude_checks:
+      - PCB.requires_drc_check
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks:
+      - PCB.requires_drc_check
+
+package:
+  identifier: atopile/ti-cd74hc4067sm
+  repository: https://github.com/atopile/packages
+  homepage: https://github.com/atopile/packages/blob/main/packages/ti-cd74hc4067sm/README.md
+  version: 0.1.0
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: Texas Instruments CD74HC4067SM 16-Channel Analog Multiplexer/Demultiplexer
+  license: MIT

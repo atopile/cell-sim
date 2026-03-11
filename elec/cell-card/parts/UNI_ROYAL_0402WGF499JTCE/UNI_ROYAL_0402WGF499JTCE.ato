@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component UNI_ROYAL_0402WGF499JTCE_package:
+    """49.9Ω (49R9) ±1%"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C25120", date="2026-03-02T18:44:09.236931+00:00", checksum="2191c504539d94f31a9cb43f38a31bf21de9a2f4fb43a428295a6d701cb0c119">
+
+    trait is_atomic_part<manufacturer="UNI-ROYAL", partnumber="0402WGF499JTCE", footprint="R0402.kicad_mod", symbol="0402WGF499JTCE.kicad_sym", model="R0402_L1.0-W0.5-H0.4.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C25120", manufacturer="UNI-ROYAL", partno="0402WGF499JTCE">
+    trait has_designator_prefix<prefix="R">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2205311900_UNI-ROYAL-Uniroyal-Elec-0402WGF499JTCE_C25120.pdf">
+
+    # pins
+    pin 2
+    pin 1

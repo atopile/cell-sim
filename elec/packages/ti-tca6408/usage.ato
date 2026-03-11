@@ -1,0 +1,40 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+
+# --- Standard library imports ---
+import ElectricPower
+import I2C
+import Resistor
+
+# --- Package import ---
+from "atopile/ti-tca6408/ti-tca6408.ato" import TI_TCA6408
+
+
+module Usage:
+    """
+    Minimal usage example for TI TCA6408 8-bit I²C GPIO expander.
+
+    Shows how to connect two TCA6408 devices to the same I²C bus
+    with different addresses (0x20 and 0x21).
+    """
+
+    # Power rail (3.3V)
+    power_3v3 = new ElectricPower
+    power_3v3.voltage = 3.3V
+
+    # I²C bus
+    i2c_bus = new I2C
+
+    # GPIO expander instances
+    expander = new TI_TCA6408
+
+    # Set addresses
+    expander.i2c.address = 0x20
+
+    # Connect power and I²C
+    power_3v3 ~ expander.power
+    expander.i2c ~ i2c_bus
+
+    # Provide logic references
+    power_3v3 ~ i2c_bus.scl.reference
+    power_3v3 ~ i2c_bus.sda.reference

@@ -1,0 +1,87 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("FOR_LOOP")
+
+import I2C
+import ElectricPower
+import ElectricLogic
+import Resistor
+import Capacitor
+
+from "parts/Texas_Instruments_TMP117AIDRVR/Texas_Instruments_TMP117AIDRVR.ato" import Texas_Instruments_TMP117AIDRVR_package
+
+module TI_TMP117:
+    """
+    Texas Instruments TMP117 high-precision digital temperature sensor.
+
+    Features:
+    - ±0.1°C accuracy (typical) from -20°C to 50°C
+    - ±0.2°C accuracy over full -55°C to 150°C range
+    - 16-bit resolution (0.0078°C per LSB)
+    - I²C interface with programmable alert
+    - Low power consumption (3.5µA typical)
+    - Medical standards compliant (ASTM E1112, ISO 80601)
+    - Wide supply voltage range: 1.8V to 5.5V
+    - WDFN-6 package (2×2 mm)
+    """
+
+    # --- Package ---
+    package = new Texas_Instruments_TMP117AIDRVR_package
+
+    # --- External interfaces ---
+    i2c = new I2C
+    """
+    I²C bus interface (7-bit addresses 0x48-0x4B based on ADD0 pin)
+    """
+    i2c.required = True
+
+    power = new ElectricPower
+    """
+    Sensor power supply (1.8V to 5.5V)
+    """
+    power.required = True
+
+    # --- Alert pin ---
+    alert = new ElectricLogic
+    """
+    Programmable alert output (open-drain, active low)
+    Configurable for temperature limits, data ready, etc.
+    """
+
+    # --- Power connections ---
+    power.hv ~ package.Vpos
+    power.lv ~ package.GND
+    # Connect exposed pad to GND for thermal performance
+    package.EP ~ power.lv
+    assert power.voltage within 1.8V to 5.5V
+
+    # --- I²C interface ---
+    i2c.scl.line ~ package.SCL
+    i2c.sda.line ~ package.SDA
+    i2c.scl.reference ~ power
+    i2c.sda.reference ~ power
+
+    # --- I2C pull-up resistors ---
+    i2c_pullup_scl = new Resistor
+    i2c_pullup_sda = new Resistor
+    for pullup in [i2c_pullup_scl, i2c_pullup_sda]:
+        pullup.resistance = 10kohm +/- 5%
+        pullup.package = "0402"
+    i2c.scl.line ~> i2c_pullup_scl ~> i2c.scl.reference.hv
+    i2c.sda.line ~> i2c_pullup_sda ~> i2c.sda.reference.hv
+
+    # --- I2C Address Configuration ---
+    # Keep the package pinned to the base address for now.
+    package.ADD0 ~ power.lv
+    i2c.address.default = 0x48
+
+    # --- Alert pin ---
+    alert.line ~ package.ALERT
+    alert.reference ~ power
+
+    # --- Decoupling capacitor ---
+    decoupling_cap = new Capacitor
+    decoupling_cap.capacitance = 100nF +/- 20%
+    decoupling_cap.package = "0402"
+    power.hv ~> decoupling_cap ~> power.lv

@@ -1,0 +1,28 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+from "pulse-hx1198.ato" import HX1198_driver
+
+import ElectricPower
+import Electrical
+
+module Usage:
+    phy_power = new ElectricPower
+    phy_txp = new Electrical
+    phy_txn = new Electrical
+    phy_rxp = new Electrical
+    phy_rxn = new Electrical
+    line_txp = new Electrical
+    line_txn = new Electrical
+    line_rxp = new Electrical
+    line_rxn = new Electrical
+
+    magnetics = new HX1198_driver
+    magnetics.phy_power ~ phy_power
+    magnetics.phy_txp ~ phy_txp
+    magnetics.phy_txn ~ phy_txn
+    magnetics.phy_rxp ~ phy_rxp
+    magnetics.phy_rxn ~ phy_rxn
+    magnetics.line_txp ~ line_txp
+    magnetics.line_txn ~ line_txn
+    magnetics.line_rxp ~ line_rxp
+    magnetics.line_rxn ~ line_rxn

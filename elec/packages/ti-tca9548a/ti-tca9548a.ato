@@ -1,0 +1,149 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("MODULE_TEMPLATING")
+
+import ElectricPower
+import I2C
+import ElectricLogic
+import Resistor
+import Capacitor
+
+from "parts/Texas_Instruments_TCA9548APWR/Texas_Instruments_TCA9548APWR.ato" import Texas_Instruments_TCA9548APWR_package
+
+module TI_TCA9548A:
+    """
+    Texas Instruments TCA9548A I2C multiplexer/switch.
+
+    Features:
+    - 8-channel I2C multiplexer/switch
+    - Bidirectional translation (1.65V to 5.5V)
+    - Low ON resistance (5Ω typical)
+    - Active HIGH channel selection
+    - 3-bit address configuration (0x70 to 0x77)
+    - 400kHz I2C bus speed support
+    - Low power consumption (2.5μA standby)
+    - Hardware reset pin
+    - TSSOP-24 package
+    """
+
+    # External interfaces
+    power = new ElectricPower
+    """
+    Power supply (1.65V to 5.5V)
+    """
+    power.required = True
+    assert power.voltage within 1.65V to 5.5V
+
+    i2c = new I2C
+    """
+    Main I2C bus connection (upstream/master side)
+    """
+
+    reset = new ElectricLogic
+    """
+    Hardware reset pin (active low). Pull high for normal operation.
+    """
+    address_pins = new ElectricLogic[3]
+    for address_pin in address_pins:
+        address_pin.reference ~ power
+        address_pin.required = False
+
+    # I2C channels (8 channels)
+    i2cs = new I2C[8]
+    """
+    8 independent I2C channels (downstream/slave side).
+    Each channel is isolated and can be individually enabled via I2C commands.
+    """
+
+    # Package
+    package = new Texas_Instruments_TCA9548APWR_package
+
+    # Connect I2C
+    i2c.sda.line ~ package.SDA
+    i2c.scl.line ~ package.SCL
+    i2c.sda.reference ~ power
+    i2c.scl.reference ~ power
+
+    # Connect Power
+    power.hv ~ package.VCC
+    power.lv ~ package.GND
+
+    # Decoupling capacitors
+    decoupling_caps = new Capacitor[2]
+    decoupling_caps[0].capacitance = 100nF +/- 20%
+    decoupling_caps[0].package = "0402"
+    decoupling_caps[1].capacitance = 2.2uF +/- 20%
+    decoupling_caps[1].package = "0402"
+    for cap in decoupling_caps:
+        power.hv ~> cap ~> power.lv
+
+    # Reset (active low, with pullup)
+    reset.line ~ package.nRESET
+    reset.reference ~ power
+
+    # Reset pullup resistor
+    reset_pullup = new Resistor
+    reset_pullup.resistance = 10kohm +/- 1%
+    reset_pullup.package = "0402"
+    reset.line ~> reset_pullup ~> reset.reference.hv
+
+    # I2C Address Configuration (3 bits = 8 possible addresses)
+    # The board straps the pins and sets the matching bus address explicitly.
+    package.A0 ~ address_pins[0].line
+    package.A1 ~ address_pins[1].line
+    package.A2 ~ address_pins[2].line
+    i2c.address.default = 0x70
+
+    # Connect I2C channels to package
+    i2cs[0].sda.line ~ package.SD0
+    i2cs[0].scl.line ~ package.SC0
+    i2cs[1].sda.line ~ package.SD1
+    i2cs[1].scl.line ~ package.SC1
+    i2cs[2].sda.line ~ package.SD2
+    i2cs[2].scl.line ~ package.SC2
+    i2cs[3].sda.line ~ package.SD3
+    i2cs[3].scl.line ~ package.SC3
+    i2cs[4].sda.line ~ package.SD4
+    i2cs[4].scl.line ~ package.SC4
+    i2cs[5].sda.line ~ package.SD5
+    i2cs[5].scl.line ~ package.SC5
+    i2cs[6].sda.line ~ package.SD6
+    i2cs[6].scl.line ~ package.SC6
+    i2cs[7].sda.line ~ package.SD7
+    i2cs[7].scl.line ~ package.SC7
+
+    # Connect I2C references to power
+    for i2c_ch in i2cs:
+        i2c_ch.sda.reference ~ power
+        i2c_ch.scl.reference ~ power
+
+    # I2C pullup resistors for each channel
+    # Each channel needs its own pullups since they're isolated
+    sda_pullups = new Resistor[8]
+    scl_pullups = new Resistor[8]
+
+    # Configure pullup resistors
+    for sda_pullup in sda_pullups:
+        sda_pullup.resistance = 10kohm +/- 1%
+        sda_pullup.package = "0402"
+    for scl_pullup in scl_pullups:
+        scl_pullup.resistance = 10kohm +/- 1%
+        scl_pullup.package = "0402"
+
+    # Connect pullups to I2C channel references (matches connected logic level)
+    i2cs[0].sda.line ~> sda_pullups[0] ~> i2cs[0].sda.reference.hv
+    i2cs[0].scl.line ~> scl_pullups[0] ~> i2cs[0].scl.reference.hv
+    i2cs[1].sda.line ~> sda_pullups[1] ~> i2cs[1].sda.reference.hv
+    i2cs[1].scl.line ~> scl_pullups[1] ~> i2cs[1].scl.reference.hv
+    i2cs[2].sda.line ~> sda_pullups[2] ~> i2cs[2].sda.reference.hv
+    i2cs[2].scl.line ~> scl_pullups[2] ~> i2cs[2].scl.reference.hv
+    i2cs[3].sda.line ~> sda_pullups[3] ~> i2cs[3].sda.reference.hv
+    i2cs[3].scl.line ~> scl_pullups[3] ~> i2cs[3].scl.reference.hv
+    i2cs[4].sda.line ~> sda_pullups[4] ~> i2cs[4].sda.reference.hv
+    i2cs[4].scl.line ~> scl_pullups[4] ~> i2cs[4].scl.reference.hv
+    i2cs[5].sda.line ~> sda_pullups[5] ~> i2cs[5].sda.reference.hv
+    i2cs[5].scl.line ~> scl_pullups[5] ~> i2cs[5].scl.reference.hv
+    i2cs[6].sda.line ~> sda_pullups[6] ~> i2cs[6].sda.reference.hv
+    i2cs[6].scl.line ~> scl_pullups[6] ~> i2cs[6].scl.reference.hv
+    i2cs[7].sda.line ~> sda_pullups[7] ~> i2cs[7].sda.reference.hv
+    i2cs[7].scl.line ~> scl_pullups[7] ~> i2cs[7].scl.reference.hv

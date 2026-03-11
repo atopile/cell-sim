@@ -1,0 +1,31 @@
+(fp_lib_table
+	(version 7)
+	(lib
+		(name "Alpha___Omega_Semicon_AO3400A")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Alpha___Omega_Semicon_AO3400A")
+		(options "")
+		(descr "atopile: part lib: Alpha___Omega_Semicon_AO3400A")
+	)
+	(lib
+		(name "Omron_Electronics_G5Q_1A4_DC24")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Omron_Electronics_G5Q_1A4_DC24")
+		(options "")
+		(descr "atopile: part lib: Omron_Electronics_G5Q_1A4_DC24")
+	)
+	(lib
+		(name "Omron_Electronics_G6K_2F_Y_TR_DC3")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Omron_Electronics_G6K_2F_Y_TR_DC3")
+		(options "")
+		(descr "atopile: part lib: Omron_Electronics_G6K_2F_Y_TR_DC3")
+	)
+	(lib
+		(name "UNI_ROYAL_0402WGF1002TCE")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/UNI_ROYAL_0402WGF1002TCE")
+		(options "")
+		(descr "atopile: part lib: UNI_ROYAL_0402WGF1002TCE")
+	)
+)

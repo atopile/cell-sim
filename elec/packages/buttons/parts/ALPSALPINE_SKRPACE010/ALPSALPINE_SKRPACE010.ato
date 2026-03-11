@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component ALPSALPINE_SKRPACE010_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C139797", date="2025-07-01T21:46:40.874118+00:00", checksum="a5ee7b34f7bdd718f9ea1e579f9c6eef400b4606de86b26383746934fd20e8b2">
+
+    trait is_atomic_part<manufacturer="ALPSALPINE", partnumber="SKRPACE010", footprint="KEY-SMD_4P-L4.2-W3.2-P2.20-LS4.6.kicad_mod", symbol="SKRPACE010.kicad_sym", model="KEY-SMD_4P-L4.2-W3.2-H2.5-LS4.6-P2.2.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C139797", manufacturer="ALPSALPINE", partno="SKRPACE010">
+    trait has_designator_prefix<prefix="SW">
+
+    # pins
+    pin 1
+    pin 2
+    pin 3
+    pin 4

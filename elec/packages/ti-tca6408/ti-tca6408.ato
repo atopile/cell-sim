@@ -1,0 +1,140 @@
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+
+import Capacitor
+import ElectricPower
+import ElectricLogic
+import has_single_electric_reference
+import I2C
+import Resistor
+
+from "parts/Texas_Instruments_TCA6408ARGTR/Texas_Instruments_TCA6408ARGTR.ato" import Texas_Instruments_TCA6408ARGTR_package
+
+module TI_TCA6408:
+    """Driver for Texas Instruments TCA6408 8-bit I²C GPIO expander.
+
+    The TCA6408 is a low-voltage 8-bit I²C GPIO expander. It provides 8 GPIOs,
+    an interrupt output, and operates from 1.65V to 5.5V. The device has configurable
+    interrupt sources and polarity inversion on all pins.
+
+    Exposes:
+        * i2c – I²C bus interface (7-bit addr 0x20 / 0x21)
+        * power – Power supply (1.65V to 5.5V)
+        * gpios – 8 GPIO pins
+        * interrupt – Interrupt output pin
+        * reset – Reset input pin
+    """
+
+    # --- Package ---
+    package = new Texas_Instruments_TCA6408ARGTR_package
+
+    # --- External interfaces ---
+    i2c = new I2C
+    """
+    I²C bus interface (7-bit addresses 0x20/0x21)
+    """
+    i2c.required = True
+
+    power = new ElectricPower
+    """
+    Power supply (1.65V to 5.5V)
+    """
+    power.required = True
+
+    trait has_single_electric_reference
+    has_single_electric_reference.reference ~ power
+
+    gpios = new ElectricLogic[8]
+    """
+    GPIO pins (P0-P7)
+    """
+    for gpio in gpios:
+        gpio.required = False
+
+    interrupt = new ElectricLogic
+    """
+    Interrupt output pin
+    """
+    interrupt.required = False
+
+    reset = new ElectricLogic
+    """
+    Reset input pin
+    """
+    reset.required = False
+
+    # --- Power connections ---
+    power.hv ~ package.VCCP
+    power.hv ~ package.VCCI
+    power.lv ~ package.GND
+    power.lv ~ package.PAD
+    assert power.voltage within 1.65V to 5.5V
+
+    # --- I²C interface ---
+    i2c.sda.line ~ package.SDA
+    i2c.scl.line ~ package.SCL
+    i2c.sda.reference ~ power
+    i2c.scl.reference ~ power
+
+    # --- GPIO connections ---
+    gpios[0].line ~ package.P0
+    gpios[1].line ~ package.P1
+    gpios[2].line ~ package.P2
+    gpios[3].line ~ package.P3
+    gpios[4].line ~ package.P4
+    gpios[5].line ~ package.P5
+    gpios[6].line ~ package.P6
+    gpios[7].line ~ package.P7
+
+    for gpio in gpios:
+        gpio.reference ~ power
+
+    # --- Interrupt and reset pins ---
+    interrupt.line ~ package.nINT
+    interrupt.reference ~ power
+
+    reset.line ~ package.nRESET
+    reset.reference ~ power
+
+    # --- I²C address selection ---
+    # The board ties ADDR high or low and sets the matching bus address explicitly.
+    address_pin = new ElectricLogic
+    address_pin.reference ~ power
+    address_pin.required = False
+    address_pin.line ~ package.ADDR
+
+    # Default to base address (0x20), can be overridden by the board.
+    i2c.address.default = 0x20
+
+    # --- I2C pullup resistors ---
+    pullup_scl = new Resistor
+    pullup_sda = new Resistor
+    pullup_scl.resistance = 4.7kohm +/- 5%
+    pullup_sda.resistance = 4.7kohm +/- 5%
+    pullup_scl.package = "0402"
+    pullup_sda.package = "0402"
+    i2c.scl.line ~> pullup_scl ~> i2c.scl.reference.hv
+    i2c.sda.line ~> pullup_sda ~> i2c.sda.reference.hv
+
+    # --- Interrupt pull-up resistor ---
+    interrupt_pullup = new Resistor
+    interrupt_pullup.resistance = 4.7kohm +/- 5%
+    interrupt_pullup.package = "0402"
+    power.hv ~> interrupt_pullup ~> package.nINT
+
+    # --- Reset pull-up resistor ---
+    reset_pullup = new Resistor
+    reset_pullup.resistance = 4.7kohm +/- 5%
+    reset_pullup.package = "0402"
+    power.hv ~> reset_pullup ~> package.nRESET
+
+    # --- Decoupling capacitors ---
+    decoupling_caps = new Capacitor[2]
+    for cap in decoupling_caps:
+        cap.capacitance = 100nF +/- 5%
+        cap.package = "0402"
+
+    power.hv ~> decoupling_caps[0] ~> power.lv
+    power.hv ~> decoupling_caps[1] ~> power.lv

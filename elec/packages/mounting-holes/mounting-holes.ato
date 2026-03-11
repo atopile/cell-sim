@@ -1,0 +1,235 @@
+#pragma experiment("MODULE_TEMPLATING")
+
+import Electrical
+
+from "parts/MountingHole_2_2_M2/MountingHole_2_2_M2.ato" import MountingHole_2_2_M2_package
+from "parts/MountingHole_2_2_M2_Pad/MountingHole_2_2_M2_Pad.ato" import MountingHole_2_2_M2_Pad_package
+from "parts/MountingHole_2_2_M2_Pad_TopBottom/MountingHole_2_2_M2_Pad_TopBottom.ato" import MountingHole_2_2_M2_Pad_TopBottom_package
+from "parts/MountingHole_2_2_M2_Pad_TopOnly/MountingHole_2_2_M2_Pad_TopOnly.ato" import MountingHole_2_2_M2_Pad_TopOnly_package
+from "parts/MountingHole_2_2_M2_Pad_Via/MountingHole_2_2_M2_Pad_Via.ato" import MountingHole_2_2_M2_Pad_Via_package
+from "parts/MountingHole_2_7_M2_5/MountingHole_2_7_M2_5.ato" import MountingHole_2_7_M2_5_package
+from "parts/MountingHole_2_7_M2_5_Pad/MountingHole_2_7_M2_5_Pad.ato" import MountingHole_2_7_M2_5_Pad_package
+from "parts/MountingHole_2_7_M2_5_Pad_TopBottom/MountingHole_2_7_M2_5_Pad_TopBottom.ato" import MountingHole_2_7_M2_5_Pad_TopBottom_package
+from "parts/MountingHole_2_7_M2_5_Pad_TopOnly/MountingHole_2_7_M2_5_Pad_TopOnly.ato" import MountingHole_2_7_M2_5_Pad_TopOnly_package
+from "parts/MountingHole_2_7_M2_5_Pad_Via/MountingHole_2_7_M2_5_Pad_Via.ato" import MountingHole_2_7_M2_5_Pad_Via_package
+from "parts/MountingHole_3_2_M3/MountingHole_3_2_M3.ato" import MountingHole_3_2_M3_package
+from "parts/MountingHole_3_2_M3_Pad/MountingHole_3_2_M3_Pad.ato" import MountingHole_3_2_M3_Pad_package
+from "parts/MountingHole_3_2_M3_Pad_TopBottom/MountingHole_3_2_M3_Pad_TopBottom.ato" import MountingHole_3_2_M3_Pad_TopBottom_package
+from "parts/MountingHole_3_2_M3_Pad_TopOnly/MountingHole_3_2_M3_Pad_TopOnly.ato" import MountingHole_3_2_M3_Pad_TopOnly_package
+from "parts/MountingHole_3_2_M3_Pad_Via/MountingHole_3_2_M3_Pad_Via.ato" import MountingHole_3_2_M3_Pad_Via_package
+from "parts/MountingHole_4_3_M4/MountingHole_4_3_M4.ato" import MountingHole_4_3_M4_package
+from "parts/MountingHole_4_3_M4_Pad/MountingHole_4_3_M4_Pad.ato" import MountingHole_4_3_M4_Pad_package
+from "parts/MountingHole_4_3_M4_Pad_TopBottom/MountingHole_4_3_M4_Pad_TopBottom.ato" import MountingHole_4_3_M4_Pad_TopBottom_package
+from "parts/MountingHole_4_3_M4_Pad_TopOnly/MountingHole_4_3_M4_Pad_TopOnly.ato" import MountingHole_4_3_M4_Pad_TopOnly_package
+from "parts/MountingHole_4_3_M4_Pad_Via/MountingHole_4_3_M4_Pad_Via.ato" import MountingHole_4_3_M4_Pad_Via_package
+from "parts/MountingHole_5_3_M5/MountingHole_5_3_M5.ato" import MountingHole_5_3_M5_package
+from "parts/MountingHole_5_3_M5_Pad/MountingHole_5_3_M5_Pad.ato" import MountingHole_5_3_M5_Pad_package
+from "parts/MountingHole_5_3_M5_Pad_TopBottom/MountingHole_5_3_M5_Pad_TopBottom.ato" import MountingHole_5_3_M5_Pad_TopBottom_package
+from "parts/MountingHole_5_3_M5_Pad_TopOnly/MountingHole_5_3_M5_Pad_TopOnly.ato" import MountingHole_5_3_M5_Pad_TopOnly_package
+from "parts/MountingHole_5_3_M5_Pad_Via/MountingHole_5_3_M5_Pad_Via.ato" import MountingHole_5_3_M5_Pad_Via_package
+from "parts/MountingHole_6_4_M6/MountingHole_6_4_M6.ato" import MountingHole_6_4_M6_package
+from "parts/MountingHole_6_4_M6_Pad/MountingHole_6_4_M6_Pad.ato" import MountingHole_6_4_M6_Pad_package
+from "parts/MountingHole_6_4_M6_Pad_TopBottom/MountingHole_6_4_M6_Pad_TopBottom.ato" import MountingHole_6_4_M6_Pad_TopBottom_package
+from "parts/MountingHole_6_4_M6_Pad_TopOnly/MountingHole_6_4_M6_Pad_TopOnly.ato" import MountingHole_6_4_M6_Pad_TopOnly_package
+from "parts/MountingHole_6_4_M6_Pad_Via/MountingHole_6_4_M6_Pad_Via.ato" import MountingHole_6_4_M6_Pad_Via_package
+from "parts/MountingHole_8_4_M8/MountingHole_8_4_M8.ato" import MountingHole_8_4_M8_package
+from "parts/MountingHole_8_4_M8_Pad/MountingHole_8_4_M8_Pad.ato" import MountingHole_8_4_M8_Pad_package
+from "parts/MountingHole_8_4_M8_Pad_TopBottom/MountingHole_8_4_M8_Pad_TopBottom.ato" import MountingHole_8_4_M8_Pad_TopBottom_package
+from "parts/MountingHole_8_4_M8_Pad_TopOnly/MountingHole_8_4_M8_Pad_TopOnly.ato" import MountingHole_8_4_M8_Pad_TopOnly_package
+from "parts/MountingHole_8_4_M8_Pad_Via/MountingHole_8_4_M8_Pad_Via.ato" import MountingHole_8_4_M8_Pad_Via_package
+
+module MountingHole_2_2_M2:
+    """M2 mounting hole without pad"""
+    package = new MountingHole_2_2_M2_package
+
+module MountingHole_2_2_M2_Pad:
+    """M2 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_2_2_M2_Pad_package
+    contact ~ package.contact
+
+module MountingHole_2_2_M2_Pad_TopBottom:
+    """M2 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_2_2_M2_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_2_2_M2_Pad_TopOnly:
+    """M2 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_2_2_M2_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_2_2_M2_Pad_Via:
+    """M2 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_2_2_M2_Pad_Via_package
+    contact ~ package.contact
+
+module MountingHole_2_7_M2_5:
+    """M2.5 mounting hole without pad"""
+    package = new MountingHole_2_7_M2_5_package
+
+module MountingHole_2_7_M2_5_Pad:
+    """M2.5 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_2_7_M2_5_Pad_package
+    contact ~ package.contact
+
+module MountingHole_2_7_M2_5_Pad_TopBottom:
+    """M2.5 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_2_7_M2_5_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_2_7_M2_5_Pad_TopOnly:
+    """M2.5 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_2_7_M2_5_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_2_7_M2_5_Pad_Via:
+    """M2.5 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_2_7_M2_5_Pad_Via_package
+    contact ~ package.contact
+
+module MountingHole_3_2_M3:
+    """M3 mounting hole without pad"""
+    package = new MountingHole_3_2_M3_package
+
+module MountingHole_3_2_M3_Pad:
+    """M3 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_3_2_M3_Pad_package
+    contact ~ package.contact
+
+module MountingHole_3_2_M3_Pad_TopBottom:
+    """M3 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_3_2_M3_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_3_2_M3_Pad_TopOnly:
+    """M3 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_3_2_M3_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_3_2_M3_Pad_Via:
+    """M3 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_3_2_M3_Pad_Via_package
+    contact ~ package.contact
+
+module MountingHole_4_3_M4:
+    """M4 mounting hole without pad"""
+    package = new MountingHole_4_3_M4_package
+
+module MountingHole_4_3_M4_Pad:
+    """M4 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_4_3_M4_Pad_package
+    contact ~ package.contact
+
+module MountingHole_4_3_M4_Pad_TopBottom:
+    """M4 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_4_3_M4_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_4_3_M4_Pad_TopOnly:
+    """M4 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_4_3_M4_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_4_3_M4_Pad_Via:
+    """M4 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_4_3_M4_Pad_Via_package
+    contact ~ package.contact
+
+module MountingHole_5_3_M5:
+    """M5 mounting hole without pad"""
+    package = new MountingHole_5_3_M5_package
+
+module MountingHole_5_3_M5_Pad:
+    """M5 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_5_3_M5_Pad_package
+    contact ~ package.contact
+
+module MountingHole_5_3_M5_Pad_TopBottom:
+    """M5 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_5_3_M5_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_5_3_M5_Pad_TopOnly:
+    """M5 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_5_3_M5_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_5_3_M5_Pad_Via:
+    """M5 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_5_3_M5_Pad_Via_package
+    contact ~ package.contact
+
+module MountingHole_6_4_M6:
+    """M6 mounting hole without pad"""
+    package = new MountingHole_6_4_M6_package
+
+module MountingHole_6_4_M6_Pad:
+    """M6 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_6_4_M6_Pad_package
+    contact ~ package.contact
+
+module MountingHole_6_4_M6_Pad_TopBottom:
+    """M6 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_6_4_M6_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_6_4_M6_Pad_TopOnly:
+    """M6 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_6_4_M6_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_6_4_M6_Pad_Via:
+    """M6 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_6_4_M6_Pad_Via_package
+    contact ~ package.contact
+
+module MountingHole_8_4_M8:
+    """M8 mounting hole without pad"""
+    package = new MountingHole_8_4_M8_package
+
+module MountingHole_8_4_M8_Pad:
+    """M8 mounting hole with pad"""
+    contact = new Electrical
+    package = new MountingHole_8_4_M8_Pad_package
+    contact ~ package.contact
+
+module MountingHole_8_4_M8_Pad_TopBottom:
+    """M8 mounting hole with top and bottom pads"""
+    contact = new Electrical
+    package = new MountingHole_8_4_M8_Pad_TopBottom_package
+    contact ~ package.contact
+
+module MountingHole_8_4_M8_Pad_TopOnly:
+    """M8 mounting hole with top-only pad"""
+    contact = new Electrical
+    package = new MountingHole_8_4_M8_Pad_TopOnly_package
+    contact ~ package.contact
+
+module MountingHole_8_4_M8_Pad_Via:
+    """M8 mounting hole with via pad"""
+    contact = new Electrical
+    package = new MountingHole_8_4_M8_Pad_Via_package
+    contact ~ package.contact

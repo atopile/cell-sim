@@ -1,0 +1,382 @@
+#pragma experiment("MODULE_TEMPLATING")
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("TRAITS")
+
+import ElectricPower
+import ElectricLogic
+import ElectricSignal
+import SWD
+import USB2_0
+import JTAG
+import UART
+import SPI
+import I2C
+import I2S
+import MultiSPI
+import Ethernet
+import XtalIF
+import Resistor
+import Capacitor
+from "atopile/network-interfaces/network-interfaces.ato" import RMII
+from "atopile/network-interfaces/network-interfaces.ato" import MDIO
+from "parts/Yangxing_Tech_X322525MRB4SI/Yangxing_Tech_X322525MRB4SI.ato" import Yangxing_Tech_X322525MRB4SI_package
+from "parts/STMicroelectronics_STM32H723ZGT6/STMicroelectronics_STM32H723ZGT6.ato" import STMicroelectronics_STM32H723ZGT6_package
+
+
+module ST_STM32H723:
+    """
+    STMicroelectronics STM32H723 (Cortex-M7 up to 550 MHz).
+    L1 cache, up to 1 MB Flash, 564 KB RAM, rich peripherals.
+    Exposes standard buses (I2C, SPI, UART, USB FS), SWD, GPIO arrays,
+    crystal interfaces, and an RMII MAC interface for external PHY.
+    Datasheet: see project README.
+    """
+
+    # --- Package ---
+    package = new STMicroelectronics_STM32H723ZGT6_package
+
+    # --- External interfaces ---
+    power_3v3 = new ElectricPower
+    """
+    3.3 V primary IO and analog supply domain. Valid 1.62 V to 3.6 V typical.
+    """
+    power_3v3.required = True
+    assert power_3v3.voltage within 1.62V to 3.6V
+
+    swd = new SWD
+    """Program/debug via SWD."""
+
+    usb = new USB2_0
+    """USB 2.0 FS device/host/OTG (on-chip FS PHY)."""
+
+    jtag = new JTAG
+    """JTAG debug interface (JTMS, JTCK, JTDI, JTDO, nTRST)."""
+
+    uart = new UART
+    spi = new SPI[2]
+    i2c = new I2C[2]
+    i2s = new I2S[2]
+
+    rmii = new RMII
+    """RMII MAC interface to an external Ethernet PHY (e.g. LAN8742A)."""
+
+    mdio = new MDIO
+    """MDIO/MDC management interface (SMI)."""
+
+    boot0 = new ElectricLogic
+    """Boot mode strap input."""
+
+    reset = new ElectricLogic
+    """Active-low reset input."""
+
+    # General-purpose IOs by port
+    gpio_a = new ElectricLogic[16]
+    gpio_b = new ElectricLogic[16]
+    gpio_c = new ElectricLogic[16]
+    gpio_d = new ElectricLogic[16]
+    gpio_e = new ElectricLogic[16]
+    gpio_f = new ElectricLogic[16]
+    gpio_g = new ElectricLogic[16]
+
+    # Low-speed and high-speed crystals
+    hse = new XtalIF
+    lse = new XtalIF
+
+    # --- Internal and auxiliary rails ---
+    power_usb = new ElectricPower
+    """USB dedicated 3.3 V PHY supply (VDD33USB)."""
+
+    power_analog = new ElectricPower
+    """Analog domain (VDDA/VSSA)."""
+
+    # Core capacitor rail(s)
+    power_vcap = new ElectricPower
+    """Core regulator output (VCAP)."""
+
+    # Tie external 3.3 V rail to internal 3.3 V domains
+    power_3v3 ~ power_analog
+    power_3v3 ~ power_usb
+
+    # --- Decoupling (representative) ---
+    # 3.3 V decoupling
+    decoupling_3v3 = new Capacitor[10]
+    for cap in decoupling_3v3:
+        cap.capacitance = 100nF +/- 20%
+        cap.package = "0402"
+        power_3v3.hv ~> cap ~> power_3v3.lv
+
+    # VDDA decoupling
+    decoupling_vdda = new Capacitor[2]
+    for cap in decoupling_vdda:
+        cap.capacitance = 100nF +/- 20%
+        cap.package = "0402"
+        power_analog.hv ~> cap ~> power_analog.lv
+
+    # VCAP (core regulator) capacitors
+    vcap_caps = new Capacitor[2]
+    for cap in vcap_caps:
+        cap.capacitance = 2.2uF +/- 20%
+        cap.package = "0402"
+        power_vcap.hv ~> cap ~> power_vcap.lv
+
+    # --- Package power connections ---
+    # VDD pins to 3V3, grounds to LV
+    package.VDD ~ power_3v3.hv
+    package.VSS ~ power_3v3.lv
+
+    # VDDA / VSSA
+    power_analog.hv ~ package.VDDA
+    power_analog.lv ~ package.VSSA
+
+    # VREF positive reference for ADC/DAC — tie to analog 3.3 V and decouple
+    power_analog.hv ~ package.VREFpos
+    vref_caps = new Capacitor[2]
+    vref_caps[0].capacitance = 1uF +/- 20%
+    vref_caps[0].package = "0402"
+    vref_caps[1].capacitance = 100nF +/- 20%
+    vref_caps[1].package = "0402"
+    for cap in vref_caps:
+        package.VREFpos ~> cap ~> power_analog.lv
+
+    # USB dedicated 3.3V rail
+    power_usb.hv ~ package.VDD33USB
+    power_usb.lv ~ power_3v3.lv
+
+    # VCAP pins
+    power_vcap.hv ~ package.VCAP
+    power_vcap.lv ~ power_3v3.lv
+
+    # Backup domain
+    # VBAT should be supplied externally if RTC/backup used; leave exposed
+    vbat = new ElectricPower
+    vbat.hv ~ package.VBAT
+    vbat.lv ~ power_3v3.lv
+
+    # Boot and reset control pins
+    boot0.line ~ package.BOOT0
+    boot0.reference ~ power_3v3
+    reset.line ~ package.NRST
+    reset.reference ~ power_3v3
+
+    # --- Debug ---
+    swd.clk ~ gpio_a[14]
+    swd.dio ~ gpio_a[13]
+
+    # --- JTAG ---
+    jtag.tms ~ gpio_a[13]
+    jtag.tck ~ gpio_a[14]
+    jtag.tdi ~ gpio_a[15]
+    jtag.tdo ~ gpio_b[3]
+    jtag.n_trst ~ gpio_b[4]
+
+    # --- USB FS ---
+    usb.usb_if.d.p ~ gpio_a[12]
+    usb.usb_if.d.n ~ gpio_a[11]
+
+    # --- High-speed crystal (HSE) ---
+    hse.xin ~ package.PH0_OSC_IN
+    hse.xout ~ package.PH1_OSC_OUT
+    hse.gnd ~ power_3v3.lv
+
+    # 25 MHz crystal for HSE (same as used with LAN8742A)
+    hse_crystal = new Yangxing_Tech_X322525MRB4SI_package
+    hse_crystal.OSC1 ~ hse.xin
+    hse_crystal.OSC2 ~ hse.xout
+    hse_crystal.GND ~ power_3v3.lv
+
+    # Crystal load capacitors (18 pF each typical)
+    hse_load_caps = new Capacitor[2]
+    for cap in hse_load_caps:
+        cap.capacitance = 18pF +/- 10%
+        cap.package = "0402"
+    hse_crystal.OSC1 ~> hse_load_caps[0] ~> power_3v3.lv
+    hse_crystal.OSC2 ~> hse_load_caps[1] ~> power_3v3.lv
+
+    # --- Low-speed crystal (LSE) ---
+    lse.xin ~ package.PC14_OSC32_IN
+    lse.xout ~ package.PC15_OSC32_OUT
+    lse.gnd ~ power_3v3.lv
+
+    # --- Default peripheral mappings (example sensible defaults) ---
+    # UART on PA9 (TX) / PA10 (RX)
+    uart.base_uart.tx ~ gpio_a[9]
+    uart.base_uart.rx ~ gpio_a[10]
+
+    # SPI buses
+    # SPI[0] on PB3 (SCK), PB4 (MISO), PB5 (MOSI)
+    spi[0].sclk ~ gpio_b[3]
+    spi[0].miso ~ gpio_b[4]
+    spi[0].mosi ~ gpio_b[5]
+    # SPI[1] on PC10 (SCK), PC11 (MISO), PC12 (MOSI)
+    spi[1].sclk ~ gpio_c[10]
+    spi[1].miso ~ gpio_c[11]
+    spi[1].mosi ~ gpio_c[12]
+
+    # I2C buses
+    # I2C[0] on PB8 (SCL) / PB9 (SDA)
+    i2c[0].scl ~ gpio_b[8]
+    i2c[0].sda ~ gpio_b[9]
+    # I2C[1] on PC0 (SCL) / PC1 (SDA)
+    i2c[1].scl ~ gpio_c[0]
+    i2c[1].sda ~ gpio_c[1]
+
+    # I2S buses
+    # I2S[0] on PC6 (SCK), PC7 (WS), PC8 (SD)
+    i2s[0].sck ~ gpio_c[6]
+    i2s[0].ws ~ gpio_c[7]
+    i2s[0].sd ~ gpio_c[8]
+    # I2S[1] on PD3 (SCK), PD4 (WS), PD5 (SD)
+    i2s[1].sck ~ gpio_d[3]
+    i2s[1].ws ~ gpio_d[4]
+    i2s[1].sd ~ gpio_d[5]
+
+    # --- RMII MAC mapping via GPIO arrays (references come from GPIO domain) ---
+    rmii.ref_clk ~ gpio_a[1]   # PA1
+    rmii.tx_en ~ gpio_b[11]    # PB11
+    rmii.txd[0] ~ gpio_b[12]   # PB12
+    rmii.txd[1] ~ gpio_b[13]   # PB13
+    rmii.rxd[0] ~ gpio_c[4]    # PC4
+    rmii.rxd[1] ~ gpio_c[5]    # PC5
+    rmii.crs_dv ~ gpio_a[7]    # PA7
+    rmii.rx_er ~ gpio_b[10]    # PB10
+
+    # --- MDIO mapping ---
+    mdio.mdc ~ gpio_a[6]       # PA6 - MDIOS_MDC (MDIO clock)
+    mdio.mdio ~ gpio_a[7]      # PA7 - ETH_MDIO (MDIO data)
+    mdio.mdc.reference ~ power_3v3
+    mdio.mdio.reference ~ power_3v3
+
+    # Provide direct port pin exposures for app wiring
+    package.PA0 ~ gpio_a[0].line
+    package.PA1 ~ gpio_a[1].line
+    package.PA2 ~ gpio_a[2].line
+    package.PA3 ~ gpio_a[3].line
+    package.PA4 ~ gpio_a[4].line
+    package.PA5 ~ gpio_a[5].line
+    package.PA6 ~ gpio_a[6].line
+    package.PA7 ~ gpio_a[7].line
+    package.PA8 ~ gpio_a[8].line
+    package.PA9 ~ gpio_a[9].line
+    package.PA10 ~ gpio_a[10].line
+    package.PA11 ~ gpio_a[11].line
+    package.PA12 ~ gpio_a[12].line
+    package.PA13 ~ gpio_a[13].line
+    package.PA14 ~ gpio_a[14].line
+    package.PA15 ~ gpio_a[15].line
+
+    package.PB0 ~ gpio_b[0].line
+    package.PB1 ~ gpio_b[1].line
+    package.PB2 ~ gpio_b[2].line
+    package.PB3 ~ gpio_b[3].line
+    package.PB4 ~ gpio_b[4].line
+    package.PB5 ~ gpio_b[5].line
+    package.PB6 ~ gpio_b[6].line
+    package.PB7 ~ gpio_b[7].line
+    package.PB8 ~ gpio_b[8].line
+    package.PB9 ~ gpio_b[9].line
+    package.PB10 ~ gpio_b[10].line
+    package.PB11 ~ gpio_b[11].line
+    package.PB12 ~ gpio_b[12].line
+    package.PB13 ~ gpio_b[13].line
+    package.PB14 ~ gpio_b[14].line
+    package.PB15 ~ gpio_b[15].line
+
+    package.PC0 ~ gpio_c[0].line
+    package.PC1 ~ gpio_c[1].line
+    package.PC2_C ~ gpio_c[2].line
+    package.PC3_C ~ gpio_c[3].line
+    package.PC4 ~ gpio_c[4].line
+    package.PC5 ~ gpio_c[5].line
+    package.PC6 ~ gpio_c[6].line
+    package.PC7 ~ gpio_c[7].line
+    package.PC8 ~ gpio_c[8].line
+    package.PC9 ~ gpio_c[9].line
+    package.PC10 ~ gpio_c[10].line
+    package.PC11 ~ gpio_c[11].line
+    package.PC12 ~ gpio_c[12].line
+    package.PC13 ~ gpio_c[13].line
+
+    package.PD0 ~ gpio_d[0].line
+    package.PD1 ~ gpio_d[1].line
+    package.PD2 ~ gpio_d[2].line
+    package.PD3 ~ gpio_d[3].line
+    package.PD4 ~ gpio_d[4].line
+    package.PD5 ~ gpio_d[5].line
+    package.PD6 ~ gpio_d[6].line
+    package.PD7 ~ gpio_d[7].line
+    package.PD8 ~ gpio_d[8].line
+    package.PD9 ~ gpio_d[9].line
+    package.PD10 ~ gpio_d[10].line
+    package.PD11 ~ gpio_d[11].line
+    package.PD12 ~ gpio_d[12].line
+    package.PD13 ~ gpio_d[13].line
+    package.PD14 ~ gpio_d[14].line
+    package.PD15 ~ gpio_d[15].line
+
+    package.PE0 ~ gpio_e[0].line
+    package.PE1 ~ gpio_e[1].line
+    package.PE2 ~ gpio_e[2].line
+    package.PE3 ~ gpio_e[3].line
+    package.PE4 ~ gpio_e[4].line
+    package.PE5 ~ gpio_e[5].line
+    package.PE6 ~ gpio_e[6].line
+    package.PE7 ~ gpio_e[7].line
+    package.PE8 ~ gpio_e[8].line
+    package.PE9 ~ gpio_e[9].line
+    package.PE10 ~ gpio_e[10].line
+    package.PE11 ~ gpio_e[11].line
+    package.PE12 ~ gpio_e[12].line
+    package.PE13 ~ gpio_e[13].line
+    package.PE14 ~ gpio_e[14].line
+    package.PE15 ~ gpio_e[15].line
+
+    package.PF0 ~ gpio_f[0].line
+    package.PF1 ~ gpio_f[1].line
+    package.PF2 ~ gpio_f[2].line
+    package.PF3 ~ gpio_f[3].line
+    package.PF4 ~ gpio_f[4].line
+    package.PF5 ~ gpio_f[5].line
+    package.PF6 ~ gpio_f[6].line
+    package.PF7 ~ gpio_f[7].line
+    package.PF8 ~ gpio_f[8].line
+    package.PF9 ~ gpio_f[9].line
+    package.PF10 ~ gpio_f[10].line
+    package.PF11 ~ gpio_f[11].line
+    package.PF12 ~ gpio_f[12].line
+    package.PF13 ~ gpio_f[13].line
+    package.PF14 ~ gpio_f[14].line
+    package.PF15 ~ gpio_f[15].line
+
+    package.PG0 ~ gpio_g[0].line
+    package.PG1 ~ gpio_g[1].line
+    package.PG2 ~ gpio_g[2].line
+    package.PG3 ~ gpio_g[3].line
+    package.PG4 ~ gpio_g[4].line
+    package.PG5 ~ gpio_g[5].line
+    package.PG6 ~ gpio_g[6].line
+    package.PG7 ~ gpio_g[7].line
+    package.PG8 ~ gpio_g[8].line
+    package.PG9 ~ gpio_g[9].line
+    package.PG10 ~ gpio_g[10].line
+    package.PG11 ~ gpio_g[11].line
+    package.PG12 ~ gpio_g[12].line
+    package.PG13 ~ gpio_g[13].line
+    package.PG14 ~ gpio_g[14].line
+    package.PG15 ~ gpio_g[15].line
+
+    # --- References ---
+    for io in gpio_a:
+        io.reference ~ power_3v3
+    for io in gpio_b:
+        io.reference ~ power_3v3
+    for io in gpio_c:
+        io.reference ~ power_3v3
+    for io in gpio_d:
+        io.reference ~ power_3v3
+    for io in gpio_e:
+        io.reference ~ power_3v3
+    for io in gpio_f:
+        io.reference ~ power_3v3
+    for io in gpio_g:
+        io.reference ~ power_3v3

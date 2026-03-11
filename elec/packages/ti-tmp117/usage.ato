@@ -1,0 +1,34 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+
+import I2C
+import ElectricPower
+import Resistor
+import ElectricLogic
+
+from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
+
+module Usage:
+    """
+    Minimal usage example for TI TMP117 high-precision temperature sensor.
+    Shows basic I2C configuration with power supply and pull-up resistors.
+    """
+
+    temp_sensor = new TI_TMP117
+
+    # Sensor power supply (3.3V)
+    power_3v3 = new ElectricPower
+    power_3v3 ~ temp_sensor.power
+    assert power_3v3.voltage within 3.2V to 3.4V
+
+    # I2C bus
+    i2c_bus = new I2C
+    i2c_bus ~ temp_sensor.i2c
+
+    # Configure address (Possible addresses: 0x48, 0x49, 0x4A, 0x4B)
+    assert temp_sensor.i2c.address is 0x48
+
+    # Alert pin is available for temperature limit notifications
+    # Can be connected to microcontroller GPIO for interrupt-driven operation
+    alert_pin = new ElectricLogic
+    alert_pin ~ temp_sensor.alert

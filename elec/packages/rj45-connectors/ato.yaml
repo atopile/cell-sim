@@ -1,0 +1,42 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: ./
+  layout: ./layouts
+
+builds:
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  horizontal:
+    entry: rj45-connectors.ato:RJ45_Horizontal_TH_Magnetics
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  vertical:
+    entry: rj45-connectors.ato:RJ45_Vertical_SMD
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  recessed:
+    entry: rj45-connectors.ato:RJ45_Recessed_SMD
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  horizontal-smd:
+    entry: rj45-connectors.ato:RJ45_Horizontal_SMD_Magnetics
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  8port:
+    entry: rj45-connectors.ato:RJ45_Horizontal_TH_Magnetics_8Port
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+
+package:
+  identifier: atopile/rj45-connectors
+  repository: https://github.com/atopile/packages
+  homepage: https://github.com/atopile/packages/blob/main/packages/rj45-connectors/README.md
+  version: "0.2.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: "RJ45 Ethernet connectors; Vertical SMD; Horizontal Through-Hole; Magnetics; Network; Jack; Socket; 8P8C"
+  license: MIT

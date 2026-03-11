@@ -1,0 +1,42 @@
+#pragma experiment("TRAITS")
+#pragma experiment("BRIDGE_CONNECT")
+
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+from "atopile/relays/helpers.ato" import RelayDPDT
+
+component Omron_Electronics_G6K_2F_Y_TR_DC3_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system = "ato_part", source = "easyeda:C2153097", date = "2025-09-05T02:26:57.068880+00:00", checksum = "7fb48bd60e6069ff09d2af7b159a40bda2eec07168ceecfa214ece495330f2a1">
+
+    trait is_atomic_part<manufacturer = "Omron Electronics", partnumber = "G6K-2F-Y-TR DC3", footprint = "RELAY-SMD_G6K-2F-Y.kicad_mod", symbol = "G6K-2F-Y-TRDC3.kicad_sym", model = "SMD-8_L10.0-W6.5-H5.4-LS7.8-P2.2.step">
+    trait has_part_picked::by_supplier<supplier_id = "lcsc", supplier_partno = "C2153097", manufacturer = "Omron Electronics", partno = "G6K-2F-Y-TR DC3">
+    trait has_designator_prefix<prefix = "U">
+
+    # pins
+    pin 8
+    pin 7
+    pin 6
+    pin 5
+    pin 4
+    pin 3
+    pin 2
+    pin 1
+
+module RelayDPDT1A3V from RelayDPDT:
+    package = new Omron_Electronics_G6K_2F_Y_TR_DC3_package
+    package.1 ~> coil ~> package.8
+
+    # Switch 0
+    package.3 ~> switch_nc[0] ~> package.2
+    package.3 ~> switch_no[0] ~> package.4
+
+    # Switch 1
+    package.6 ~> switch_nc[1] ~> package.7
+    package.6 ~> switch_no[1] ~> package.5
+
+    assert coil.voltage within 3V +/- 10%
+    assert coil.resistance within 90ohm +/- 10%

@@ -1,0 +1,38 @@
+#pragma experiment("TRAITS")
+#pragma experiment("FOR_LOOP")
+#pragma experiment("BRIDGE_CONNECT")
+
+import ElectricLogic
+import ElectricPower
+import I2C
+from "atopile/microchip-emc2101/microchip-emc2101.ato" import Microchip_EMC2101
+
+module Usage:
+    """
+    Minimal usage example for microchip-emc2101.
+    Demonstrates how to use the EMC2101 temperature sensor and fan controller
+    in a typical thermal management application with MSOP-8 package.
+    """
+
+    # Power supply
+    power_3v3 = new ElectricPower
+    assert power_3v3.voltage within 3.2V to 3.4V
+
+    # I2C bus for communication
+    i2c_bus = new I2C
+    assert i2c_bus.frequency within 100kHz to 400kHz
+
+    # Fan control signal
+    fan_pwm_signal = new ElectricLogic
+
+    # EMC2101 temperature sensor and fan controller
+    temp_controller = new Microchip_EMC2101
+
+    # Connect power
+    power_3v3 ~ temp_controller.power
+
+    # Connect I2C bus
+    i2c_bus ~ temp_controller.i2c
+
+    # Connect fan PWM output
+    fan_pwm_signal ~ temp_controller.pwm_out

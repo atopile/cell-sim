@@ -1,0 +1,104 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+#pragma experiment("FOR_LOOP")
+
+import ElectricPower
+import Inductor
+import Resistor
+import Electrical
+import ElectricLogic
+import can_bridge_by_name
+import has_part_removed
+
+from "parts/Alpha___Omega_Semicon_AO3400A/Alpha___Omega_Semicon_AO3400A.ato" import Alpha_Omega_Semicon_AO3400A
+
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
+
+module Coil:
+    """Relay coil"""
+    _inductor = new Inductor
+    contacts = new Electrical[2]
+    voltage: V
+    """Coil nominal voltage"""
+    resistance: ohm
+    """Coil resistance"""
+
+    trait has_part_removed
+
+    # connect electricals
+    _inductor.unnamed[0] ~ contacts[0]
+    _inductor.unnamed[1] ~ contacts[1]
+    trait can_bridge_by_name<input_name = "contacts[0]", output_name = "contacts[1]">
+
+    # set parameters
+    assert _inductor.max_current is voltage / _inductor.dc_resistance
+    assert _inductor.dc_resistance is resistance
+
+module SwitchNO:
+    common = new Electrical
+    normally_open = new Electrical
+    trait can_bridge_by_name<input_name = "common", output_name = "normally_open">
+    trait has_part_removed
+
+module SwitchNC:
+    common = new Electrical
+    normally_closed = new Electrical
+    trait can_bridge_by_name<input_name = "common", output_name = "normally_closed">
+    trait has_part_removed
+
+module LowSideNFETSwitch:
+    """ Low side NFET switch for controlling a relay coil """
+    enable = new ElectricLogic
+    gate_resistor = new Resistor
+    ilim_resistor = new Resistor
+    mosfet = new Alpha_Omega_Semicon_AO3400A
+
+    _input = new Electrical
+    _output = new Electrical
+
+    _input ~ mosfet.drain
+    _output ~ mosfet.source
+
+    assert enable.reference.voltage >= mosfet.gate_source_threshold_voltage
+
+    # Configure gate resistors
+    for resistor in [gate_resistor, ilim_resistor]:
+        resistor.resistance = 10kohm +/- 5%
+        resistor.package = "0402"
+
+    # Mosfet connections
+    enable.line ~> ilim_resistor ~> mosfet.gate
+    enable.line ~> gate_resistor ~> mosfet.source
+
+    # Bridge
+    trait can_bridge_by_name<input_name = "_input", output_name = "_output">
+
+module Relay:
+    """ Base relay module """
+    coil = new Coil
+
+module RelaySPSTNO from Relay:
+    """ SPST-NO relay (1 Form A) — single normally-open contact """
+    switch_no = new SwitchNO
+
+module RelayDPDT from Relay:
+    """ DPDT relay with two normally-open and two normally-closed poles """
+    switch_nc = new SwitchNC[2]
+    switch_no = new SwitchNO[2]
+
+module LogicLevelRelayBase:
+    """
+    Monostable relay with logic level driver and indicator LED
+    """
+    coil_power = new ElectricPower
+    enable = new ElectricLogic
+    coil_switch = new LowSideNFETSwitch
+    indicator_led = new LEDIndicatorGreen
+
+    # Enable connection
+    enable ~ coil_switch.enable
+
+    # LED in parallel with relay coil — lights only when N-FET is on
+    # power.hv = coil supply, power.lv = N-FET drain (coil low side)
+    indicator_led.power.hv ~ coil_power.hv
+    indicator_led.power.lv ~ coil_switch._input

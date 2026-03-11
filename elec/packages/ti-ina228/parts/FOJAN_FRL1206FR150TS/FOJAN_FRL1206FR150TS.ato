@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component FOJAN_FRL1206FR150TS_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2907348", date="2026-03-10T03:29:07.629934+00:00", checksum="cc0737ae9677f4d565997256d672c02924c2c6a1f213c9203d701afaa2fa21a0">
+
+    trait is_atomic_part<manufacturer="FOJAN", partnumber="FRL1206FR150TS", footprint="R1206.kicad_mod", symbol="FRL1206FR150TS.kicad_sym", model="R1206_L3.2-W1.6-H0.6.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2907348", manufacturer="FOJAN", partno="FRL1206FR150TS">
+    trait has_designator_prefix<prefix="R">
+    trait has_datasheet<datasheet="https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2308241947_FOJAN-FRL1206FR150TS_C2907348.pdf">
+
+    # pins
+    pin 2
+    pin 1

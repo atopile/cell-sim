@@ -1,0 +1,60 @@
+import Regulator
+import ElectricPower
+import Resistor
+
+
+module SimpleResistorChain:
+    resistors = new Resistor[2]
+
+
+module SimpleFeedbackDivider:
+    """
+    Minimal two-resistor feedback network.
+
+    This avoids the stdlib divider solver. Designs are expected to set the
+    resistor values directly.
+    """
+
+    ref_in = new ElectricPower
+    ref_out = new ElectricPower
+    chain = new SimpleResistorChain
+
+    ref_out.lv ~ ref_in.lv
+    ref_in.hv ~> chain.resistors[0] ~> ref_out.hv
+    ref_out.hv ~> chain.resistors[1] ~> ref_in.lv
+
+
+module AdjustableRegulator from Regulator:
+    input_voltage: voltage
+    output_voltage: voltage
+    reference_voltage: voltage
+
+    feedback_divider = new SimpleFeedbackDivider
+
+    assert input_voltage is power_in.voltage
+    assert output_voltage is power_out.voltage
+
+    power_out ~ feedback_divider.ref_in
+
+    power_in.required = True
+    power_out.required = True
+
+
+module Buck from AdjustableRegulator:
+    pass
+
+
+module Boost from AdjustableRegulator:
+    pass
+
+
+module FixedLDO from Regulator:
+    pass
+
+
+module AdjustableLDO from AdjustableRegulator:
+    pass
+
+
+module Flyback from AdjustableRegulator:
+    pass

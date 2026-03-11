@@ -1,0 +1,147 @@
+(footprint "STMicroelectronics_USBLC6_2SC6:SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL"
+	(version 20241229)
+	(generator "faebryk_convert")
+	(generator_version "v5")
+	(layer "F.Cu")
+	(tedit "5DC5F6A4")
+	(uuid "b892556b-be5e-4db5-a662-ec3431b8fd95")
+	(property "Reference" "REF**"
+		(at 0 -5.15)
+		(layer "F.SilkS")
+		(uuid "901bbd4d-07e4-4610-9d1d-2bbab292e387")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL"
+		(at 0 5.15)
+		(layer "F.Fab")
+		(uuid "656cd12a-1eab-418f-97e8-6d6949ab5a82")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_circle
+		(center -1.46 1.4)
+		(end -1.43 1.4)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(locked no)
+		(uuid "05d585ad-c29f-48fa-bc36-e04df881906c")
+	)
+	(fp_circle
+		(center -0.92 1.68)
+		(end -0.82 1.68)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "Cmts.User")
+		(locked no)
+		(uuid "e17ea7ab-ab69-4914-8536-f631bc6c63de")
+	)
+	(fp_circle
+		(center -1.67 1.3)
+		(end -1.52 1.3)
+		(stroke
+			(width 0.3)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(locked no)
+		(uuid "63b4aaec-7805-4d74-a575-2b571f6adbfe")
+	)
+	(fp_line
+		(start 1.54 0.89)
+		(end 1.54 -0.89)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "7a5c80d1-9994-4fe0-82ab-7412fd5f66c3")
+	)
+	(fp_line
+		(start -1.54 0.89)
+		(end -1.54 -0.89)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(layers "F.SilkS")
+		(locked no)
+		(uuid "2e08bddf-d536-469b-9563-44bd98d43556")
+	)
+	(fp_text user "%R"
+		(at 0 0)
+		(layer "F.Fab")
+		(uuid "e689bd08-9f0d-4145-a1fc-ac3855c11bba")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -0.95 1.15 0)
+		(size 0.53 1.07)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "a2925b9b-6f1e-4862-bc96-7ac310ba7e44")
+	)
+	(pad "2" smd rect
+		(at 0 1.15 0)
+		(size 0.53 1.07)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "85d0d41a-f20d-47a5-956f-fdcf36b9f02b")
+	)
+	(pad "3" smd rect
+		(at 0.95 1.15 0)
+		(size 0.53 1.07)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "9afdbb3e-0021-4292-a9c5-cc57ada627e4")
+	)
+	(pad "4" smd rect
+		(at 0.95 -1.15 0)
+		(size 0.53 1.07)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "46ca237f-3a96-48f8-9026-2c171dc4bd9a")
+	)
+	(pad "5" smd rect
+		(at 0 -1.15 0)
+		(size 0.53 1.07)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "6e162c21-582e-4c4a-b6fe-4563761c3888")
+	)
+	(pad "6" smd rect
+		(at -0.95 -1.15 0)
+		(size 0.53 1.07)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "093de6f9-6834-4e7d-9cc1-666197daeaf3")
+	)
+	(model "${KIPRJMOD}/../../parts/STMicroelectronics_USBLC6_2SC6/SOT-23-6_L2.9-W1.6-H1.5-LS2.8-P0.95.step"
+		(offset
+			(xyz 0 0 -0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 270)
+		)
+	)
+	(embedded_fonts no)
+)

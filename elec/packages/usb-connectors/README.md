@@ -1,0 +1,53 @@
+# USB Connectors
+
+This package provides USB connectors for convenience.
+
+## Usage
+
+```ato
+#pragma experiment("TRAITS")
+
+import USB2_0
+import ElectricPower
+import has_part_removed
+
+from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
+from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCVerticalConnector
+
+module MCU:
+    """Host MCU providing USB bus and power rail."""
+
+    trait has_part_removed
+
+    power = new ElectricPower
+    usb_1 = new USB2_0
+    usb_2 = new USB2_0
+
+
+module Usage:
+    """Minimal example of horizontal and vertical USB connectors."""
+
+    # MCU & sensor
+    mcu = new MCU
+    usb_connector_horizontal = new USB2_0TypeCHorizontalConnector
+    usb_connector_vertical = new USB2_0TypeCVerticalConnector
+
+    # Shared 5V PD rail
+    power = new ElectricPower
+    power ~ mcu.power
+    power ~ usb_connector_horizontal.usb.usb_if.buspower
+    power ~ usb_connector_vertical.usb.usb_if.buspower
+
+    # USB connection
+    mcu.usb_1 ~ usb_connector_horizontal.usb
+    mcu.usb_2 ~ usb_connector_vertical.usb
+
+```
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or pull requests.
+
+## License
+
+This package is provided under the [MIT License](mdc:packages/https:/opensource.org/license/mit).

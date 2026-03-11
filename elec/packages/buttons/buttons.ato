@@ -1,0 +1,45 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+
+import Electrical
+import can_bridge_by_name
+import has_part_removed
+
+from "parts/ALPSALPINE_SKRPACE010/ALPSALPINE_SKRPACE010.ato" import ALPSALPINE_SKRPACE010_package
+from "parts/ALPSALPINE_SKTDLDE010/ALPSALPINE_SKTDLDE010.ato" import ALPSALPINE_SKTDLDE010_package
+
+module Button:
+    """
+    Simple momentary switch with two terminals that can be bridged.
+    Use this to connect circuits when the button is pressed.
+    """
+    input = new Electrical
+    output = new Electrical
+
+    trait can_bridge_by_name<input_name="input", output_name="output">
+
+module VerticalButton from ALPSALPINE_SKRPACE010_button_driver:
+    """
+    Vertical momentary switch (Alps Alpine SKRPACE010)
+    """
+
+module HorizontalButton from ALPSALPINE_SKTDLDE010_button_driver:
+    """
+    Horizontal momentary switch (Alps Alpine SKTDLDE010)
+    """
+
+# Button driver implementations
+module ALPSALPINE_SKRPACE010_button_driver from Button:
+    package = new ALPSALPINE_SKRPACE010_package
+    # Connect both sides of the switch
+    input ~ package.1
+    input ~ package.2
+    output ~ package.3
+    output ~ package.4
+
+module ALPSALPINE_SKTDLDE010_button_driver from Button:
+    package = new ALPSALPINE_SKTDLDE010_package
+    # Connect the switch terminals
+    input ~ package.1
+    output ~ package.2
+    # package.3 and package.4 are mechanical

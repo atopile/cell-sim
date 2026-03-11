@@ -1,0 +1,27 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_DRV8837DSGR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C39159", date="2026-01-24T03:47:15.827024+00:00", checksum="ccc4ce302917c5e446534a3b5f47e9fdf9b98912b3081b24ead135f6abb67542">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="DRV8837DSGR", footprint="WSON-8_L2.0-W2.0-P0.50-TL-EP.kicad_mod", symbol="DRV8837DSGR.kicad_sym", model="WSON-8_L2.0-W2.0-H0.8-P0.50.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C39159", manufacturer="Texas Instruments", partno="DRV8837DSGR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2410122006_Texas-Instruments-DRV8837DSGR_C39159.pdf">
+
+    # pins
+    signal EP ~ pin 9
+    signal GND ~ pin 4
+    signal IN1 ~ pin 6
+    signal IN2 ~ pin 5
+    signal OUT1 ~ pin 2
+    signal OUT2 ~ pin 3
+    signal VCC ~ pin 8
+    signal VM ~ pin 1
+    signal nSPLEEP ~ pin 7

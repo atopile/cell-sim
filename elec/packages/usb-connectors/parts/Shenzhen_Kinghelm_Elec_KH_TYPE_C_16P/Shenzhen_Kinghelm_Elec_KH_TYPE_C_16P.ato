@@ -1,0 +1,36 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Shenzhen_Kinghelm_Elec_KH_TYPE_C_16P_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C709357", date="2025-05-30T20:23:52.637504+00:00", checksum="c644ab4c729e4301c2b51d74b11995cc99e666294a2175cbaefb8f039d1fefea">
+
+    trait is_atomic_part<manufacturer="Shenzhen Kinghelm Elec", partnumber="KH-TYPE-C-16P", footprint="USB-C-SMD_KH-TYPE-C-16P.kicad_mod", symbol="KH-TYPE-C-16P.kicad_sym", model="USB-C-SMD_KH-TYPE-C-16P.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C709357", manufacturer="Shenzhen Kinghelm Elec", partno="KH-TYPE-C-16P">
+    trait has_designator_prefix<prefix="USB">
+
+    # pins
+    signal CC1 ~ pin A5
+    signal CC2 ~ pin B5
+    signal DN1 ~ pin A7
+    signal DN2 ~ pin B7
+    signal DP1 ~ pin A6
+    signal DP2 ~ pin B6
+    signal EP ~ pin 1
+    EP ~ pin 2
+    EP ~ pin 3
+    EP ~ pin 4
+    signal GND ~ pin A12
+    GND ~ pin A1
+    GND ~ pin B12
+    GND ~ pin B1
+    signal SUB1 ~ pin A8
+    signal SUB2 ~ pin B8
+    signal VBUS ~ pin A9
+    VBUS ~ pin A4
+    VBUS ~ pin B9
+    VBUS ~ pin B4

@@ -1,0 +1,164 @@
+(footprint "Walter_Elec_STE1206M1W0R016F:R1206"
+    (layer "F.Cu")
+    (descr "")
+    (version 20241229)
+    (generator "faebryk")
+    (generator_version "v5")
+    (tedit "5DC5F6A4")
+    (property "Reference" "REF**"
+        (at 0 -4 0)
+        (layer "F.SilkS")
+        (hide no)
+        (uuid "c26625bb-ba45-4c0b-baee-893be5897d54")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "Value" "R1206"
+        (at 0 4 0)
+        (layer "F.Fab")
+        (hide no)
+        (uuid "def71e50-ac72-48c3-b6b0-9b37b46baa3f")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+    )
+    (property "checksum" "fd91bd881f5598a259156cb70d6c3685f8e0f56bc07f56c85982cdb1d7610851"
+        (at 0 0 0)
+        (layer "User.9")
+        (hide no)
+        (uuid "2783cd2f-9e80-4d9d-b0e4-9ae61fbb1434")
+        (effects
+            (font
+                (size 0.125 0.125)
+                (thickness 0.01875)
+            )
+            (hide yes)
+        )
+    )
+    (attr smd)
+    (fp_line
+        (start 0.95 1.08)
+        (end 2.31 1.08)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "10e827e0-5a8e-4b12-b53f-fc1cccc06337")
+    )
+    (fp_line
+        (start 2.31 1.08)
+        (end 2.31 -1.08)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "38246097-4fde-48cc-8cea-d66ef09c14b7")
+    )
+    (fp_line
+        (start 2.31 -1.08)
+        (end 0.95 -1.08)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "2f8dc579-35f1-475e-a055-de5d6b898f9e")
+    )
+    (fp_line
+        (start -0.95 1.08)
+        (end -2.31 1.08)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "a8522678-e9ac-416a-849d-8a1ffea27b33")
+    )
+    (fp_line
+        (start -2.31 1.08)
+        (end -2.31 -1.08)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "41179dec-c96f-440c-977a-e06de434cd7f")
+    )
+    (fp_line
+        (start -2.31 -1.08)
+        (end -0.95 -1.08)
+        (stroke
+            (width 0.15)
+            (type solid)
+        )
+        (layer "F.SilkS")
+        (uuid "4a0f3351-4e00-4a93-b30f-0704a4afb104")
+    )
+    (fp_circle
+        (center -1.55 0.79)
+        (end -1.52 0.79)
+        (stroke
+            (width 0.06)
+            (type solid)
+        )
+        (fill no)
+        (layer "F.Fab")
+        (uuid "f62ed047-444b-4ce3-b151-5a0c8b29d1a5")
+    )
+    (fp_text user "%R"
+        (at 0 0 0)
+        (layer "F.Fab")
+        (uuid "07c0ca89-dac1-400b-b4f2-b43818814e7a")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (fp_text user "${REFERENCE}"
+        (at 0 -4 0)
+        (layer "F.SilkS")
+        (uuid "c26625bb-ba45-4c0b-baee-893be5897d54")
+        (effects
+            (font
+                (size 1 1)
+                (thickness 0.15)
+            )
+        )
+        (unlocked no)
+    )
+    (pad "2" smd rect
+        (at 1.48 0 0)
+        (size 1.21 1.7)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "38ea70de-31cd-48bf-895b-c64704a1664b")
+    )
+    (pad "1" smd rect
+        (at -1.48 0 0)
+        (size 1.21 1.7)
+        (layers "F.Cu" "F.Paste" "F.Mask")
+        (uuid "d0212a6b-6bd8-4a81-a09a-365e02ea6b38")
+    )
+    (model "${KIPRJMOD}/../../parts/Walter_Elec_STE1206M1W0R016F/R1206_L3.2-W1.6-H0.6.step"
+        (offset
+            (xyz 0 0 0)
+        )
+        (scale
+            (xyz 1 1 1)
+        )
+        (rotate
+            (xyz 0 0 0)
+        )
+    )
+)

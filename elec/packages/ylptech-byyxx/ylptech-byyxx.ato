@@ -1,0 +1,232 @@
+#pragma experiment("BRIDGE_CONNECT")
+#pragma experiment("TRAITS")
+
+import ElectricPower
+import Regulator
+import Capacitor
+
+from "parts/YLPTEC_B2405S_2WR3/YLPTEC_B2405S_2WR3.ato" import YLPTEC_B2405S_2WR3_package
+from "parts/YLPTEC_B0505S_2WR3/YLPTEC_B0505S_2WR3.ato" import YLPTEC_B0505S_2WR3_package
+from "parts/YLPTEC_B1205S_2WR2/YLPTEC_B1205S_2WR2.ato" import YLPTEC_B1205S_2WR2_package
+from "parts/YLPTEC_B2412S_3WR2/YLPTEC_B2412S_3WR2.ato" import YLPTEC_B2412S_3WR2_package
+from "parts/YLPTEC_B2403S_3WR2/YLPTEC_B2403S_3WR2.ato" import YLPTEC_B2403S_3WR2_package
+
+module YLPTEC_B2405S_2WR3 from Regulator:
+    """
+    YLPTEC B2405S-2WR3 Isolated 2W DC-DC Converter
+    - Input: 24V (21.6V to 26.4V)
+    - Output: 5V (400mA max)
+    - Galvanically isolated input/output
+    - SIP-6 package
+    """
+
+    # --- External interfaces ---
+    power_in.required = True
+    """Input power supply (24V nominal, ±10%)"""
+
+    power_out.required = True
+    """Isolated 5V output rail"""
+
+    # --- Voltage constraints ---
+    assert power_in.voltage within 21.6V to 26.4V
+    assert power_out.voltage within 4.75V to 5.25V
+
+    # --- Package ---
+    package = new YLPTEC_B2405S_2WR3_package
+
+    # --- Package connections ---
+    # Input side
+    package.Vin ~ power_in.hv
+    package.GND ~ power_in.lv
+
+    # Output side (isolated)
+    package.VOpos ~ power_out.hv
+    package.P0V ~ power_out.lv
+
+    # --- Input decoupling capacitor ---
+    input_cap = new Capacitor
+    input_cap.capacitance = 2.2uF +/- 20%
+    input_cap.package = "0805"
+    power_in.hv ~> input_cap ~> power_in.lv
+
+    # --- Output decoupling capacitor ---
+    output_cap = new Capacitor
+    output_cap.capacitance = 10uF +/- 20%
+    output_cap.package = "0805"
+    power_out.hv ~> output_cap ~> power_out.lv
+
+module YLPTEC_B0505S_2WR3 from Regulator:
+    """
+    YLPTEC B0505S-2WR3 Isolated 2W DC-DC Converter
+    - Input: 5V (4.5V to 5.5V)
+    - Output: 5V (400mA max)
+    - Galvanically isolated input/output
+    - SIP-6 package
+    """
+
+    # --- External interfaces ---
+    power_in.required = True
+    """Input power supply (5V nominal, ±10%)"""
+
+    power_out.required = True
+    """Isolated 5V output rail"""
+
+    # --- Voltage constraints ---
+    assert power_in.voltage within 4.5V to 5.5V
+    assert power_out.voltage within 4.75V to 5.25V
+
+    # --- Package ---
+    package = new YLPTEC_B0505S_2WR3_package
+
+    # --- Package connections ---
+    # Input side
+    package.VINpos ~ power_in.hv
+    package.GND ~ power_in.lv
+
+    # Output side (isolated)
+    package.Vopos ~ power_out.hv
+    package.Voneg ~ power_out.lv
+
+    # --- Input decoupling capacitor ---
+    input_cap = new Capacitor
+    input_cap.capacitance = 2.2uF +/- 20%
+    input_cap.package = "0805"
+    power_in.hv ~> input_cap ~> power_in.lv
+
+    # --- Output decoupling capacitor ---
+    output_cap = new Capacitor
+    output_cap.capacitance = 10uF +/- 20%
+    output_cap.package = "0805"
+    power_out.hv ~> output_cap ~> power_out.lv
+
+module YLPTEC_B1205S_2WR2 from Regulator:
+    """
+    YLPTEC B1205S-2WR2 Isolated 2W DC-DC Converter
+    - Input: 12V (10.8V to 13.2V)
+    - Output: 5V (400mA max)
+    - Galvanically isolated input/output
+    - SIP-6 package
+    """
+
+    # --- External interfaces ---
+    power_in.required = True
+    """Input power supply (12V nominal, ±10%)"""
+
+    power_out.required = True
+    """Isolated 5V output rail"""
+
+    # --- Voltage constraints ---
+    assert power_in.voltage within 10.8V to 13.2V
+    assert power_out.voltage within 4.75V to 5.25V
+
+    # --- Package ---
+    package = new YLPTEC_B1205S_2WR2_package
+
+    # --- Package connections ---
+    # Input side
+    package.Vin ~ power_in.hv
+    package.GND ~ power_in.lv
+
+    # Output side (isolated)
+    package.Vopos ~ power_out.hv
+    package.P0V ~ power_out.lv
+
+    # --- Input decoupling capacitor ---
+    input_cap = new Capacitor
+    input_cap.capacitance = 2.2uF +/- 20%
+    input_cap.package = "0805"
+    power_in.hv ~> input_cap ~> power_in.lv
+
+    # --- Output decoupling capacitor ---
+    output_cap = new Capacitor
+    output_cap.capacitance = 10uF +/- 20%
+    output_cap.package = "0805"
+    power_out.hv ~> output_cap ~> power_out.lv
+
+module YLPTEC_B2403S_3WR2 from Regulator:
+    """
+    YLPTEC B2403S-3WR2 Isolated 3W DC-DC Converter
+    - Input: 24V (21.6V to 26.4V)
+    - Output: 3.3V (600mA max)
+    - Galvanically isolated input/output
+    - SIP-6 package
+    """
+
+    # --- External interfaces ---
+    power_in.required = True
+    """Input power supply (24V nominal, ±10%)"""
+
+    power_out.required = True
+    """Isolated 3.3V output rail"""
+
+    # --- Voltage constraints ---
+    assert power_in.voltage within 21.6V to 26.4V
+    assert power_out.voltage within 3.14V to 3.47V
+
+    # --- Package ---
+    package = new YLPTEC_B2403S_3WR2_package
+
+    # --- Package connections ---
+    # Input side
+    package.VIN ~ power_in.hv
+    package.GND ~ power_in.lv
+
+    # Output side (isolated)
+    package.VOpos ~ power_out.hv
+    package.P0V ~ power_out.lv
+
+    # --- Input decoupling capacitor ---
+    input_cap = new Capacitor
+    input_cap.capacitance = 2.2uF +/- 20%
+    input_cap.package = "0805"
+    power_in.hv ~> input_cap ~> power_in.lv
+
+    # --- Output decoupling capacitor ---
+    output_cap = new Capacitor
+    output_cap.capacitance = 10uF +/- 20%
+    output_cap.package = "0805"
+    power_out.hv ~> output_cap ~> power_out.lv
+
+module YLPTEC_B2412S_3WR2 from Regulator:
+    """
+    YLPTEC B2412S-3WR2 Isolated 3W DC-DC Converter
+    - Input: 24V (21.6V to 26.4V)
+    - Output: 12V (250mA max)
+    - Galvanically isolated input/output
+    - SIP-4 package
+    """
+
+    # --- External interfaces ---
+    power_in.required = True
+    """Input power supply (24V nominal, ±10%)"""
+
+    power_out.required = True
+    """Isolated 12V output rail"""
+
+    # --- Voltage constraints ---
+    assert power_in.voltage within 21.6V to 26.4V
+    assert power_out.voltage within 11.4V to 12.6V
+
+    # --- Package ---
+    package = new YLPTEC_B2412S_3WR2_package
+
+    # --- Package connections ---
+    # Input side
+    package.VIN ~ power_in.hv
+    package.GND ~ power_in.lv
+
+    # Output side (isolated)
+    package.VOpos ~ power_out.hv
+    package.P0V ~ power_out.lv
+
+    # --- Input decoupling capacitor ---
+    input_cap = new Capacitor
+    input_cap.capacitance = 2.2uF +/- 20%
+    input_cap.package = "0805"
+    power_in.hv ~> input_cap ~> power_in.lv
+
+    # --- Output decoupling capacitor ---
+    output_cap = new Capacitor
+    output_cap.capacitance = 10uF +/- 20%
+    output_cap.package = "0805"
+    power_out.hv ~> output_cap ~> power_out.lv

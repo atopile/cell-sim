@@ -1,0 +1,41 @@
+requires-atopile: "^0.14.0"
+
+paths:
+  src: "."
+  layout: ./layouts
+
+builds:
+  hdr-2-54mm-10pin-arm-cortex:
+    entry: programming-headers.ato:HDR_2_54mm_10pin_ARM_Cortex
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  idc-2-54mm-10pin-arm-cortex:
+    entry: programming-headers.ato:IDC_2_54mm_10pin_ARM_Cortex
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  idc-2-54mm-20pin-arm:
+    entry: programming-headers.ato:IDC_2_54mm_20pin_ARM
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  tc2050-arm-cortex:
+    entry: programming-headers.ato:TC2050_ARM_Cortex
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  tc2030-arm-cortex:
+    entry: programming-headers.ato:TC2030_ARM_Cortex
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  usage:
+    entry: usage.ato:Usage
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+
+package:
+  identifier: atopile/programming-headers
+  repository: https://github.com/atopile/packages
+  version: "0.2.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: JTAG and SWD headers for programming and debugging convenience
+  license: MIT

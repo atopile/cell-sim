@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component UNI_ROYAL_0603WAF1802T5E_package:
+    """18KΩ (1802) ±1%"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C25810", date="2026-03-10T04:32:56.273496+00:00", checksum="ed4fc88fc4d205bd1e61312a08c4e418d877fb2f6e519759ae2c874cd373efc4">
+
+    trait is_atomic_part<manufacturer="UNI-ROYAL", partnumber="0603WAF1802T5E", footprint="R0603.kicad_mod", symbol="0603WAF1802T5E.kicad_sym", model="R0603.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C25810", manufacturer="UNI-ROYAL", partno="0603WAF1802T5E">
+    trait has_designator_prefix<prefix="R">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2206010045_UNI-ROYAL-Uniroyal-Elec-0603WAF1802T5E_C25810.pdf">
+
+    # pins
+    pin 2
+    pin 1

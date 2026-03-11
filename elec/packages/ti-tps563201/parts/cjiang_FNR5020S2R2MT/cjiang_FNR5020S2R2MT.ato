@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component cjiang_FNR5020S2R2MT_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C167923", date="2026-03-10T03:54:32.781912+00:00", checksum="b90a5f68ddff69fa3e2f57f75ffa5fc1ea293c0c2e13e9986924df4d90fa65e7">
+
+    trait is_atomic_part<manufacturer="cjiang", partnumber="FNR5020S2R2MT", footprint="IND-SMD_L5.0-W5.0_FNR5012S.kicad_mod", symbol="FNR5020S2R2MT.kicad_sym", model="IND-SMD_L5.0-W5.0-H4.0.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C167923", manufacturer="cjiang", partno="FNR5020S2R2MT">
+    trait has_designator_prefix<prefix="L">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_cjiang--Changjiang-Microelectronics-Tech-FNR5020S2R2MT_C167923.pdf">
+
+    # pins
+    pin 2
+    pin 1

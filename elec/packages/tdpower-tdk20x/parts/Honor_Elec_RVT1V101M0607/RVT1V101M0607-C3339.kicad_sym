@@ -1,0 +1,192 @@
+(kicad_symbol_lib
+    (version 1)
+    (generator "faebryk")
+    (symbol "RVT1V101M0607-C3339"
+        (property "Reference" "C"
+            (id 0)
+            (at 0 8.89 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide no)
+            )
+        )
+        (property "Value" "RVT1V101M0607-C3339"
+            (id 1)
+            (at 0 -8.89 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide no)
+            )
+        )
+        (property "Footprint" "C3339:CAP-SMD_BD6.3-L6.6-W6.6-FD"
+            (id 2)
+            (at 0 -11.43 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide yes)
+            )
+        )
+        (property "Datasheet" "https://lcsc.com/product-detail/Aluminum-Electrolytic-Capacitors-SMD_100uF-35V_C3339.html"
+            (id 3)
+            (at 0 -13.97 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide yes)
+            )
+        )
+        (property "LCSC Part" "C3339"
+            (id 5)
+            (at 0 -16.51 0)
+            (effects
+                (font
+                    (size 1.27 1.27)
+                )
+                (hide yes)
+            )
+        )
+        (property "checksum" "fcf3cf4f6a078adc7bb9fd2386766c076a3f436c4064d1a8f2556c8dd5743bb3"
+            (at 0 0 0)
+            (effects
+                (font
+                    (size 0 0)
+                )
+                (hide yes)
+            )
+        )
+        (in_bom yes)
+        (on_board yes)
+        (symbol "RVT1V101M0607-C3339_0_1"
+            (polyline
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+                (pts
+                    (xy 2.03 0.51)
+                    (xy -2.03 0.51)
+                )
+            )
+            (polyline
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+                (pts
+                    (xy 0 1.27)
+                    (xy 0 0.51)
+                )
+            )
+            (polyline
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+                (pts
+                    (xy 0 -0.51)
+                    (xy 0 -1.27)
+                )
+            )
+            (polyline
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+                (pts
+                    (xy 0.76 2.54)
+                    (xy 0.76 1.52)
+                )
+            )
+            (polyline
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+                (pts
+                    (xy 1.27 2.03)
+                    (xy 0.25 2.03)
+                )
+            )
+            (arc
+                (start 1.95 -1.33)
+                (mid -1.57 -4.79)
+                (end -1.83 -1.21)
+                (stroke
+                    (width 0)
+                    (type default)
+                    (color 0 0 0 0)
+                )
+                (fill
+                    (type none)
+                )
+            )
+            (pin input line
+                (at 0 3.81 270)
+                (length 2.54)
+                (name "1"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+                (number "1"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+            )
+            (pin input line
+                (at 0 -3.81 90)
+                (length 2.54)
+                (name "2"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+                (number "2"
+                    (effects
+                        (font
+                            (size 1.27 1.27)
+                        )
+                        (hide no)
+                    )
+                )
+            )
+        )
+    )
+)

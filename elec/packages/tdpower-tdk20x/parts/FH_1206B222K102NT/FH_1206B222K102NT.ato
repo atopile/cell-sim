@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component FH_1206B222K102NT_package:
+    """2.2nF (222) ±10% 1kV"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C9191", date="2026-01-16T05:58:45.879564+00:00", checksum="860cac668c1cacce4ab3290c51c8193f41b9a592d367c2763ddbeeda2cff363b">
+
+    trait is_atomic_part<manufacturer="FH ", partnumber="1206B222K102NT", footprint="C1206.kicad_mod", symbol="1206B222K102NT.kicad_sym", model="C1206_L3.2-W1.6-H1.3.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C9191", manufacturer="FH ", partno="1206B222K102NT">
+    trait has_designator_prefix<prefix="C">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_FH--Guangdong-Fenghua-Advanced-Tech-1206B222K102NT_C9191.pdf">
+
+    # pins
+    pin 1
+    pin 2

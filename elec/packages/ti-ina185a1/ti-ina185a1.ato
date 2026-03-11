@@ -1,0 +1,67 @@
+#pragma experiment("TRAITS")
+
+# --- Standard library imports ---
+import ElectricPower
+import ElectricSignal
+import DifferentialPair
+import Capacitor
+
+# --- Part import ---
+from "parts/Texas_Instruments_INA185A1IDRLR/Texas_Instruments_INA185A1IDRLR.ato" import Texas_Instruments_INA185A1IDRLR_package
+
+module TI_INA185A1:
+    """
+    Texas Instruments INA185A1 zero-drift, bidirectional current sense amplifier.
+
+    - Gain: 20 V/V (A1 variant)
+    - Supply voltage: 2.7V to 5.5V
+    - Sense inputs: differential across shunt
+    - Output: analog voltage referenced to REF pin
+    """
+
+    # --- External interfaces ---
+    power = new ElectricPower
+    """
+    Device supply (2.7V to 5.5V)
+    """
+    power.required = True
+    assert power.voltage within 2.7V to 5.5V
+
+    input = new DifferentialPair
+    """
+    Differential shunt sense input (connect across current sense resistor)
+    """
+    input.required = True
+    # assert input.reference.voltage within -0.2V to 26V
+
+    output = new ElectricSignal
+    """
+    Analog output voltage
+    """
+    output.required = True
+    output.reference ~ power
+
+    ref = new ElectricSignal
+    """
+    Output reference input (sets output offset)
+    """
+    ref.required = True
+    ref.reference ~ power
+
+    gain = 20
+    """Amplifier gain is 20V/V"""
+
+    # --- Decoupling capacitor ---
+    supply_cap = new Capacitor
+    supply_cap.capacitance = 100nF +/- 20%
+    supply_cap.package = "0402"
+    power.hv ~> supply_cap ~> power.lv
+
+    # --- Package connections ---
+    package = new Texas_Instruments_INA185A1IDRLR_package
+    package.VS ~ power.hv
+    package.GND ~ power.lv
+    package.INpos ~ input.p.line
+    package.INneg ~ input.n.line
+    package.OUT ~ output.line
+    package.REF ~ ref.line

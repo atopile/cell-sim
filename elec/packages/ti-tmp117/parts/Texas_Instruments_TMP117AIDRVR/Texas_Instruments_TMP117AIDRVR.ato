@@ -1,0 +1,23 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_TMP117AIDRVR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C699536", date="2025-07-10T20:47:26.462973+00:00", checksum="4d4fa94a6b5c5eea3b28c9c2c7de0f73c94ec70eb40bfe9bb48cb5bebe210a90">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="TMP117AIDRVR", footprint="WSON-6_L2.0-W2.0-P0.65-TL-EP.kicad_mod", symbol="TMP117AIDRVR.kicad_sym", model="WSON-6_L2.0-W2.0-H0.8-P0.65.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C699536", manufacturer="Texas Instruments", partno="TMP117AIDRVR">
+    trait has_designator_prefix<prefix="U">
+
+    # pins
+    signal ADD0 ~ pin 4
+    signal ALERT ~ pin 3
+    signal EP ~ pin 7
+    signal GND ~ pin 2
+    signal SCL ~ pin 1
+    signal SDA ~ pin 6
+    signal Vpos ~ pin 5

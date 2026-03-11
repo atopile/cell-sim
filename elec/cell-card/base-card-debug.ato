@@ -1,0 +1,210 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+from "atopile/st-stm32h723/st-stm32h723.ato" import ST_STM32H723
+from "atopile/microchip-lan8742a/microchip-lan8742a.ato" import Microchip_LAN8742A
+from "atopile/ti-tpsm84209/ti-tpsm84209.ato" import TI_TPSM84209
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R_3V3
+from "atopile/tdpower-tdk20x/tdpower-tdk20x.ato" import TDPOWER_TDK20_driver
+from "atopile/pulse-hx1198/pulse-hx1198.ato" import HX1198_driver
+from "atopile/ti-iso7721/ti-iso7721.ato" import ISO7721_UART_driver
+from "atopile/programming-headers/programming-headers.ato" import TC2030_ARM_Cortex
+from "atopile/ti-tmp117/ti-tmp117.ato" import TI_TMP117
+from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
+from "atopile/buttons/buttons.ato" import VerticalButton
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorRed
+from "atopile/mounting-holes/mounting-holes.ato" import MountingHole_3_2_M3
+
+import ElectricPower
+import I2C
+
+
+module ProbePower:
+    power_24v = new ElectricPower
+    power_24v_iso = new ElectricPower
+    power_5v = new ElectricPower
+    power_3v3 = new ElectricPower
+
+    iso_dcdc = new TDPOWER_TDK20_driver
+    power_24v ~ iso_dcdc.power_in
+    iso_dcdc.power_out ~ power_24v_iso
+
+    buck_5v = new TI_TPSM84209
+    power_24v_iso ~> buck_5v ~> power_5v
+
+    ldo_3v3 = new LDK220M_R_3V3
+    power_5v ~> ldo_3v3 ~> power_3v3
+
+
+module ProbeMcu:
+    power_3v3 = new ElectricPower
+    mcu = new ST_STM32H723
+    mcu.power_3v3 ~ power_3v3
+
+
+module ProbeMcuPhy:
+    power_3v3 = new ElectricPower
+    mcu = new ST_STM32H723
+    phy = new Microchip_LAN8742A
+    mcu.power_3v3 ~ power_3v3
+    phy.power_3v3 ~ power_3v3
+    mcu.rmii ~ phy.rmii
+    mcu.mdio ~ phy.mdio
+
+
+module ProbeMcuPhyMag:
+    power_3v3 = new ElectricPower
+    mcu = new ST_STM32H723
+    phy = new Microchip_LAN8742A
+    xfmr = new HX1198_driver
+    mcu.power_3v3 ~ power_3v3
+    phy.power_3v3 ~ power_3v3
+    xfmr.phy_power ~ power_3v3
+    mcu.rmii ~ phy.rmii
+    mcu.mdio ~ phy.mdio
+    phy.ethernet.pairs[1].p.line ~ xfmr.phy_txp
+    phy.ethernet.pairs[1].n.line ~ xfmr.phy_txn
+    phy.ethernet.pairs[0].p.line ~ xfmr.phy_rxp
+    phy.ethernet.pairs[0].n.line ~ xfmr.phy_rxn
+
+
+module ProbeMcuDebug:
+    power_3v3 = new ElectricPower
+    mcu = new ST_STM32H723
+    swd = new TC2030_ARM_Cortex
+    mcu.power_3v3 ~ power_3v3
+    mcu.jtag ~ swd.jtag
+
+
+module ProbeMcuUartIso:
+    power_3v3_card = new ElectricPower
+    power_3v3_bp = new ElectricPower
+    mcu = new ST_STM32H723
+    uart_iso = new ISO7721_UART_driver
+    mcu.power_3v3 ~ power_3v3_card
+    uart_iso.power_card ~ power_3v3_card
+    uart_iso.power_bp ~ power_3v3_bp
+    mcu.uart.base_uart ~ uart_iso.uart_card
+
+
+module ProbeMcuI2cTemp:
+    power_3v3 = new ElectricPower
+    i2c_bus = new I2C
+    mcu = new ST_STM32H723
+    temp = new TI_TMP117
+    mcu.power_3v3 ~ power_3v3
+    temp.power ~ power_3v3
+    temp.i2c ~ i2c_bus
+
+
+module ProbeBaseCore:
+    backplane_24v = new ElectricPower
+    backplane_3v3 = new ElectricPower
+    power_24v_iso = new ElectricPower
+    power_5v = new ElectricPower
+    power_3v3 = new ElectricPower
+    i2c_bus = new I2C
+
+    mcu = new ST_STM32H723
+    phy = new Microchip_LAN8742A
+    xfmr = new HX1198_driver
+    iso_dcdc = new TDPOWER_TDK20_driver
+    buck_5v = new TI_TPSM84209
+    ldo_3v3 = new LDK220M_R_3V3
+    uart_iso = new ISO7721_UART_driver
+    temp = new TI_TMP117
+    swd = new TC2030_ARM_Cortex
+
+    backplane_24v ~ iso_dcdc.power_in
+    iso_dcdc.power_out ~ power_24v_iso
+    power_24v_iso ~> buck_5v ~> power_5v
+    power_5v ~> ldo_3v3 ~> power_3v3
+
+    mcu.power_3v3 ~ power_3v3
+    phy.power_3v3 ~ power_3v3
+    xfmr.phy_power ~ power_3v3
+    uart_iso.power_card ~ power_3v3
+    uart_iso.power_bp ~ backplane_3v3
+    temp.power ~ power_3v3
+
+    mcu.rmii ~ phy.rmii
+    mcu.mdio ~ phy.mdio
+    phy.ethernet.pairs[1].p.line ~ xfmr.phy_txp
+    phy.ethernet.pairs[1].n.line ~ xfmr.phy_txn
+    phy.ethernet.pairs[0].p.line ~ xfmr.phy_rxp
+    phy.ethernet.pairs[0].n.line ~ xfmr.phy_rxn
+    mcu.uart.base_uart ~ uart_iso.uart_card
+    mcu.jtag ~ swd.jtag
+    temp.i2c ~ i2c_bus
+
+
+module ProbeBaseNoPower:
+    backplane_3v3 = new ElectricPower
+    power_3v3 = new ElectricPower
+    i2c_bus = new I2C
+
+    mcu = new ST_STM32H723
+    phy = new Microchip_LAN8742A
+    xfmr = new HX1198_driver
+    uart_iso = new ISO7721_UART_driver
+    temp = new TI_TMP117
+    swd = new TC2030_ARM_Cortex
+
+    mcu.power_3v3 ~ power_3v3
+    phy.power_3v3 ~ power_3v3
+    xfmr.phy_power ~ power_3v3
+    uart_iso.power_card ~ power_3v3
+    uart_iso.power_bp ~ backplane_3v3
+    temp.power ~ power_3v3
+
+    mcu.rmii ~ phy.rmii
+    mcu.mdio ~ phy.mdio
+    phy.ethernet.pairs[1].p.line ~ xfmr.phy_txp
+    phy.ethernet.pairs[1].n.line ~ xfmr.phy_txn
+    phy.ethernet.pairs[0].p.line ~ xfmr.phy_rxp
+    phy.ethernet.pairs[0].n.line ~ xfmr.phy_rxn
+    mcu.uart.base_uart ~ uart_iso.uart_card
+    mcu.jtag ~ swd.jtag
+    temp.i2c ~ i2c_bus
+
+
+module ProbeBaseFullPeripherals:
+    backplane_3v3 = new ElectricPower
+    power_3v3 = new ElectricPower
+    i2c_bus = new I2C
+
+    mcu = new ST_STM32H723
+    phy = new Microchip_LAN8742A
+    xfmr = new HX1198_driver
+    uart_iso = new ISO7721_UART_driver
+    temp = new TI_TMP117
+    swd = new TC2030_ARM_Cortex
+    usb = new USB2_0TypeCHorizontalConnector
+    reset_btn = new VerticalButton
+    boot_btn = new VerticalButton
+    led_green = new LEDIndicatorGreen
+    led_red = new LEDIndicatorRed
+    mh1 = new MountingHole_3_2_M3
+    mh2 = new MountingHole_3_2_M3
+    mh3 = new MountingHole_3_2_M3
+    mh4 = new MountingHole_3_2_M3
+
+    mcu.power_3v3 ~ power_3v3
+    phy.power_3v3 ~ power_3v3
+    xfmr.phy_power ~ power_3v3
+    uart_iso.power_card ~ power_3v3
+    uart_iso.power_bp ~ backplane_3v3
+    temp.power ~ power_3v3
+    led_green.power ~ power_3v3
+    led_red.power ~ power_3v3
+
+    mcu.rmii ~ phy.rmii
+    mcu.mdio ~ phy.mdio
+    phy.ethernet.pairs[1].p.line ~ xfmr.phy_txp
+    phy.ethernet.pairs[1].n.line ~ xfmr.phy_txn
+    phy.ethernet.pairs[0].p.line ~ xfmr.phy_rxp
+    phy.ethernet.pairs[0].n.line ~ xfmr.phy_rxn
+    mcu.uart.base_uart ~ uart_iso.uart_card
+    mcu.jtag ~ swd.jtag
+    temp.i2c ~ i2c_bus
+    mcu.usb ~ usb.usb

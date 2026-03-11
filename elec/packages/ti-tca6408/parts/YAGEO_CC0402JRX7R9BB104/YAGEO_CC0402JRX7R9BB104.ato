@@ -1,0 +1,18 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component YAGEO_CC0402JRX7R9BB104_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C5182432", date="2025-09-11T19:02:42.679841+00:00", checksum="18e92c4be4fedc18dd08e6c466b042021277ff4ca3ea5dfbc132483894781543">
+
+    trait is_atomic_part<manufacturer="YAGEO", partnumber="CC0402JRX7R9BB104", footprint="C0402.kicad_mod", symbol="CC0402JRX7R9BB104.kicad_sym", model="C0402_L1.0-W0.5-H0.5.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C5182432", manufacturer="YAGEO", partno="CC0402JRX7R9BB104">
+    trait has_designator_prefix<prefix="C">
+
+    # pins
+    pin 1
+    pin 2

@@ -1,0 +1,87 @@
+#pragma experiment("BRIDGE_CONNECT")
+
+# ISO7721 — Dual-channel digital isolator for UART TX/RX
+# Channel A: Side 2 → Side 1 (backplane RX → card MCU RX)
+# Channel B: Side 1 → Side 2 (card MCU TX → backplane TX)
+
+import ElectricPower
+import ElectricLogic
+import UART_Base
+import Capacitor
+
+from "parts/Texas_Instruments_ISO7721DR/Texas_Instruments_ISO7721DR.ato" import Texas_Instruments_ISO7721DR_package
+
+
+module TI_ISO7721:
+    """
+    Texas Instruments ISO7721DR — dual-channel digital isolator.
+    Channel A propagates side 2 -> side 1.
+    Channel B propagates side 1 -> side 2.
+    """
+
+    power_side1 = new ElectricPower
+    power_side1.required = True
+    assert power_side1.voltage within 3.0V to 5.5V
+
+    power_side2 = new ElectricPower
+    power_side2.required = True
+    assert power_side2.voltage within 3.0V to 5.5V
+
+    in_side1 = new ElectricLogic
+    out_side2 = new ElectricLogic
+    in_side2 = new ElectricLogic
+    out_side1 = new ElectricLogic
+
+    package = new Texas_Instruments_ISO7721DR_package
+
+    power_side1.hv ~ package.VCC1
+    power_side1.lv ~ package.GND1
+    power_side2.hv ~ package.VCC2
+    power_side2.lv ~ package.GND2
+
+    in_side2.line ~ package.INA
+    out_side1.line ~ package.OUTA
+    in_side1.line ~ package.INB
+    out_side2.line ~ package.OUTB
+
+    in_side1.reference ~ power_side1
+    out_side1.reference ~ power_side1
+    in_side2.reference ~ power_side2
+    out_side2.reference ~ power_side2
+
+    decap_side1 = new Capacitor
+    decap_side1.capacitance = 100nF +/- 20%
+    decap_side1.package = "0402"
+    power_side1.hv ~> decap_side1 ~> power_side1.lv
+
+    decap_side2 = new Capacitor
+    decap_side2.capacitance = 100nF +/- 20%
+    decap_side2.package = "0402"
+    power_side2.hv ~> decap_side2 ~> power_side2.lv
+
+
+module ISO7721_UART_driver:
+    """
+    Compatibility wrapper for the card/backplane UART use case.
+    """
+
+    power_card = new ElectricPower
+    power_bp = new ElectricPower
+
+    uart_card = new UART_Base
+    uart_bp = new UART_Base
+
+    core = new TI_ISO7721
+
+    power_card ~ core.power_side1
+    power_bp ~ core.power_side2
+
+    uart_bp.tx.line ~ core.in_side2.line
+    uart_bp.tx.reference ~ core.in_side2.reference
+    core.out_side1.line ~ uart_card.rx.line
+    core.out_side1.reference ~ uart_card.rx.reference
+
+    uart_card.tx.line ~ core.in_side1.line
+    uart_card.tx.reference ~ core.in_side1.reference
+    core.out_side2.line ~ uart_bp.rx.line
+    core.out_side2.reference ~ uart_bp.rx.reference

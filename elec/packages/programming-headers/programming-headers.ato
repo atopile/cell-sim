@@ -1,0 +1,159 @@
+#pragma experiment("TRAITS")
+
+import ElectricLogic
+import JTAG
+import ElectricPower
+import SWD
+import has_part_removed
+
+from "parts/Hanbo_Electronic_HB_PH9_12725PB2GOB/Hanbo_Electronic_HB_PH9_12725PB2GOB.ato" import Hanbo_Electronic_HB_PH9_12725PB2GOB_package
+from "parts/Tag-Connect_TC2050-IDC-NL_2x05_P1.27mm_Vertical/Tag-Connect_TC2050-IDC-NL_2x05_P1.27mm_Vertical.ato" import Tag_Connect_TC2050_IDC_NL_2x05_P1_27mm_Vertical_package
+from "parts/Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical/Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical.ato" import Tag_Connect_TC2030_IDC_NL_2x03_P1_27mm_Vertical_package
+from "parts/XFCN_BH254VS_10P/XFCN_BH254VS_10P.ato" import XFCN_BH254VS_10P_package
+from "parts/Liansheng_BH_00019/Liansheng_BH_00019.ato" import Liansheng_BH_00019_package
+
+"""
+ARM Cortex Debug:
+    - Contains JTAG ( >= 10pin) and SWD ( >= 6pin) functionality
+    - Does not power the target
+
+TI MSP430 FET/SPI by wire
+    - Contains JTAG ( >= 10pin) and SWD ( >= 6pin) functionality
+    - Can power the target
+"""
+
+module HDR_2_54mm_10pin_ARM_Cortex:
+    connector = new Hanbo_Electronic_HB_PH9_12725PB2GOB_package
+
+    jtag = new JTAG
+    jtag.vtref.hv ~ connector.1
+    jtag.tms.line ~ connector.2
+    jtag.vtref.lv ~ connector.3
+    jtag.tck.line ~ connector.4
+    jtag.vtref.lv ~ connector.5
+    jtag.tdo.line ~ connector.6
+    # connector.7
+    jtag.tdi.line ~ connector.8
+    jtag.vtref.lv ~ connector.9
+    jtag.n_trst.line ~ connector.10
+
+    swd = new SWD
+    swd.has_single_electric_reference.reference.hv ~ connector.1
+    swd.dio.line ~ connector.2
+    swd.has_single_electric_reference.reference.lv ~ connector.3
+    swd.clk.line ~ connector.4
+    swd.has_single_electric_reference.reference.lv ~ connector.5
+    swd.swo.line ~ connector.6
+    # connector.7
+    swd.has_single_electric_reference.reference.lv ~ connector.9
+    swd.reset.line ~ connector.10
+
+    swd.has_single_electric_reference.reference ~ jtag.vtref
+
+module IDC_2_54mm_10pin_ARM_Cortex:
+    connector = new XFCN_BH254VS_10P_package
+
+    jtag = new JTAG
+    jtag.vtref.hv ~ connector.1
+    jtag.tms.line ~ connector.2
+    jtag.vtref.lv ~ connector.3
+    jtag.tck.line ~ connector.4
+    jtag.vtref.lv ~ connector.5
+    jtag.tdo.line ~ connector.6
+    # connector.7
+    jtag.tdi.line ~ connector.8
+    jtag.vtref.lv ~ connector.9
+    jtag.n_trst.line ~ connector.10
+
+    swd = new SWD
+    swd.has_single_electric_reference.reference.hv ~ connector.1
+    swd.dio.line ~ connector.2
+    swd.has_single_electric_reference.reference.lv ~ connector.3
+    swd.clk.line ~ connector.4
+    swd.has_single_electric_reference.reference.lv ~ connector.5
+    swd.swo.line ~ connector.6
+    # connector.7
+    swd.has_single_electric_reference.reference.lv ~ connector.9
+    swd.reset.line ~ connector.10
+
+    swd.has_single_electric_reference.reference ~ jtag.vtref
+
+module IDC_2_54mm_20pin_ARM:
+    connector = new Liansheng_BH_00019_package
+
+    jtag = new JTAG
+    connector.1 ~ jtag.vtref.hv
+    connector.3 ~ jtag.n_trst.line
+    connector.5 ~ jtag.tdi.line
+    connector.7 ~ jtag.tms.line
+    connector.9 ~ jtag.tck.line
+    connector.11 ~ jtag.rtck.line
+    connector.13 ~ jtag.tdo.line
+    connector.15 ~ jtag.n_reset.line
+    # connector.17
+    # connector.19
+
+    # connector.2
+    connector.4 ~ jtag.vtref.lv
+    connector.6 ~ jtag.vtref.lv
+    connector.8 ~ jtag.vtref.lv
+    connector.10 ~ jtag.vtref.lv
+    connector.12 ~ jtag.vtref.lv
+    connector.14 ~ jtag.vtref.lv
+    connector.16 ~ jtag.vtref.lv
+    connector.18 ~ jtag.vtref.lv
+    connector.20 ~ jtag.vtref.lv
+
+module TC2050_ARM_Cortex:
+    connector = new Tag_Connect_TC2050_IDC_NL_2x05_P1_27mm_Vertical_package
+
+    jtag = new JTAG
+    connector.1 ~ jtag.vtref.hv
+    connector.2 ~ jtag.tms.line
+    connector.3 ~ jtag.vtref.lv
+    connector.4 ~ jtag.tck.line
+    connector.5 ~ jtag.vtref.lv
+    connector.6 ~ jtag.tdo.line
+    connector.7 ~ jtag.rtck.line
+    connector.8 ~ jtag.tdi.line
+    connector.9 ~ jtag.n_trst.line
+    connector.10 ~ jtag.n_reset.line
+
+    swd = new SWD
+    connector.1 ~ swd.has_single_electric_reference.reference.hv
+    connector.2 ~ swd.dio.line
+    connector.3 ~ swd.has_single_electric_reference.reference.lv
+    connector.4 ~ swd.clk.line
+    connector.5 ~ swd.has_single_electric_reference.reference.lv
+    connector.6 ~ swd.swo.line
+    # connector.7
+    # connector.8
+    # connector.9
+    connector.10 ~ swd.reset.line
+
+    # footprint only
+    trait has_part_removed
+
+module TC2030_ARM_Cortex:
+    connector = new Tag_Connect_TC2030_IDC_NL_2x03_P1_27mm_Vertical_package
+
+    swd = new SWD
+    connector.1 ~ swd.has_single_electric_reference.reference.hv
+    connector.2 ~ swd.dio.line
+    connector.3 ~ swd.reset.line
+    connector.4 ~ swd.clk.line
+    connector.5 ~ swd.has_single_electric_reference.reference.lv
+    connector.6 ~ swd.swo.line
+
+    jtag = new JTAG
+    connector.1 ~ jtag.vtref.hv
+    connector.2 ~ jtag.tms.line
+    connector.3 ~ jtag.n_reset.line
+    connector.4 ~ jtag.tck.line
+    connector.5 ~ jtag.vtref.lv
+    connector.6 ~ jtag.tdo.line
+
+    swd.has_single_electric_reference.reference ~ jtag.vtref
+
+    # footprint only
+    trait has_part_removed

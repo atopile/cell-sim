@@ -1,0 +1,24 @@
+(fp_lib_table
+	(version 7)
+	(lib
+		(name "Pulse_Elec_HX1198NLT")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Pulse_Elec_HX1198NLT")
+		(options "")
+		(descr "atopile: part lib: Pulse_Elec_HX1198NLT")
+	)
+	(lib
+		(name "UNI_ROYAL_0402WGF499JTCE")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/UNI_ROYAL_0402WGF499JTCE")
+		(options "")
+		(descr "atopile: part lib: UNI_ROYAL_0402WGF499JTCE")
+	)
+	(lib
+		(name "Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+		(options "")
+		(descr "atopile: part lib: Samsung_Electro_Mechanics_CL05B104KO5NNNC")
+	)
+)

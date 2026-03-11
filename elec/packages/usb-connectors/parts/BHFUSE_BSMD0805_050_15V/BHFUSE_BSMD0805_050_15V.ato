@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component BHFUSE_BSMD0805_050_15V_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C883109", date="2026-01-19T06:29:16.573268+00:00", checksum="2caff978fed85db4cf77a8dcc0f0b7d0dd516b7ec0f3aa389972ddecc97c5bc0">
+
+    trait is_atomic_part<manufacturer="BHFUSE", partnumber="BSMD0805-050-15V", footprint="F0805.kicad_mod", symbol="BSMD0805-050-15V.kicad_sym", model="F0805_L2.1-W1.4-H0.8.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C883109", manufacturer="BHFUSE", partno="BSMD0805-050-15V">
+    trait has_designator_prefix<prefix="F">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2305121423_BHFUSE-BSMD0805-050-15V_C883109.pdf">
+
+    # pins
+    pin 2
+    pin 1

@@ -1,0 +1,35 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_INA3221AIRGVR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C181255", date="2025-07-10T00:30:24.618691+00:00", checksum="9a8079ed8fcce92362428a63ada9960e99d689aa6a647d7f7b111994fc8ead40">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="INA3221AIRGVR", footprint="QFN-16_L4.0-W4.0-P0.65-TL-EP2.2.kicad_mod", symbol="INA3221AIRGVR.kicad_sym", model="QFN-16_L4.0-W4.0-H1.0-P0.65.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C181255", manufacturer="Texas Instruments", partno="INA3221AIRGVR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://lcsc.com/datasheet/lcsc_datasheet_2410010331_Texas-Instruments-INA3221AIRGVR_C181255.pdf">
+
+    # pins
+    signal A0 ~ pin 5
+    signal CRITICAL ~ pin 9
+    signal GND ~ pin 3
+    signal IN_1 ~ pin 11
+    signal IN_2 ~ pin 14
+    signal IN_3 ~ pin 1
+    signal INplus1 ~ pin 12
+    signal INplus2 ~ pin 15
+    signal INplus3 ~ pin 2
+    signal PAD ~ pin 17
+    signal PV ~ pin 10
+    signal SCL ~ pin 6
+    signal SDA ~ pin 7
+    signal TC ~ pin 13
+    signal VPU ~ pin 16
+    signal VS ~ pin 4
+    signal WARNING ~ pin 8

@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component SAMSUNG_CL21B105KBFNNNE_package:
+    """1uF (105) ±10% 50V"""
+
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C28323", date="2025-05-29T09:50:39.831850+00:00", checksum="408fcbb796729ed68b50b32d73c91532398178a2392107223a5d8cf12c78a242">
+
+    trait is_atomic_part<manufacturer="SAMSUNG", partnumber="CL21B105KBFNNNE", footprint="C0805.kicad_mod", symbol="CL21B105KBFNNNE.kicad_sym", model="C0805_L2.0-W1.3-H1.3.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C28323", manufacturer="SAMSUNG", partno="CL21B105KBFNNNE">
+    trait has_designator_prefix<prefix="C">
+
+    # pins
+    pin 1
+    pin 2

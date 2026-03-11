@@ -1,0 +1,31 @@
+(fp_lib_table
+    (version 7)
+    (lib
+        (name "HANBO_HB_PH9_12725PB2GOB")
+        (type "KiCad")
+        (uri "${KIPRJMOD}/../../parts/HANBO_HB_PH9_12725PB2GOB")
+        (options "")
+        (descr "atopile: part lib: HANBO_HB_PH9_12725PB2GOB")
+    )
+    (lib
+        (name "Hanbo_Electronic_HB_PH9_12725PB2GOB")
+        (type "KiCad")
+        (uri "${KIPRJMOD}/../../parts/Hanbo_Electronic_HB_PH9_12725PB2GOB")
+        (options "")
+        (descr "atopile: part lib: Hanbo_Electronic_HB_PH9_12725PB2GOB")
+    )
+    (lib
+        (name "Tag-Connect_TC2050-IDC-NL_2x05_P1.27mm_Vertical")
+        (type "KiCad")
+        (uri "${KIPRJMOD}/../../parts/Tag-Connect_TC2050-IDC-NL_2x05_P1.27mm_Vertical")
+        (options "")
+        (descr "atopile: part lib: Tag-Connect_TC2050-IDC-NL_2x05_P1.27mm_Vertical")
+    )
+    (lib
+        (name "XFCN_BH254VS_10P")
+        (type "KiCad")
+        (uri "${KIPRJMOD}/../../parts/XFCN_BH254VS_10P")
+        (options "")
+        (descr "atopile: part lib: XFCN_BH254VS_10P")
+    )
+)

@@ -1,0 +1,37 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  B0505S:
+    entry: ylptech-byyxx.ato:YLPTEC_B0505S_2WR3
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  B1205S:
+    entry: ylptech-byyxx.ato:YLPTEC_B1205S_2WR2
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  B2403S:
+    entry: ylptech-byyxx.ato:YLPTEC_B2403S_3WR2
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  B2412S:
+    entry: ylptech-byyxx.ato:YLPTEC_B2412S_3WR2
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+  usage:
+    entry: usage.ato:Usage
+    hide_designators: true
+    exclude_checks: ["PCB.requires_drc_check"]
+
+package:
+  identifier: atopile/ylptech-byyxx
+  repository: https://github.com/atopile/packages
+  version: "0.2.0"
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: YLPTEC isolated DC-DC converters
+  license: MIT

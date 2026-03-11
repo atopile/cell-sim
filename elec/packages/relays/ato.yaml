@@ -1,0 +1,26 @@
+requires-atopile: "^0.14.0"
+
+paths:
+    src: "."
+    layout: ./layouts
+
+builds:
+    default:
+        entry: relays.ato:LogicLevelRelaySPSTNO10A24V
+    dpdt-1a-3v:
+        entry: relays.ato:LogicLevelRelayDPDT1A3V
+    usage:
+        entry: usage.ato:Usage
+
+dependencies:
+    - atopile/indicator-leds
+
+package:
+    identifier: atopile/relays
+    repository: https://github.com/np/projects/cell-sim
+    version: 0.1.0
+    authors:
+        - name: cell-sim
+          email: noreply@cellsim.local
+    summary: Local relay drivers used by CellSim
+    license: MIT

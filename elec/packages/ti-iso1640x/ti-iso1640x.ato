@@ -1,0 +1,141 @@
+
+#pragma experiment("BRIDGE_CONNECT")
+
+import I2C
+import ElectricPower
+import Resistor
+import Capacitor
+
+from "i2c_isolator.py" import I2CIsolator
+from "parts/Texas_Instruments_ISO1640BDR/Texas_Instruments_ISO1640BDR.ato" import Texas_Instruments_ISO1640BDR_package
+from "parts/Texas_Instruments_ISO1640QDWRQ1/Texas_Instruments_ISO1640QDWRQ1.ato" import Texas_Instruments_ISO1640QDWRQ1_package
+
+module TI_ISO1640QDWRQ1 from I2CIsolator:
+    """
+    Texas Instruments ISO1640QDWRQ1 bidirectional I2C isolator.
+
+    External interfaces:
+    - power_rails[0]: Side 1 power supply (2.25V to 5.5V)
+    - power_rails[1]: Side 2 power supply (2.25V to 5.5V)
+    - i2cs[0]: Side 1 I2C bus interface (isolated)
+    - i2cs[1]: Side 2 I2C bus interface (isolated)
+    """
+
+    # --- Part instance ---
+    ic = new Texas_Instruments_ISO1640QDWRQ1_package
+
+    # --- External interface documentation ---
+    power_rails[0].required = True
+    power_rails[1].required = True
+
+    # Power connections
+    power_rails[0].hv ~ ic.VCC1
+    power_rails[0].lv ~ ic.GND1
+    power_rails[1].hv ~ ic.VCC2
+    power_rails[1].lv ~ ic.GND2
+
+    # I2C connections
+    i2cs[0].scl.line ~ ic.SCL1
+    i2cs[0].sda.line ~ ic.SDA1
+    i2cs[1].scl.line ~ ic.SCL2
+    i2cs[1].sda.line ~ ic.SDA2
+
+    # Power supply requirements
+    assert power_rails[0].voltage within 2.25V to 5.5V
+    assert power_rails[1].voltage within 2.25V to 5.5V
+
+    # I2C frequency support
+    assert i2cs[0].frequency <= 1MHz
+    assert i2cs[1].frequency <= 1MHz
+
+    # I2C pullup resistors (10kohm 0402)
+    pullup_scl_side1 = new Resistor
+    pullup_sda_side1 = new Resistor
+    pullup_scl_side2 = new Resistor
+    pullup_sda_side2 = new Resistor
+
+    pullup_scl_side1.resistance = 10kohm +/- 5%
+    pullup_scl_side1.package = "0402"
+    pullup_sda_side1.resistance = 10kohm +/- 5%
+    pullup_sda_side1.package = "0402"
+    pullup_scl_side2.resistance = 10kohm +/- 5%
+    pullup_scl_side2.package = "0402"
+    pullup_sda_side2.resistance = 10kohm +/- 5%
+    pullup_sda_side2.package = "0402"
+
+    # Connect pullup resistors
+    power_rails[0].hv ~> pullup_scl_side1 ~> i2cs[0].scl.line
+    power_rails[0].hv ~> pullup_sda_side1 ~> i2cs[0].sda.line
+    power_rails[1].hv ~> pullup_scl_side2 ~> i2cs[1].scl.line
+    power_rails[1].hv ~> pullup_sda_side2 ~> i2cs[1].sda.line
+
+    # Decoupling capacitors (100nF 0402)
+    decoupling_cap_side1 = new Capacitor
+    decoupling_cap_side2 = new Capacitor
+
+    decoupling_cap_side1.capacitance = 100nF +/- 20%
+    decoupling_cap_side1.package = "0402"
+    decoupling_cap_side2.capacitance = 100nF +/- 20%
+    decoupling_cap_side2.package = "0402"
+
+    # Connect decoupling capacitors
+    power_rails[0].hv ~> decoupling_cap_side1 ~> power_rails[0].lv
+    power_rails[1].hv ~> decoupling_cap_side2 ~> power_rails[1].lv
+
+
+module TI_ISO1640BDR from I2CIsolator:
+    """
+    Texas Instruments ISO1640BDR bidirectional I2C isolator.
+
+    SOIC-8 version of the same internal card-level isolation function.
+    """
+
+    ic = new Texas_Instruments_ISO1640BDR_package
+
+    power_rails[0].required = True
+    power_rails[1].required = True
+
+    power_rails[0].hv ~ ic.VCC1
+    power_rails[0].lv ~ ic.GND1
+    power_rails[1].hv ~ ic.VCC2
+    power_rails[1].lv ~ ic.GND2
+
+    i2cs[0].scl.line ~ ic.SCL1
+    i2cs[0].sda.line ~ ic.SDA1
+    i2cs[1].scl.line ~ ic.SCL2
+    i2cs[1].sda.line ~ ic.SDA2
+
+    assert power_rails[0].voltage within 2.25V to 5.5V
+    assert power_rails[1].voltage within 2.25V to 5.5V
+    assert i2cs[0].frequency <= 1MHz
+    assert i2cs[1].frequency <= 1MHz
+
+    pullup_scl_side1 = new Resistor
+    pullup_sda_side1 = new Resistor
+    pullup_scl_side2 = new Resistor
+    pullup_sda_side2 = new Resistor
+
+    pullup_scl_side1.resistance = 10kohm +/- 5%
+    pullup_scl_side1.package = "0402"
+    pullup_sda_side1.resistance = 10kohm +/- 5%
+    pullup_sda_side1.package = "0402"
+    pullup_scl_side2.resistance = 10kohm +/- 5%
+    pullup_scl_side2.package = "0402"
+    pullup_sda_side2.resistance = 10kohm +/- 5%
+    pullup_sda_side2.package = "0402"
+
+    power_rails[0].hv ~> pullup_scl_side1 ~> i2cs[0].scl.line
+    power_rails[0].hv ~> pullup_sda_side1 ~> i2cs[0].sda.line
+    power_rails[1].hv ~> pullup_scl_side2 ~> i2cs[1].scl.line
+    power_rails[1].hv ~> pullup_sda_side2 ~> i2cs[1].sda.line
+
+    decoupling_cap_side1 = new Capacitor
+    decoupling_cap_side2 = new Capacitor
+
+    decoupling_cap_side1.capacitance = 100nF +/- 20%
+    decoupling_cap_side1.package = "0402"
+    decoupling_cap_side2.capacitance = 100nF +/- 20%
+    decoupling_cap_side2.package = "0402"
+
+    power_rails[0].hv ~> decoupling_cap_side1 ~> power_rails[0].lv
+    power_rails[1].hv ~> decoupling_cap_side2 ~> power_rails[1].lv

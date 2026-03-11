@@ -1,0 +1,20 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+
+component Texas_Instruments_ISO1640BDR_package:
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="ISO1640BDR", footprint="SOIC-8_L5.0-W4.0-P1.27-LS6.0-BL.kicad_mod", symbol="ISO1640BDR.kicad_sym", model="SOIC-8_L4.9-W3.9-H1.7-LS6.0-P1.27.STEP">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C5122339", manufacturer="Texas Instruments", partno="ISO1640BDR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://www.ti.com/lit/ds/symlink/iso1640.pdf">
+
+    signal GND1 ~ pin 1
+    signal VCC1 ~ pin 2
+    signal SDA1 ~ pin 3
+    signal SCL1 ~ pin 4
+    signal GND2 ~ pin 5
+    signal SCL2 ~ pin 6
+    signal SDA2 ~ pin 7
+    signal VCC2 ~ pin 8

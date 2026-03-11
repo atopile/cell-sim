@@ -1,0 +1,31 @@
+(fp_lib_table
+	(version 7)
+	(lib
+		(name "UNI_ROYAL_0402WGF1001TCE")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/UNI_ROYAL_0402WGF1001TCE")
+		(options "")
+		(descr "atopile: part lib: UNI_ROYAL_0402WGF1001TCE")
+	)
+	(lib
+		(name "UNI_ROYAL_0402WGF5101TCE")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/UNI_ROYAL_0402WGF5101TCE")
+		(options "")
+		(descr "atopile: part lib: UNI_ROYAL_0402WGF5101TCE")
+	)
+	(lib
+		(name "FH_0402B152K500NT")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/FH_0402B152K500NT")
+		(options "")
+		(descr "atopile: part lib: FH_0402B152K500NT")
+	)
+	(lib
+		(name "UNI_ROYAL_0402WGF2002TCE")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/../../parts/UNI_ROYAL_0402WGF2002TCE")
+		(options "")
+		(descr "atopile: part lib: UNI_ROYAL_0402WGF2002TCE")
+	)
+)

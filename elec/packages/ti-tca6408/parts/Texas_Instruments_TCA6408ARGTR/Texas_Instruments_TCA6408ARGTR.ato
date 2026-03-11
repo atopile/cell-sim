@@ -1,0 +1,35 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component Texas_Instruments_TCA6408ARGTR_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C181499", date="2025-07-05T00:58:11.486457+00:00", checksum="4fe34eb837ca22de37de6723c72ee7858fcce7e075dc7e658ed86baa4f016af2">
+
+    trait is_atomic_part<manufacturer="Texas Instruments", partnumber="TCA6408ARGTR", footprint="QFN-16_L3.0-W3.0-P0.50-BL-EP1.7.kicad_mod", symbol="TCA6408ARGTR.kicad_sym", model="QFN-16_L3.0-W3.0-H0.9-P0.50.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C181499", manufacturer="Texas Instruments", partno="TCA6408ARGTR">
+    trait has_designator_prefix<prefix="U">
+    trait has_datasheet<datasheet="https://lcsc.com/datasheet/lcsc_datasheet_2410010331_Texas-Instruments-TCA6408ARGTR_C181499.pdf">
+
+    # pins
+    signal ADDR ~ pin 16
+    signal GND ~ pin 6
+    signal P0 ~ pin 2
+    signal P1 ~ pin 3
+    signal P2 ~ pin 4
+    signal P3 ~ pin 5
+    signal P4 ~ pin 7
+    signal P5 ~ pin 8
+    signal P6 ~ pin 9
+    signal P7 ~ pin 10
+    signal PAD ~ pin 17
+    signal SCL ~ pin 12
+    signal SDA ~ pin 13
+    signal VCCI ~ pin 15
+    signal VCCP ~ pin 14
+    signal nINT ~ pin 11
+    signal nRESET ~ pin 1

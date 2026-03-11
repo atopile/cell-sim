@@ -1,0 +1,29 @@
+requires-atopile: ^0.14.0
+
+paths:
+  src: .
+  layout: ./layouts
+
+builds:
+  ti_drv8837:
+    entry: ti-drv883x.ato:TI_DRV8837
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  ti_drv8838:
+    entry: ti-drv883x.ato:TI_DRV8838
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+  usage:
+    entry: usage.ato:Usage
+    exclude_checks: ["PCB.requires_drc_check"]
+    hide_designators: true
+
+package:
+  identifier: atopile/ti-drv883x
+  repository: https://github.com/atopile/packages/blob/main/packages/ti-drv883x/README.md
+  version: 0.1.0
+  authors:
+    - name: atopile
+      email: hi@atopile.io
+  summary: Texas Instruments, ti, DRV8837, DRV8838, DC Motor Driver PH/EN, IN0/IN1
+  license: MIT
