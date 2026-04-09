@@ -1,6 +1,8 @@
 import Resistor
 import ElectricPower
 import ElectricLogic
+import I2C
+import ResistorVoltageDivider
 
 from "atopile/ti-tlv75901/ti-tlv75901.ato" import TI_TLV75901
 from "atopile/ti-tps563201/ti-tps563201.ato" import TI_TPS563201
@@ -56,13 +58,13 @@ module DigitalLDO:
 
     i2c ~ dac.i2c
 
-    dac.output ~> ctrl_resistor ~> feedback_div.ref_out.hv
+    dac.output.line ~> ctrl_resistor ~> ldo.feedback_divider.ref_out.hv
 
     # Enable current limiting resistor
     enable_current_limmiting_resistor = new Resistor
     enable_current_limmiting_resistor.resistance = 10kohm +/- 5%
     enable_current_limmiting_resistor.package = "0402"
-    enable ~> enable_current_limmiting_resistor ~> ldo.enable
+    enable.line ~> enable_current_limmiting_resistor ~> ldo.enable.line
 
 module DigitalBuck:
     """
@@ -114,10 +116,10 @@ module DigitalBuck:
 
     i2c ~ dac.i2c
 
-    dac.output ~> ctrl_resistor ~> feedback_div.ref_out.hv
+    dac.output.line ~> ctrl_resistor ~> buck.feedback_divider.ref_out.hv
 
     # Enable current limiting resistor
     enable_current_limmiting_resistor = new Resistor
     enable_current_limmiting_resistor.resistance = 10kohm +/- 5%
     enable_current_limmiting_resistor.package = "0402"
-    enable ~> enable_current_limmiting_resistor ~> ldo.enable
+    enable.line ~> enable_current_limmiting_resistor ~> buck.enable.line

@@ -1,8 +1,6 @@
-#pragma experiment("TRAITS")
-#pragma experiment("MODULE_TEMPLATING")
-#pragma experiment("FOR_LOOP")
-
 import ElectricPower
+import ElectricLogic
+import Electrical
 import I2C
 import Resistor
 import has_net_name_suggestion
@@ -101,20 +99,17 @@ module Cell:
     load_switch = new SwitchableLoad
 
     # addresses:
-    adc.address = "0x48"
-    buck.dac.address = "0x61"
-    ldo.dac.address = "0x60"
-    gpio.address = "0x20"
-    current_sense.address = "0x21"
+    adc.i2c.address = 0x48
+    buck.dac.i2c.address = 0x61
+    ldo.dac.i2c.address = 0x60
+    gpio.i2c.address = 0x20
 
     # Power LEDs
     power_5v ~ voltage_led.power
     power_5v ~ current_led.power
 
     # Connect LEDs
-    cell_down.led_data ~ current_led.din.io
-    current_led.dout.io ~ voltage_led.din.io
-    voltage_led.dout.io ~ cell_up.led_data
+    cell_down.led_data ~> current_led ~> voltage_led ~> cell_up.led_data
 
     # Jumper connections
     cell_up.cell ~ filter.power_out.hv
@@ -142,7 +137,7 @@ module Cell:
     filter.C2.package = "0805"
 
     # Current sense config
-    current_sense.current = 0.5A
+    current_sense.max_current = 0.5A
     current_sense.shunt.resistance = 100mohm +/- 10%
 
     # Power devices
@@ -159,14 +154,14 @@ module Cell:
     # TODO: do the math in ato
     # Buck config: vout = 5v when vctrl = 0V, vout = 0V when vctrl = 3.3V
     assert buck.power_out.voltage within 0V to 5V
-    buck.feedback_div.r_top.resistance = 37kohm +/- 2%
-    buck.feedback_div.r_bottom.resistance = 10kohm +/- 2%
+    buck.buck.feedback_divider.chain.resistors[0].resistance = 37kohm +/- 2%
+    buck.buck.feedback_divider.chain.resistors[1].resistance = 10kohm +/- 2%
     buck.ctrl_resistor.resistance = 24kohm +/- 2%
 
     # TODO: do the math in ato
     # LDO config: vout = 5v when vctrl = 0V, vout = 0V when vctrl = 3.3V
-    ldo.feedback_div.r_top.resistance = 60kohm +/- 2%
-    ldo.feedback_div.r_bottom.resistance = 10kohm +/- 2%
+    ldo.ldo.feedback_divider.chain.resistors[0].resistance = 60kohm +/- 2%
+    ldo.ldo.feedback_divider.chain.resistors[1].resistance = 10kohm +/- 2%
     ldo.ctrl_resistor.resistance = 43kohm +/- 2%
 
     # Connect Cell components
@@ -181,7 +176,8 @@ module Cell:
     # Load switch
     filter.power_out ~ load_switch.power_in
     load_resistor_current = 20mA to 30mA
-    assert ldo.power_out.voltage.max / load_switch.load_resistor.resistance within load_resistor_current
+    assert ldo.power_out.voltage / load_switch.load_resistor.resistance within load_resistor_current
+    # assert ldo.power_out.voltage.max / load_switch.load_resistor.resistance within load_resistor_current
 
     # dmm relay
     dmm_current_limiting_resistors = new SeriesPowerResistors
@@ -195,9 +191,9 @@ module Cell:
     adc.inputs[3].line ~ current_sense.power_out.hv
 
     # GPIO expander
-    gpio.gpios[2].line ~ buck.enable
+    gpio.gpios[2] ~ buck.enable
     gpio.gpios[3] ~ ldo.enable
-    gpio.gpios[4] ~ load_switch.control.line
+    gpio.gpios[4].line ~ load_switch.control.line
     gpio.gpios[5] ~ output_relay.enable
 
     _power_5v.hv.suggest_net_name = "CELL_5V_VCC"
@@ -207,8 +203,8 @@ module Cell:
     buck.enable.suggest_net_name = "CELL_BUCK_ENABLE"
     ldo.enable.suggest_net_name = "CELL_LDO_ENABLE"
     load_switch.control.suggest_net_name = "CELL_LOAD_SWITCH_CONTROL"
-    output_relay.input.suggest_net_name = "CELL_OUTPUT_RELAY_CONTROL"
-    dmm_relay.input.suggest_net_name = "CELL_DMM_RELAY_CONTROL"
+    output_relay.enable.suggest_net_name = "CELL_OUTPUT_RELAY_CONTROL"
+    dmm_relay.enable.suggest_net_name = "CELL_DMM_RELAY_CONTROL"
     current_sense.output.suggest_net_name = "CELL_CURRENT_SENSE_OUTPUT"
     filter.power_out.hv.suggest_net_name = "CELL_FILTER_POWER_OUT_VCC"
     buck.power_out.hv.suggest_net_name = "CELL_BUCK_POWER_OUT_VCC"

@@ -1,6 +1,3 @@
-#pragma experiment("TRAITS")
-#pragma experiment("MODULE_TEMPLATING")
-
 import Resistor
 import ElectricPower
 import ElectricLogic

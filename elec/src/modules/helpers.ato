@@ -1,7 +1,3 @@
-#pragma experiment("TRAITS")
-#pragma experiment("MODULE_TEMPLATING")
-#pragma experiment("FOR_LOOP")
-
 import Resistor
 import MOSFET
 import ElectricPower
@@ -44,8 +40,8 @@ module SwitchableLoad:
     power_in = new ElectricPower
     control = new ElectricSignal
 
-    power_in.hv ~ load_resistor.unnamed[1]
-    fet.drain ~ load_resistor.unnamed[2]
+    power_in.hv ~ load_resistor.unnamed[0]
+    fet.drain ~ load_resistor.unnamed[1]
 
     # connect up circuit
     control.line ~> gate_resistor ~> fet.gate

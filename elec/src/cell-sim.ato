@@ -1,17 +1,11 @@
-#pragma experiment("TRAITS")
-#pragma experiment("MODULE_TEMPLATING")
-#pragma experiment("FOR_LOOP")
-
 import Capacitor
 import Resistor
-import I2CPullup
 import Inductor
-import Power
+import ElectricPower
 import SPI
 import I2C
 import DifferentialPair
 import MOSFET
-import Inductor
 import has_net_name_suggestion
 import ResistorVoltageDivider
 
@@ -40,23 +34,23 @@ from "modules/digital_thermistor.ato" import DigitalSimulatedThermistor_4_Channe
 from "modules/power_or.ato" import PowerDiodeOr
 
 module CellSim:
-    power_in = new Power
+    power_in = new ElectricPower
     assert power_in.voltage within 12V to 20V
 
-    power_batt = new Power
+    power_batt = new ElectricPower
     # assert power_batt.voltage within 12V to 20V
 
-    power_5v = new Power
+    power_5v = new ElectricPower
     assert power_5v.voltage within 5V +/- 5%
-    power_3v3 = new Power
+    power_3v3 = new ElectricPower
     assert power_3v3.voltage within 3.3V +/- 10%
-    dmm_out = new Power
+    dmm_out = new ElectricPower
 
     micro = new Espressif_ESP32_S3
     usbc = new USB2_0TypeCHorizontalConnector
     ethernet = new Wiznet_W5500
 
-    # Power input #TODO: add input filter and current sensor
+    # ElectricPower input #TODO: add input filter and current sensor
     input_filter = new PiFilter
     power_connector = new XT30_Male_Right_Angle
     current_sensor = new CurrentSensor
@@ -123,21 +117,19 @@ module CellSim:
     micro.i2c2 ~ mux_2.i2c
     mux_2.i2c.address = "0x70"
 
-    i2c_pullup = new I2CPullup
-    power_3v3 ~ i2c_pullup.power
-    micro.i2c ~ i2c_pullup.i2c
-    i2c_pullup.r_scl.resistance = 2kohm +/- 20%
-    i2c_pullup.r_sda.resistance = 2kohm +/- 20%
-    i2c_pullup.r_scl.package = "0402"
-    i2c_pullup.r_sda.package = "0402"
+    i2c_pullup_resistors = new Resistor[2]
+    for pull_resistor in i2c_pullup_resistors:
+        pull_resistor.resistance = 2kohm +/- 20%
+        pull_resistor.package = "0402"
+    power_3v3.hv ~> i2c_pullup_resistors[0] ~> micro.i2c.scl
+    power_3v3.lv ~> i2c_pullup_resistors[1] ~> micro.i2c.sda
 
-    i2c_2_pullup = new I2CPullup
-    power_3v3 ~ i2c_2_pullup.power
-    micro.i2c2 ~ i2c_2_pullup.i2c
-    i2c_2_pullup.r_scl.resistance = 2kohm +/- 20%
-    i2c_2_pullup.r_sda.resistance = 2kohm +/- 20%
-    i2c_2_pullup.r_scl.package = "0402"
-    i2c_2_pullup.r_sda.package = "0402"
+    i2c_2_pullup_resistors = new Resistor[2]
+    for pull_resistor in i2c_2_pullup_resistors:
+        pull_resistor.resistance = 2kohm +/- 20%
+        pull_resistor.package = "0402"
+    power_3v3.hv ~> i2c_2_pullup_resistors[0] ~> micro.i2c2.scl
+    power_3v3.lv ~> i2c_2_pullup_resistors[1] ~> micro.i2c2.sda
 
     # regulator to 5V
     buck = new TI_LV2842X
@@ -153,7 +145,7 @@ module CellSim:
 
     # regulator to 3.3V
     ldo3v3 = new LDK220M_R
-    ldo3v3.v_in = buck.v_out
+    assert ldo3v3.v_in within buck.v_out
     ldo3v3.v_out = 3.3V +/- 10%
     power_5v ~ ldo3v3.power_in
     ldo3v3.power_out ~ power_3v3
@@ -288,7 +280,7 @@ module CellSim:
     digital_thermistor.thermistor_4 ~ molex_vsh.21
     digital_thermistor.thermistor_gnd ~ molex_vsh.22
 
-    # Power net tie jumpers
+    # ElectricPower net tie jumpers
     power_jumper_vcc = new Resistor
     power_jumper_vcc.resistance = 0ohm
     power_jumper_vcc.package = "0402"

@@ -1,5 +1,6 @@
 import I2C
 import ElectricPower
+import ElectricSignal
 import Resistor
 import Capacitor
 
@@ -36,13 +37,12 @@ module DigitalSimulatedThermistor_4_Channel:
     isolated_converter = new YLPTEC_B1205S_2WR2
     digital_isolator = new TI_ISO1640QDWRQ1
     adc = new TI_ADS1115
-    dac = new MICROCHIP_MCP4728
+    dac = new Microchip_MCP4728
     ldo = new LDK220M_R
 
     # Addresses
-    digital_isolator.address = "0x20"
-    adc.address = "0x48"
-    dac.address = "0x60"
+    adc.i2c.address = 0x48
+    dac.i2c.address = 0x60
 
     # Isolated 12v to 3.3v
     power_12v ~> isolated_converter ~> ldo ~> _power_3v3

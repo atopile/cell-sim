@@ -1,5 +1,4 @@
-requires-atopile: ^0.14.0
-
+requires-atopile: ^0.15.3
 builds:
   default:
     entry: elec/src/cell-sim.ato:CellSim
@@ -17,16 +16,16 @@ dependencies:
   release: 0.2.1
 - type: registry
   identifier: atopile/espressif-esp32-s3
-  release: 0.2.1
+  release: 0.3.0
 - type: registry
   identifier: atopile/usb-connectors
   release: 0.4.1
 - type: registry
   identifier: atopile/wiznet-w5500
-  release: 0.1.0
+  release: 0.2.0
 - type: registry
   identifier: atopile/opsco-sk6805-ec20
-  release: 0.4.0
+  release: 0.5.0
 - type: registry
   identifier: atopile/ti-iso1640x
   release: 0.3.0
@@ -47,7 +46,7 @@ dependencies:
   release: 0.1.1
 - type: registry
   identifier: atopile/ti-cd74hc4067sm
-  release: 0.1.0
+  release: 0.1.1
 - type: registry
   identifier: atopile/ti-ina185a1
   release: 0.1.0
@@ -65,19 +64,19 @@ dependencies:
   release: 0.2.0
 - type: registry
   identifier: atopile/ti-lv2842x
-  release: 0.2.3
+  release: 0.3.0
 - type: registry
   identifier: atopile/ti-tca6408
   release: 0.2.0
 - type: registry
   identifier: atopile/relays
-  release: 0.2.0
+  release: 0.2.1
 - type: registry
   identifier: atopile/st-ldk220
-  release: 0.2.3
+  release: 0.3.0
 - type: registry
   identifier: atopile/ti-tlv75901
-  release: 0.4.0
+  release: 0.5.0
 - type: registry
   identifier: atopile/ti-tps563201
-  release: 0.1.9
+  release: 0.2.0
