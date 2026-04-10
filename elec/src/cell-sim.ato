@@ -66,7 +66,7 @@ module CellSim:
     input_filter.C2.capacitance = 10uF +/- 20%
     input_filter.C2.package = "0805"
 
-    current_sensor.output ~ micro.io21
+    current_sensor.output ~ micro.io[21]
 
     # Input ceramic capacitors
     input_cap_1 = new Capacitor
@@ -84,7 +84,7 @@ module CellSim:
     power_in ~ voltage_sense.ref_in
     voltage_sense.v_out = 3V +/- 10%
     voltage_sense.current = 1mA to 2mA
-    voltage_sense.ref_out ~ micro.io16
+    voltage_sense.ref_out ~ micro.io[16]
 
     # DMM output
     dmm_connector = new SimpleBananaPlugPower
@@ -92,7 +92,18 @@ module CellSim:
 
     # Micro connections
     power_3v3 ~ micro.power
-    usbc.usb2 ~ micro.usb2
+    usbc.usb ~ micro.usb
+
+    # patch in microcontroller interfaces
+    micro_i2c2 = new I2C
+    micro_i2c2.scl ~ micro.io[0]  # TODO: what pins do we connect to?
+    micro_i2c2.sda ~ micro.io[1]  # TODO: what pins do we connect to?
+
+    micro_spi2 = new SPI
+    micro_spi2.sclk ~ micro.io[2]  # TODO: what pins do we connect to?
+    micro_spi2.mosi ~ micro.io[3]  # TODO: what pins do we connect to?
+    micro_spi2.miso ~ micro.io[4]  # TODO: what pins do we connect to?
+    # micro_spi2.cs ~ micro.io[5]  # TODO: what pins do we connect to?
 
     # OLED module connector
     oled_module = new OLEDModuleConnector
@@ -102,9 +113,9 @@ module CellSim:
 
     # Ethernet
     power_3v3 ~ ethernet.power
-    micro.spi2 ~ ethernet.spi
-    micro.io35 ~ ethernet.interrupt
-    micro.io36 ~ ethernet.reset
+    micro_spi2 ~ ethernet.spi
+    micro.io[35] ~ ethernet.interrupt
+    micro.io[36] ~ ethernet.reset
 
     # I2C mux
     mux_1 = new TI_TCA9548A
@@ -114,7 +125,7 @@ module CellSim:
 
     mux_2 = new TI_TCA9548A
     power_3v3 ~ mux_2.power
-    micro.i2c2 ~ mux_2.i2c
+    micro_i2c2 ~ mux_2.i2c
     mux_2.i2c.address = "0x70"
 
     i2c_pullup_resistors = new Resistor[2]
@@ -128,8 +139,8 @@ module CellSim:
     for pull_resistor in i2c_2_pullup_resistors:
         pull_resistor.resistance = 2kohm +/- 20%
         pull_resistor.package = "0402"
-    power_3v3.hv ~> i2c_2_pullup_resistors[0] ~> micro.i2c2.scl
-    power_3v3.lv ~> i2c_2_pullup_resistors[1] ~> micro.i2c2.sda
+    power_3v3.hv ~> i2c_2_pullup_resistors[0] ~> micro_i2c2.scl
+    power_3v3.lv ~> i2c_2_pullup_resistors[1] ~> micro_i2c2.sda
 
     # regulator to 5V
     buck = new TI_LV2842X
@@ -139,8 +150,8 @@ module CellSim:
 
     # Internal buck output or USB supply to 5V rail
     diode_or = new PowerDiodeOr
-    usbc.power ~ diode_or.power[0]
-    buck.power_out ~ diode_or.power[1]
+    usbc.usb.usb_if.buspower ~ diode_or.power_in[0]
+    buck.power_out ~ diode_or.power_in[1]
     diode_or.power_out ~ power_5v
 
     # regulator to 3.3V
@@ -154,24 +165,23 @@ module CellSim:
     level_shifter = new Level_Shifter_3V3_to_5V
     power_3v3 ~ level_shifter.power_3v3
     power_5v ~ level_shifter.power_5v
-    micro.io15 ~ level_shifter.signal_3v3
+    micro.io[15] ~ level_shifter.signal_3v3
 
     # Multiplexer
     dmm_mux = new TI_CD74HC4067SM
     power_3v3 ~ dmm_mux.power
-    micro.io5 ~ dmm_mux.nEnable
-    micro.io1 ~ dmm_mux.S0
-    micro.io2 ~ dmm_mux.S1
-    micro.io3 ~ dmm_mux.S2
-    micro.io4 ~ dmm_mux.S3
-    micro.io5 ~ dmm_mux.nEnable
-    power_3v3.hv ~ dmm_mux.COMMON_IO  # Outputs 3.3V to selected channel
+    micro.io[1] ~ dmm_mux.selects[0]
+    micro.io[2] ~ dmm_mux.selects[1]
+    micro.io[3] ~ dmm_mux.selects[2]
+    micro.io[4] ~ dmm_mux.selects[3]
+    micro.io[5] ~ dmm_mux.enable
+    power_3v3.hv ~ dmm_mux.common  # Outputs 3.3V to selected channel
 
     # Digitaly simulated thermistor 4 channels
     digital_thermistor = new DigitalSimulatedThermistor_4_Channel
     power_3v3 ~ digital_thermistor.power_3v3
     power_in ~ digital_thermistor.power_12v
-    micro.i2c2 ~ digital_thermistor.i2c
+    micro_i2c2 ~ digital_thermistor.i2c
 
     # Connect cells in a stack
     cells = new Cell[16]
@@ -217,22 +227,22 @@ module CellSim:
     cells[13].cell_up ~ cells[14].cell_down
     cells[14].cell_up ~ cells[15].cell_down
 
-    dmm_mux.CH0 ~ cells[0].dmm_relay_enable
-    dmm_mux.CH1 ~ cells[1].dmm_relay_enable
-    dmm_mux.CH2 ~ cells[2].dmm_relay_enable
-    dmm_mux.CH3 ~ cells[3].dmm_relay_enable
-    dmm_mux.CH4 ~ cells[4].dmm_relay_enable
-    dmm_mux.CH5 ~ cells[5].dmm_relay_enable
-    dmm_mux.CH6 ~ cells[6].dmm_relay_enable
-    dmm_mux.CH7 ~ cells[7].dmm_relay_enable
-    dmm_mux.CH8 ~ cells[8].dmm_relay_enable
-    dmm_mux.CH9 ~ cells[9].dmm_relay_enable
-    dmm_mux.CH10 ~ cells[10].dmm_relay_enable
-    dmm_mux.CH11 ~ cells[11].dmm_relay_enable
-    dmm_mux.CH12 ~ cells[12].dmm_relay_enable
-    dmm_mux.CH13 ~ cells[13].dmm_relay_enable
-    dmm_mux.CH14 ~ cells[14].dmm_relay_enable
-    dmm_mux.CH15 ~ cells[15].dmm_relay_enable
+    dmm_mux.ios[0] ~ cells[0].dmm_relay_enable
+    dmm_mux.ios[1] ~ cells[1].dmm_relay_enable
+    dmm_mux.ios[2] ~ cells[2].dmm_relay_enable
+    dmm_mux.ios[3] ~ cells[3].dmm_relay_enable
+    dmm_mux.ios[4] ~ cells[4].dmm_relay_enable
+    dmm_mux.ios[5] ~ cells[5].dmm_relay_enable
+    dmm_mux.ios[6] ~ cells[6].dmm_relay_enable
+    dmm_mux.ios[7] ~ cells[7].dmm_relay_enable
+    dmm_mux.ios[8] ~ cells[8].dmm_relay_enable
+    dmm_mux.ios[9] ~ cells[9].dmm_relay_enable
+    dmm_mux.ios[10] ~ cells[10].dmm_relay_enable
+    dmm_mux.ios[11] ~ cells[11].dmm_relay_enable
+    dmm_mux.ios[12] ~ cells[12].dmm_relay_enable
+    dmm_mux.ios[13] ~ cells[13].dmm_relay_enable
+    dmm_mux.ios[14] ~ cells[14].dmm_relay_enable
+    dmm_mux.ios[15] ~ cells[15].dmm_relay_enable
 
     # IDC-VSH connector
     idc_vsh = new IDC_VSH_connector
@@ -271,20 +281,20 @@ module CellSim:
     cells[11].power_out.hv ~ molex_vsh.1
 
     # Thermistor connections to VSH
-    digital_thermistor.thermistor_1 ~ molex_vsh.15
-    digital_thermistor.thermistor_gnd ~ molex_vsh.16
-    digital_thermistor.thermistor_2 ~ molex_vsh.17
-    digital_thermistor.thermistor_gnd ~ molex_vsh.18
-    digital_thermistor.thermistor_3 ~ molex_vsh.19
-    digital_thermistor.thermistor_gnd ~ molex_vsh.20
-    digital_thermistor.thermistor_4 ~ molex_vsh.21
-    digital_thermistor.thermistor_gnd ~ molex_vsh.22
+    digital_thermistor.thermistor_outputs[0].line ~ molex_vsh.15
+    digital_thermistor.thermistor_outputs[0].reference.lv ~ molex_vsh.16
+    digital_thermistor.thermistor_outputs[1].line ~ molex_vsh.17
+    digital_thermistor.thermistor_outputs[1].reference.lv ~ molex_vsh.18
+    digital_thermistor.thermistor_outputs[2].line ~ molex_vsh.19
+    digital_thermistor.thermistor_outputs[2].reference.lv ~ molex_vsh.20
+    digital_thermistor.thermistor_outputs[3].line ~ molex_vsh.21
+    digital_thermistor.thermistor_outputs[3].reference.lv ~ molex_vsh.22
 
     # ElectricPower net tie jumpers
     power_jumper_vcc = new Resistor
     power_jumper_vcc.resistance = 0ohm
     power_jumper_vcc.package = "0402"
-    cells[16].power_out.hv ~> power_jumper_vcc ~> idc_vsh.power.hv
+    cells[15].power_out.hv ~> power_jumper_vcc ~> idc_vsh.power.hv
 
     power_jumper_gnd = new Resistor
     power_jumper_gnd.resistance = 0ohm
@@ -293,8 +303,8 @@ module CellSim:
 
     # Debugging
     i2c_debug = new SaleaeHeaderRightAngle_2
-    micro.i2c ~ i2c_debug.header[0].i2c
-    micro.i2c2 ~ i2c_debug.header[1].i2c2
+    micro.i2c ~ i2c_debug.headers[0].i2c
+    micro_i2c2 ~ i2c_debug.headers[1].i2c
 
     # Netname overrides
     power_in.hv.suggest_net_name = "POWER_IN_VCC"
@@ -310,23 +320,23 @@ module CellSim:
 
     micro.i2c.scl.suggest_net_name = "MICRO_I2C_1_SCL"
     micro.i2c.sda.suggest_net_name = "MICRO_I2C_1_SDA"
-    micro.i2c2.scl.suggest_net_name = "MICRO_I2C_2_SCL"
-    micro.i2c2.sda.suggest_net_name = "MICRO_I2C_2_SDA"
+    micro_i2c2.scl.suggest_net_name = "MICRO_I2C_2_SCL"
+    micro_i2c2.sda.suggest_net_name = "MICRO_I2C_2_SDA"
 
-    micro.spi2.sck.suggest_net_name = "MICRO_SPI_2_SCK"
-    micro.spi2.mosi.suggest_net_name = "MICRO_SPI_2_MOSI"
-    micro.spi2.miso.suggest_net_name = "MICRO_SPI_2_MISO"
-    micro.spi2.cs.suggest_net_name = "MICRO_SPI_2_CS"
+    micro_spi2.sclk.suggest_net_name = "MICRO_SPI_2_SCK"
+    micro_spi2.mosi.suggest_net_name = "MICRO_SPI_2_MOSI"
+    micro_spi2.miso.suggest_net_name = "MICRO_SPI_2_MISO"
+    # micro_spi2.cs.suggest_net_name = "MICRO_SPI_2_CS"
 
     current_sensor.output.suggest_net_name = "INPUT_CURRENT_SENSOR_OUTPUT"
 
-    dmm_mux.S0.suggest_net_name = "DMM_MUX_S0"
-    dmm_mux.S1.suggest_net_name = "DMM_MUX_S1"
-    dmm_mux.S2.suggest_net_name = "DMM_MUX_S2"
-    dmm_mux.S3.suggest_net_name = "DMM_MUX_S3"
+    dmm_mux.selects[0].suggest_net_name = "DMM_MUX_S0"
+    dmm_mux.selects[1].suggest_net_name = "DMM_MUX_S1"
+    dmm_mux.selects[2].suggest_net_name = "DMM_MUX_S2"
+    dmm_mux.selects[3].suggest_net_name = "DMM_MUX_S3"
 
-    level_shifter.lv_signal.suggest_net_name = "LED_DATA_3V3"
-    level_shifter.hv_signal.suggest_net_name = "LED_DATA_5V"
+    level_shifter.signal_3v3.suggest_net_name = "LED_DATA_3V3"
+    level_shifter.signal_5v.suggest_net_name = "LED_DATA_5V"
 
-    digital_thermistor._power_3v3.suggest_net_name = "THERMISTOR_POWER_3V3"
-    digital_thermistor._power_5v.suggest_net_name = "THERMISTOR_POWER_5V"
+    digital_thermistor.power_3v3.suggest_net_name = "THERMISTOR_POWER_3V3"
+    digital_thermistor.isolated_converter.power_out.suggest_net_name = "THERMISTOR_POWER_5V"

@@ -60,10 +60,10 @@ module DigitalSimulatedThermistor_4_Channel:
     # DAC
     _i2c ~ dac.i2c
     _power_3v3 ~ dac.power
-    thermistor_outputs[0] ~ dac.vouta
-    thermistor_outputs[1] ~ dac.voutb
-    thermistor_outputs[2] ~ dac.voutc
-    thermistor_outputs[3] ~ dac.voutd
+    thermistor_outputs[0] ~ dac.vouts[0]
+    thermistor_outputs[1] ~ dac.vouts[1]
+    thermistor_outputs[2] ~ dac.vouts[2]
+    thermistor_outputs[3] ~ dac.vouts[3]
 
     # ADC
     _i2c ~ adc.i2c
