@@ -1,662 +1,342 @@
-from "generics/capacitors.ato" import Capacitor
-from "generics/resistors.ato" import Resistor, I2CPullup
-from "generics/inductors.ato" import Inductor
-from "generics/diodes.ato" import PowerDiodeOr
-from "generics/interfaces.ato" import Power, SPI, I2C, DiffPair
-from "generics/mosfets.ato" import NFET
-from "generics/leds.ato" import LEDIndicatorGreen
-from "generics/regulators.ato" import IsolatedRegulator, Regulator, LDO
-from "generics/vdivs.ato" import _VDiv, VDiv
-from "generics/inductors.ato" import Inductor
-from "generics/filters.ato" import PiFilter
-from "generics/vdivs.ato" import _VDiv
+import Capacitor
+import Resistor
+import Inductor
+import ElectricPower
+import SPI
+import I2C
+import DifferentialPair
+import MOSFET
+import has_net_name_suggestion
+import ResistorVoltageDivider
 
-from "cell.ato" import Cell
-from "thermistor.ato" import Thermistor
-from "ethernet.ato" import W5500Ethernet
-from "components/esp32-s3/elec/src/esp32-s3.ato" import ESP32S3
-from "components/level-shifter/elec/src/level-shifter.ato" import LevelShifter
-from "components/sk6805-ec20/elec/src/sk6805-ec20.ato" import SK6805EC20
-from "components/ldk220m-r/elec/src/ldk220m-r.ato" import LDK220M_R
-from "components/lv2842xlvddcr/lv2842kit.ato" import LV2842Kit
-from "components/usb-connectors/usb-connectors.ato" import USBCConn
-from "components/tca9548apwr/elec/src/tca9548apwr.ato" import TCA9548APWR
-from "components/xt-connectors/xt-connectors.ato" import XT30_Male_Right_Angle
-from "components/saleae-header/saleae-header.ato" import SaleaeHeader
-from "components/YNR4030.ato" import YNR4030_101M
-from "components/current-sensor.ato" import CurrentSensor
-from "components/CD74HC4067SM96.ato" import CD74HC4067SM96 # multiplexer
-from "components/banana-power.ato" import BananaPower
-from "components/lcd-connector.ato" import LCDConnector
-from "components/RVT1E471M1010_C3351.ato" import RVT1E471M1010_C3351
-from "components/7447709101.ato" import Wurth7447709101
-from "components/FMF06FTHR010.ato" import FMF06FTHR010_LHL
-from "components/IDC-VSH-connector.ato" import IDC_VSH_connector
-from "components/Molex_5018762240.ato" import Molex_5018762240
+from "atopile/espressif-esp32-s3/espressif-esp32-s3.ato" import Espressif_ESP32_S3
+from "atopile/indicator-leds/indicator-leds.ato" import LEDIndicatorGreen
+from "atopile/usb-connectors/usb-connectors.ato" import USB2_0TypeCHorizontalConnector
+from "atopile/wiznet-w5500/wiznet-w5500.ato" import Wiznet_W5500
+from "atopile/xt-connectors/xt-connectors.ato" import XT30_Male_Right_Angle
+from "atopile/opsco-sk6805-ec20/opsco-sk6805-ec20.ato" import OPSCO_SK6805_EC20
+from "atopile/st-ldk220/st-ldk220.ato" import LDK220M_R
+from "atopile/ti-lv2842x/ti-lv2842x.ato" import TI_LV2842X
+from "atopile/ti-tca9548a/ti-tca9548a.ato" import TI_TCA9548A
+from "atopile/saleae-header/saleae-header.ato" import SaleaeHeaderRightAngle_2
+from "atopile/diodes-inc-74lvc1t45dw-7/diodes-inc-74lvc1t45dw-7.ato" import Level_Shifter_3V3_to_5V
+from "atopile/banana-plugs/banana-plugs.ato" import SimpleBananaPlugPower
+from "atopile/ti-cd74hc4067sm/ti-cd74hc4067sm.ato" import TI_CD74HC4067SM
 
-
+# local packages
+from "parts/MOLEX_5018762240/MOLEX_5018762240.ato" import MOLEX_5018762240_package
+from "modules/cell.ato" import Cell
+from "modules/filters.ato" import PiFilter
+from "modules/oled_module_connector.ato" import OLEDModuleConnector
+from "modules/idc_connector.ato" import IDC_VSH_connector
+from "modules/current_sensor.ato" import CurrentSensor
+from "modules/digital_thermistor.ato" import DigitalSimulatedThermistor_4_Channel
+from "modules/power_or.ato" import PowerDiodeOr
 
 module CellSim:
-    power_in = new Power
-    power_batt = new Power
-    power_5v = new Power
-    power_3v3 = new Power
-    dmm_out = new Power
+    power_in = new ElectricPower
+    assert power_in.voltage within 12V to 20V
 
-    micro = new ESP32S3
-    usbc = new USBCConn
-    ethernet = new W5500Ethernet
+    power_batt = new ElectricPower
+    # assert power_batt.voltage within 12V to 20V
 
-    # Power input #TODO: add input filter and current sensor
+    power_5v = new ElectricPower
+    assert power_5v.voltage within 5V +/- 5%
+    power_3v3 = new ElectricPower
+    assert power_3v3.voltage within 3.3V +/- 10%
+    dmm_out = new ElectricPower
+
+    micro = new Espressif_ESP32_S3
+    usbc = new USB2_0TypeCHorizontalConnector
+    ethernet = new Wiznet_W5500
+
+    # ElectricPower input #TODO: add input filter and current sensor
     input_filter = new PiFilter
     power_connector = new XT30_Male_Right_Angle
     current_sensor = new CurrentSensor
-    current_sensor.current = 5A
-    power_connector.power ~ input_filter.power_in
-    input_filter.power_out ~ current_sensor.power_in
+    current_sensor.max_current = 5A
+    power_connector.power ~> input_filter ~> current_sensor.power_in
     current_sensor.power_out ~ power_in
 
     # Configure current sensor
     power_3v3 ~ current_sensor.power
-    current_sensor.shunt -> FMF06FTHR010_LHL
-    input_filter.C1 -> RVT1E471M1010_C3351 # 470uF Electrolytic
-    input_filter.L1 -> Wurth7447709101 # 100uH
-    input_filter.C2.value = 10uF +/- 20%
+    current_sensor.shunt.lcsc_id = "C105362"  # 10mΩ ±1% ±70ppm/C 1W 1206
+    input_filter.C1.lcsc_id = "C3351"  # 470uF Electrolytic
+    input_filter.L1.lcsc_id = "C6463690"  # 100uH
+    input_filter.C2.capacitance = 10uF +/- 20%
     input_filter.C2.package = "0805"
 
-    current_sensor.output ~ micro.io21
+    current_sensor.output ~ micro.io[21]
 
     # Input ceramic capacitors
     input_cap_1 = new Capacitor
-    input_cap_1.value = 10uF +/- 20%
+    input_cap_1.capacitance = 10uF +/- 20%
     input_cap_1.package = "0805"
     power_in ~ input_cap_1.power
 
     input_cap_2 = new Capacitor
-    input_cap_2.value = 10uF +/- 20%
+    input_cap_2.capacitance = 10uF +/- 20%
     input_cap_2.package = "0805"
     power_in ~ input_cap_2.power
 
     # Input voltage sense
-    voltage_sense = new VDiv
-    power_in ~ voltage_sense.power
-    voltage_sense.v_out = 0V to 3V
-    voltage_sense.out ~ micro.io16
+    voltage_sense = new ResistorVoltageDivider
+    power_in ~ voltage_sense.ref_in
+    voltage_sense.v_out = 3V +/- 10%
+    voltage_sense.current = 1mA to 2mA
+    voltage_sense.ref_out ~ micro.io[16]
 
     # DMM output
-    dmm_connector = new BananaPower
+    dmm_connector = new SimpleBananaPlugPower
     dmm_connector.power ~ dmm_out
 
     # Micro connections
     power_3v3 ~ micro.power
-    usbc.usb2 ~ micro.usb2
+    usbc.usb ~ micro.usb
 
-    # LCD
-    lcd = new LCDConnector
-    power_3v3 ~ lcd.power
-    micro.i2c ~ lcd.i2c
-    lcd.address = "0x3C"
+    # patch in microcontroller interfaces
+    micro_i2c2 = new I2C
+    micro_i2c2.scl ~ micro.io[0]  # TODO: what pins do we connect to?
+    micro_i2c2.sda ~ micro.io[1]  # TODO: what pins do we connect to?
+
+    micro_spi2 = new SPI
+    micro_spi2.sclk ~ micro.io[2]  # TODO: what pins do we connect to?
+    micro_spi2.mosi ~ micro.io[3]  # TODO: what pins do we connect to?
+    micro_spi2.miso ~ micro.io[4]  # TODO: what pins do we connect to?
+    # micro_spi2.cs ~ micro.io[5]  # TODO: what pins do we connect to?
+
+    # OLED module connector
+    oled_module = new OLEDModuleConnector
+    power_3v3 ~ oled_module.power
+    micro.i2c ~ oled_module.i2c
+    oled_module.i2c.address = "0x3C"
 
     # Ethernet
     power_3v3 ~ ethernet.power
-    micro.spi2 ~ ethernet.spi
-    micro.io35 ~ ethernet.interrupt
-    micro.io36 ~ ethernet.reset
+    micro_spi2 ~ ethernet.spi
+    micro.io[35] ~ ethernet.interrupt
+    micro.io[36] ~ ethernet.reset
 
     # I2C mux
-    mux_1 = new TCA9548APWR
+    mux_1 = new TI_TCA9548A
     power_3v3 ~ mux_1.power
     micro.i2c ~ mux_1.i2c
-    mux_1.address = "0x70"
+    mux_1.i2c.address = "0x70"
 
-    mux_2 = new TCA9548APWR
+    mux_2 = new TI_TCA9548A
     power_3v3 ~ mux_2.power
-    micro.i2c2 ~ mux_2.i2c
-    mux_2.address = "0x70"
+    micro_i2c2 ~ mux_2.i2c
+    mux_2.i2c.address = "0x70"
 
-    i2c_pullup = new I2CPullup
-    power_3v3 ~ i2c_pullup.power
-    micro.i2c ~ i2c_pullup.i2c
-    i2c_pullup.r_scl.value = 2kohm +/- 20%
-    i2c_pullup.r_sda.value = 2kohm +/- 20%
-    i2c_pullup.r_scl.package = "0402"
-    i2c_pullup.r_sda.package = "0402"
+    i2c_pullup_resistors = new Resistor[2]
+    for pull_resistor in i2c_pullup_resistors:
+        pull_resistor.resistance = 2kohm +/- 20%
+        pull_resistor.package = "0402"
+    power_3v3.hv ~> i2c_pullup_resistors[0] ~> micro.i2c.scl
+    power_3v3.lv ~> i2c_pullup_resistors[1] ~> micro.i2c.sda
 
-    i2c_2_pullup = new I2CPullup
-    power_3v3 ~ i2c_2_pullup.power
-    micro.i2c2 ~ i2c_2_pullup.i2c
-    i2c_2_pullup.r_scl.value = 2kohm +/- 20%
-    i2c_2_pullup.r_sda.value = 2kohm +/- 20%
-    i2c_2_pullup.r_scl.package = "0402"
-    i2c_2_pullup.r_sda.package = "0402"
+    i2c_2_pullup_resistors = new Resistor[2]
+    for pull_resistor in i2c_2_pullup_resistors:
+        pull_resistor.resistance = 2kohm +/- 20%
+        pull_resistor.package = "0402"
+    power_3v3.hv ~> i2c_2_pullup_resistors[0] ~> micro_i2c2.scl
+    power_3v3.lv ~> i2c_2_pullup_resistors[1] ~> micro_i2c2.sda
 
     # regulator to 5V
-    buck = new LV2842Kit
+    buck = new TI_LV2842X
     buck.v_in = 12V +/- 10%
     buck.v_out = 5V +/- 5%
     power_in ~ buck.power_in
 
-    # Diode or USB supply to 5V rail
+    # Internal buck output or USB supply to 5V rail
     diode_or = new PowerDiodeOr
-    usbc.power ~ diode_or.power_in1
-    buck.power_out ~ diode_or.power_in2
+    usbc.usb.usb_if.buspower ~ diode_or.power_in[0]
+    buck.power_out ~ diode_or.power_in[1]
     diode_or.power_out ~ power_5v
 
     # regulator to 3.3V
     ldo3v3 = new LDK220M_R
-    ldo3v3.v_in = buck.v_out
+    assert ldo3v3.v_in within buck.v_out
     ldo3v3.v_out = 3.3V +/- 10%
     power_5v ~ ldo3v3.power_in
     ldo3v3.power_out ~ power_3v3
 
     # LEDs
-    level_shifter = new LevelShifter
-    power_3v3 ~ level_shifter.power_lv
-    power_5v ~ level_shifter.power_hv
-    micro.io15 ~ level_shifter.lv_signal
+    level_shifter = new Level_Shifter_3V3_to_5V
+    power_3v3 ~ level_shifter.power_3v3
+    power_5v ~ level_shifter.power_5v
+    micro.io[15] ~ level_shifter.signal_3v3
 
     # Multiplexer
-    dmm_mux = new CD74HC4067SM96
+    dmm_mux = new TI_CD74HC4067SM
     power_3v3 ~ dmm_mux.power
-    micro.io5 ~ dmm_mux.nEnable
-    micro.io1 ~ dmm_mux.S0
-    micro.io2 ~ dmm_mux.S1
-    micro.io3 ~ dmm_mux.S2
-    micro.io4 ~ dmm_mux.S3
-    micro.io5 ~ dmm_mux.nEnable
-    power_3v3.vcc ~ dmm_mux.COMMON_IO # Outputs 3.3V to selected channel
+    micro.io[1] ~ dmm_mux.selects[0]
+    micro.io[2] ~ dmm_mux.selects[1]
+    micro.io[3] ~ dmm_mux.selects[2]
+    micro.io[4] ~ dmm_mux.selects[3]
+    micro.io[5] ~ dmm_mux.enable
+    power_3v3.hv ~ dmm_mux.common  # Outputs 3.3V to selected channel
 
-    # Thermistor
-    thermistor = new Thermistor
-    power_3v3 ~ thermistor.power_3v3
-    power_in ~ thermistor.power_12v
-    micro.i2c2 ~ thermistor.i2c
+    # Digitaly simulated thermistor 4 channels
+    digital_thermistor = new DigitalSimulatedThermistor_4_Channel
+    power_3v3 ~ digital_thermistor.power_3v3
+    power_in ~ digital_thermistor.power_12v
+    micro_i2c2 ~ digital_thermistor.i2c
 
     # Connect cells in a stack
-    cell1 = new Cell
-    mux_1.i2c0 ~ cell1.i2c
-    power_in ~ cell1.power_in
-    power_5v ~ cell1.power_5v
-    power_3v3 ~ cell1.power_isolator
-    dmm_out ~ cell1.dmm_out
-    level_shifter.hv_signal ~ cell1.cell_down.led_data
-    # power_in.gnd ~ cell1.cell_down.cell #
-    dmm_mux.CH0 ~ cell1.dmm_relay_enable
+    cells = new Cell[16]
+    for cell in cells:
+        power_in ~ cell.power_in
+        power_5v ~ cell.power_5v
+        power_3v3 ~ cell.power_isolator
+        dmm_out ~ cell.dmm_out
 
-    cell2 = new Cell
-    mux_1.i2c1 ~ cell2.i2c
-    power_in ~ cell2.power_in
-    power_5v ~ cell2.power_5v
-    power_3v3 ~ cell2.power_isolator
-    dmm_out ~ cell2.dmm_out
-    cell1.cell_up ~ cell2.cell_down
-    dmm_mux.CH1 ~ cell2.dmm_relay_enable
+    level_shifter.signal_5v ~ cells[0].cell_down.led_data
+    # power_in.lv ~ cells[1].cell_down.cell #
 
-    cell3 = new Cell
-    mux_1.i2c2 ~ cell3.i2c
-    power_in ~ cell3.power_in
-    power_5v ~ cell3.power_5v
-    power_3v3 ~ cell3.power_isolator
-    dmm_out ~ cell3.dmm_out
-    cell2.cell_up ~ cell3.cell_down
-    dmm_mux.CH2 ~ cell3.dmm_relay_enable
+    mux_1.i2cs[0] ~ cells[0].i2c
+    mux_1.i2cs[1] ~ cells[1].i2c
+    mux_1.i2cs[2] ~ cells[2].i2c
+    mux_1.i2cs[3] ~ cells[3].i2c
+    mux_1.i2cs[4] ~ cells[4].i2c
+    mux_1.i2cs[5] ~ cells[5].i2c
+    mux_1.i2cs[6] ~ cells[6].i2c
+    mux_1.i2cs[7] ~ cells[7].i2c
+    mux_2.i2cs[0] ~ cells[8].i2c
+    mux_2.i2cs[1] ~ cells[9].i2c
+    mux_2.i2cs[2] ~ cells[10].i2c
+    mux_2.i2cs[3] ~ cells[11].i2c
+    mux_2.i2cs[4] ~ cells[12].i2c
+    mux_2.i2cs[5] ~ cells[13].i2c
+    mux_2.i2cs[6] ~ cells[14].i2c
+    mux_2.i2cs[7] ~ cells[15].i2c
 
-    cell4 = new Cell
-    mux_1.i2c3 ~ cell4.i2c
-    power_in ~ cell4.power_in
-    power_5v ~ cell4.power_5v
-    power_3v3 ~ cell4.power_isolator
-    dmm_out ~ cell4.dmm_out
-    cell3.cell_up ~ cell4.cell_down
-    dmm_mux.CH3 ~ cell4.dmm_relay_enable
+    cells[0].cell_up ~ cells[1].cell_down
+    cells[1].cell_up ~ cells[2].cell_down
+    cells[2].cell_up ~ cells[3].cell_down
+    cells[3].cell_up ~ cells[4].cell_down
+    cells[4].cell_up ~ cells[5].cell_down
+    cells[5].cell_up ~ cells[6].cell_down
+    cells[6].cell_up ~ cells[7].cell_down
+    cells[7].cell_up ~ cells[8].cell_down
+    cells[8].cell_up ~ cells[9].cell_down
+    cells[9].cell_up ~ cells[10].cell_down
+    cells[10].cell_up ~ cells[11].cell_down
+    cells[11].cell_up ~ cells[12].cell_down
+    cells[12].cell_up ~ cells[13].cell_down
+    cells[13].cell_up ~ cells[14].cell_down
+    cells[14].cell_up ~ cells[15].cell_down
 
-    cell5 = new Cell
-    mux_1.i2c4 ~ cell5.i2c
-    power_in ~ cell5.power_in
-    power_5v ~ cell5.power_5v
-    power_3v3 ~ cell5.power_isolator
-    dmm_out ~ cell5.dmm_out
-    cell4.cell_up ~ cell5.cell_down
-    dmm_mux.CH4 ~ cell5.dmm_relay_enable
-
-    cell6 = new Cell
-    mux_1.i2c5 ~ cell6.i2c
-    power_in ~ cell6.power_in
-    power_5v ~ cell6.power_5v
-    power_3v3 ~ cell6.power_isolator
-    dmm_out ~ cell6.dmm_out
-    cell5.cell_up ~ cell6.cell_down
-    dmm_mux.CH5 ~ cell6.dmm_relay_enable
-
-    cell7 = new Cell
-    mux_1.i2c6 ~ cell7.i2c
-    power_in ~ cell7.power_in
-    power_5v ~ cell7.power_5v
-    power_3v3 ~ cell7.power_isolator
-    dmm_out ~ cell7.dmm_out
-    cell6.cell_up ~ cell7.cell_down
-    dmm_mux.CH6 ~ cell7.dmm_relay_enable
-
-    cell8 = new Cell
-    mux_1.i2c7 ~ cell8.i2c
-    power_in ~ cell8.power_in
-    power_5v ~ cell8.power_5v
-    power_3v3 ~ cell8.power_isolator
-    dmm_out ~ cell8.dmm_out
-    cell7.cell_up ~ cell8.cell_down
-    dmm_mux.CH7 ~ cell8.dmm_relay_enable
-
-    cell9 = new Cell
-    mux_2.i2c0 ~ cell9.i2c
-    power_in ~ cell9.power_in
-    power_5v ~ cell9.power_5v
-    power_3v3 ~ cell9.power_isolator
-    dmm_out ~ cell9.dmm_out
-    cell8.cell_up ~ cell9.cell_down
-    dmm_mux.CH8 ~ cell9.dmm_relay_enable
-
-    cell10 = new Cell
-    mux_2.i2c1 ~ cell10.i2c
-    power_in ~ cell10.power_in
-    power_5v ~ cell10.power_5v
-    power_3v3 ~ cell10.power_isolator
-    dmm_out ~ cell10.dmm_out
-    cell9.cell_up ~ cell10.cell_down
-    dmm_mux.CH9 ~ cell10.dmm_relay_enable
-
-    cell11 = new Cell
-    mux_2.i2c2 ~ cell11.i2c
-    power_in ~ cell11.power_in
-    power_5v ~ cell11.power_5v
-    power_3v3 ~ cell11.power_isolator
-    dmm_out ~ cell11.dmm_out
-    cell10.cell_up ~ cell11.cell_down
-    dmm_mux.CH10 ~ cell11.dmm_relay_enable
-
-    cell12 = new Cell
-    mux_2.i2c3 ~ cell12.i2c
-    power_in ~ cell12.power_in
-    power_5v ~ cell12.power_5v
-    power_3v3 ~ cell12.power_isolator
-    dmm_out ~ cell12.dmm_out
-    cell11.cell_up ~ cell12.cell_down
-    dmm_mux.CH11 ~ cell12.dmm_relay_enable
-
-    cell13 = new Cell
-    mux_2.i2c4 ~ cell13.i2c
-    power_in ~ cell13.power_in
-    power_5v ~ cell13.power_5v
-    power_3v3 ~ cell13.power_isolator
-    dmm_out ~ cell13.dmm_out
-    cell12.cell_up ~ cell13.cell_down
-    dmm_mux.CH12 ~ cell13.dmm_relay_enable
-
-    cell14 = new Cell
-    mux_2.i2c5 ~ cell14.i2c
-    power_in ~ cell14.power_in
-    power_5v ~ cell14.power_5v
-    power_3v3 ~ cell14.power_isolator
-    dmm_out ~ cell14.dmm_out
-    cell13.cell_up ~ cell14.cell_down
-    dmm_mux.CH13 ~ cell14.dmm_relay_enable
-
-    cell15 = new Cell
-    mux_2.i2c6 ~ cell15.i2c
-    power_in ~ cell15.power_in
-    power_5v ~ cell15.power_5v
-    power_3v3 ~ cell15.power_isolator
-    dmm_out ~ cell15.dmm_out
-    cell14.cell_up ~ cell15.cell_down
-    dmm_mux.CH14 ~ cell15.dmm_relay_enable
-
-    cell16 = new Cell
-    mux_2.i2c7 ~ cell16.i2c
-    power_in ~ cell16.power_in
-    power_5v ~ cell16.power_5v
-    power_3v3 ~ cell16.power_isolator
-    dmm_out ~ cell16.dmm_out
-    cell15.cell_up ~ cell16.cell_down
-    dmm_mux.CH15 ~ cell16.dmm_relay_enable
+    dmm_mux.ios[0] ~ cells[0].dmm_relay_enable
+    dmm_mux.ios[1] ~ cells[1].dmm_relay_enable
+    dmm_mux.ios[2] ~ cells[2].dmm_relay_enable
+    dmm_mux.ios[3] ~ cells[3].dmm_relay_enable
+    dmm_mux.ios[4] ~ cells[4].dmm_relay_enable
+    dmm_mux.ios[5] ~ cells[5].dmm_relay_enable
+    dmm_mux.ios[6] ~ cells[6].dmm_relay_enable
+    dmm_mux.ios[7] ~ cells[7].dmm_relay_enable
+    dmm_mux.ios[8] ~ cells[8].dmm_relay_enable
+    dmm_mux.ios[9] ~ cells[9].dmm_relay_enable
+    dmm_mux.ios[10] ~ cells[10].dmm_relay_enable
+    dmm_mux.ios[11] ~ cells[11].dmm_relay_enable
+    dmm_mux.ios[12] ~ cells[12].dmm_relay_enable
+    dmm_mux.ios[13] ~ cells[13].dmm_relay_enable
+    dmm_mux.ios[14] ~ cells[14].dmm_relay_enable
+    dmm_mux.ios[15] ~ cells[15].dmm_relay_enable
 
     # IDC-VSH connector
     idc_vsh = new IDC_VSH_connector
-    cell1.power_out.gnd ~ idc_vsh.cell0
-    cell1.power_out.vcc ~ idc_vsh.cell1
-    cell2.power_out.vcc ~ idc_vsh.cell2
-    cell3.power_out.vcc ~ idc_vsh.cell3
-    cell4.power_out.vcc ~ idc_vsh.cell4
-    cell5.power_out.vcc ~ idc_vsh.cell5
-    cell6.power_out.vcc ~ idc_vsh.cell6
-    cell7.power_out.vcc ~ idc_vsh.cell7
-    cell8.power_out.vcc ~ idc_vsh.cell8
-    cell9.power_out.vcc ~ idc_vsh.cell9
-    cell10.power_out.vcc ~ idc_vsh.cell10
-    cell11.power_out.vcc ~ idc_vsh.cell11
-    cell12.power_out.vcc ~ idc_vsh.cell12
-    cell13.power_out.vcc ~ idc_vsh.cell13
-    cell14.power_out.vcc ~ idc_vsh.cell14
-    cell15.power_out.vcc ~ idc_vsh.cell15
-    cell16.power_out.vcc ~ idc_vsh.cell16
+    cells[0].power_out.lv ~ idc_vsh.cells[0]
+    cells[0].power_out.hv ~ idc_vsh.cells[1]
+    cells[1].power_out.hv ~ idc_vsh.cells[2]
+    cells[2].power_out.hv ~ idc_vsh.cells[3]
+    cells[3].power_out.hv ~ idc_vsh.cells[4]
+    cells[4].power_out.hv ~ idc_vsh.cells[5]
+    cells[5].power_out.hv ~ idc_vsh.cells[6]
+    cells[6].power_out.hv ~ idc_vsh.cells[7]
+    cells[7].power_out.hv ~ idc_vsh.cells[8]
+    cells[8].power_out.hv ~ idc_vsh.cells[9]
+    cells[9].power_out.hv ~ idc_vsh.cells[10]
+    cells[10].power_out.hv ~ idc_vsh.cells[11]
+    cells[11].power_out.hv ~ idc_vsh.cells[12]
+    cells[12].power_out.hv ~ idc_vsh.cells[13]
+    cells[13].power_out.hv ~ idc_vsh.cells[14]
+    cells[14].power_out.hv ~ idc_vsh.cells[15]
+    cells[15].power_out.hv ~ idc_vsh.cells[16]
 
     # Molex VSH connector
-    molex_vsh = new Molex_5018762240
-    cell1.power_out.gnd ~ molex_vsh.p13
-    cell1.power_out.vcc ~ molex_vsh.p12
-    cell2.power_out.vcc ~ molex_vsh.p11
-    cell3.power_out.vcc ~ molex_vsh.p10
-    cell4.power_out.vcc ~ molex_vsh.p9
-    cell5.power_out.vcc ~ molex_vsh.p8
-    cell6.power_out.vcc ~ molex_vsh.p7
-    cell7.power_out.vcc ~ molex_vsh.p6
-    cell8.power_out.vcc ~ molex_vsh.p5
-    cell9.power_out.vcc ~ molex_vsh.p4
-    cell10.power_out.vcc ~ molex_vsh.p3
-    cell11.power_out.vcc ~ molex_vsh.p2
-    cell12.power_out.vcc ~ molex_vsh.p1
+    molex_vsh = new MOLEX_5018762240_package
+    cells[0].power_out.lv ~ molex_vsh.13
+    cells[0].power_out.hv ~ molex_vsh.12
+    cells[1].power_out.hv ~ molex_vsh.11
+    cells[2].power_out.hv ~ molex_vsh.10
+    cells[3].power_out.hv ~ molex_vsh.9
+    cells[4].power_out.hv ~ molex_vsh.8
+    cells[5].power_out.hv ~ molex_vsh.7
+    cells[6].power_out.hv ~ molex_vsh.6
+    cells[7].power_out.hv ~ molex_vsh.5
+    cells[8].power_out.hv ~ molex_vsh.4
+    cells[9].power_out.hv ~ molex_vsh.3
+    cells[10].power_out.hv ~ molex_vsh.2
+    cells[11].power_out.hv ~ molex_vsh.1
 
     # Thermistor connections to VSH
-    thermistor.thermistor_1 ~ molex_vsh.p15
-    thermistor.thermistor_gnd ~ molex_vsh.p16
-    thermistor.thermistor_2 ~ molex_vsh.p17
-    thermistor.thermistor_gnd ~ molex_vsh.p18
-    thermistor.thermistor_3 ~ molex_vsh.p19
-    thermistor.thermistor_gnd ~ molex_vsh.p20
-    thermistor.thermistor_4 ~ molex_vsh.p21
-    thermistor.thermistor_gnd ~ molex_vsh.p22
+    digital_thermistor.thermistor_outputs[0].line ~ molex_vsh.15
+    digital_thermistor.thermistor_outputs[0].reference.lv ~ molex_vsh.16
+    digital_thermistor.thermistor_outputs[1].line ~ molex_vsh.17
+    digital_thermistor.thermistor_outputs[1].reference.lv ~ molex_vsh.18
+    digital_thermistor.thermistor_outputs[2].line ~ molex_vsh.19
+    digital_thermistor.thermistor_outputs[2].reference.lv ~ molex_vsh.20
+    digital_thermistor.thermistor_outputs[3].line ~ molex_vsh.21
+    digital_thermistor.thermistor_outputs[3].reference.lv ~ molex_vsh.22
 
-    # Power net tie jumpers
+    # ElectricPower net tie jumpers
     power_jumper_vcc = new Resistor
-    power_jumper_vcc.value = 0ohm
+    power_jumper_vcc.resistance = 0ohm
     power_jumper_vcc.package = "0402"
-    cell16.power_out.vcc ~ power_jumper_vcc.p1
-    power_jumper_vcc.p2 ~ idc_vsh.power.vcc
+    cells[15].power_out.hv ~> power_jumper_vcc ~> idc_vsh.power.hv
 
-    power_jumper_gnd = new Resistor 
-    power_jumper_gnd.value = 0ohm
+    power_jumper_gnd = new Resistor
+    power_jumper_gnd.resistance = 0ohm
     power_jumper_gnd.package = "0402"
-    cell1.power_out.gnd ~ power_jumper_gnd.p1
-    power_jumper_gnd.p2 ~ idc_vsh.power.gnd
+    cells[1].power_out.lv ~> power_jumper_gnd ~> idc_vsh.power.lv
 
     # Debugging
-    i2c_debug = new SaleaeHeader
-    micro.i2c ~ i2c_debug.i2c
-    micro.i2c2 ~ i2c_debug.i2c2
-    i2c_debug.gnd ~ power_in.gnd
+    i2c_debug = new SaleaeHeaderRightAngle_2
+    micro.i2c ~ i2c_debug.headers[0].i2c
+    micro_i2c2 ~ i2c_debug.headers[1].i2c
 
     # Netname overrides
-    power_in.vcc.override_net_name = "POWER_IN_VCC"
-    power_in.gnd.override_net_name = "POWER_IN_GND"
-    power_in.vcc.override_net_name = "POWER_IN_VCC"
-    power_batt.vcc.override_net_name = "POWER_BATT_VCC"
-    power_5v.vcc.override_net_name = "POWER_5V_VCC"
-    power_3v3.vcc.override_net_name = "POWER_3V3_VCC"
-    dmm_out.vcc.override_net_name = "DMM_OUT_VCC"
-    dmm_out.gnd.override_net_name = "DMM_OUT_GND"
+    power_in.hv.suggest_net_name = "POWER_IN_VCC"
+    power_in.lv.suggest_net_name = "POWER_IN_GND"
+    power_batt.hv.suggest_net_name = "POWER_BATT_VCC"
+    power_5v.hv.suggest_net_name = "POWER_5V_VCC"
+    power_3v3.hv.suggest_net_name = "POWER_3V3_VCC"
+    dmm_out.hv.suggest_net_name = "DMM_OUT_VCC"
+    dmm_out.lv.suggest_net_name = "DMM_OUT_GND"
 
-    ethernet.interrupt.override_net_name = "ETHERNET_INTERRUPT"
-    ethernet.reset.override_net_name = "ETHERNET_RESET"
+    ethernet.interrupt.suggest_net_name = "ETHERNET_INTERRUPT"
+    ethernet.reset.suggest_net_name = "ETHERNET_RESET"
 
-    micro.i2c.scl.override_net_name = "MICRO_I2C_1_SCL"
-    micro.i2c.sda.override_net_name = "MICRO_I2C_1_SDA"
-    micro.i2c2.scl.override_net_name = "MICRO_I2C_2_SCL"
-    micro.i2c2.sda.override_net_name = "MICRO_I2C_2_SDA"
+    micro.i2c.scl.suggest_net_name = "MICRO_I2C_1_SCL"
+    micro.i2c.sda.suggest_net_name = "MICRO_I2C_1_SDA"
+    micro_i2c2.scl.suggest_net_name = "MICRO_I2C_2_SCL"
+    micro_i2c2.sda.suggest_net_name = "MICRO_I2C_2_SDA"
 
-    micro.spi2.sck.override_net_name = "MICRO_SPI_2_SCK"
-    micro.spi2.mosi.override_net_name = "MICRO_SPI_2_MOSI"
-    micro.spi2.miso.override_net_name = "MICRO_SPI_2_MISO"
-    micro.spi2.cs.override_net_name = "MICRO_SPI_2_CS"
+    micro_spi2.sclk.suggest_net_name = "MICRO_SPI_2_SCK"
+    micro_spi2.mosi.suggest_net_name = "MICRO_SPI_2_MOSI"
+    micro_spi2.miso.suggest_net_name = "MICRO_SPI_2_MISO"
+    # micro_spi2.cs.suggest_net_name = "MICRO_SPI_2_CS"
 
-    current_sensor.output.override_net_name = "INPUT_CURRENT_SENSOR_OUTPUT"
+    current_sensor.output.suggest_net_name = "INPUT_CURRENT_SENSOR_OUTPUT"
 
-    dmm_mux.nEnable.override_net_name = "DMM_MUX_ENABLE"
-    dmm_mux.S0.override_net_name = "DMM_MUX_S0"
-    dmm_mux.S1.override_net_name = "DMM_MUX_S1"
-    dmm_mux.S2.override_net_name = "DMM_MUX_S2"
-    dmm_mux.S3.override_net_name = "DMM_MUX_S3"
+    dmm_mux.selects[0].suggest_net_name = "DMM_MUX_S0"
+    dmm_mux.selects[1].suggest_net_name = "DMM_MUX_S1"
+    dmm_mux.selects[2].suggest_net_name = "DMM_MUX_S2"
+    dmm_mux.selects[3].suggest_net_name = "DMM_MUX_S3"
 
-    level_shifter.lv_signal.override_net_name = "LED_DATA_3V3"
-    level_shifter.hv_signal.override_net_name = "LED_DATA_5V"
+    level_shifter.signal_3v3.suggest_net_name = "LED_DATA_3V3"
+    level_shifter.signal_5v.suggest_net_name = "LED_DATA_5V"
 
-    thermistor._power_3v3.override_net_name = "THERMISTOR_POWER_3V3"
-    thermistor._power_5v.override_net_name = "THERMISTOR_POWER_5V"
-
-    cell1._power_5v.vcc.override_net_name = "CELL1_5V_VCC"
-    cell1._power_3v3.vcc.override_net_name = "CELL1_3V3_VCC"
-    cell1._power_3v3.gnd.override_net_name = "CELL1_GND" # only cell 1 has a ground
-    cell1._iso_i2c.scl.override_net_name = "CELL1_I2C_SCL"
-    cell1._iso_i2c.sda.override_net_name = "CELL1_I2C_SDA"
-    cell1.buck.enable.override_net_name = "CELL1_BUCK_ENABLE"
-    cell1.ldo.enable.override_net_name = "CELL1_LDO_ENABLE"
-    cell1.load_switch.control.override_net_name = "CELL1_LOAD_SWITCH_CONTROL"
-    cell1.output_relay.input.override_net_name = "CELL1_OUTPUT_RELAY_CONTROL"
-    cell1.dmm_relay.input.override_net_name = "CELL1_DMM_RELAY_CONTROL"
-    cell1.current_sense.output.override_net_name = "CELL1_CURRENT_SENSE_OUTPUT"
-    cell1.filter.power_out.vcc.override_net_name = "CELL1_FILTER_POWER_OUT_VCC"
-    cell1.buck.power_out.vcc.override_net_name = "CELL1_BUCK_POWER_OUT_VCC"
-    cell1.ldo.power_out.vcc.override_net_name = "CELL1_LDO_POWER_OUT_VCC"
-    cell1.current_sense.power_out.vcc.override_net_name = "CELL1_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell2._power_5v.vcc.override_net_name = "CELL2_5V_VCC"
-    cell2._power_3v3.vcc.override_net_name = "CELL2_3V3_VCC"
-    cell2._iso_i2c.scl.override_net_name = "CELL2_I2C_SCL"
-    cell2._iso_i2c.sda.override_net_name = "CELL2_I2C_SDA"
-    cell2.buck.enable.override_net_name = "CELL2_BUCK_ENABLE"
-    cell2.ldo.enable.override_net_name = "CELL2_LDO_ENABLE"
-    cell2.load_switch.control.override_net_name = "CELL2_LOAD_SWITCH_CONTROL"
-    cell2.output_relay.input.override_net_name = "CELL2_OUTPUT_RELAY_CONTROL"
-    cell2.dmm_relay.input.override_net_name = "CELL2_DMM_RELAY_CONTROL"
-    cell2.current_sense.output.override_net_name = "CELL2_CURRENT_SENSE_OUTPUT"
-    cell2.filter.power_out.vcc.override_net_name = "CELL2_FILTER_POWER_OUT_VCC"
-    cell2.buck.power_out.vcc.override_net_name = "CELL2_BUCK_POWER_OUT_VCC"
-    cell2.ldo.power_out.vcc.override_net_name = "CELL2_LDO_POWER_OUT_VCC"
-    cell2.current_sense.power_out.vcc.override_net_name = "CELL2_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell3._power_5v.vcc.override_net_name = "CELL3_5V_VCC"
-    cell3._power_3v3.vcc.override_net_name = "CELL3_3V3_VCC"
-    cell3._iso_i2c.scl.override_net_name = "CELL3_I2C_SCL"
-    cell3._iso_i2c.sda.override_net_name = "CELL3_I2C_SDA"
-    cell3.buck.enable.override_net_name = "CELL3_BUCK_ENABLE"
-    cell3.ldo.enable.override_net_name = "CELL3_LDO_ENABLE"
-    cell3.load_switch.control.override_net_name = "CELL3_LOAD_SWITCH_CONTROL"
-    cell3.output_relay.input.override_net_name = "CELL3_OUTPUT_RELAY_CONTROL"
-    cell3.dmm_relay.input.override_net_name = "CELL3_DMM_RELAY_CONTROL"
-    cell3.current_sense.output.override_net_name = "CELL3_CURRENT_SENSE_OUTPUT"
-    cell3.filter.power_out.vcc.override_net_name = "CELL3_FILTER_POWER_OUT_VCC"
-    cell3.buck.power_out.vcc.override_net_name = "CELL3_BUCK_POWER_OUT_VCC"
-    cell3.ldo.power_out.vcc.override_net_name = "CELL3_LDO_POWER_OUT_VCC"
-    cell3.current_sense.power_out.vcc.override_net_name = "CELL3_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell4._power_5v.vcc.override_net_name = "CELL4_5V_VCC"
-    cell4._power_3v3.vcc.override_net_name = "CELL4_3V3_VCC"
-    cell4._iso_i2c.scl.override_net_name = "CELL4_I2C_SCL"
-    cell4._iso_i2c.sda.override_net_name = "CELL4_I2C_SDA"
-    cell4.buck.enable.override_net_name = "CELL4_BUCK_ENABLE"
-    cell4.ldo.enable.override_net_name = "CELL4_LDO_ENABLE"
-    cell4.load_switch.control.override_net_name = "CELL4_LOAD_SWITCH_CONTROL"
-    cell4.output_relay.input.override_net_name = "CELL4_OUTPUT_RELAY_CONTROL"
-    cell4.dmm_relay.input.override_net_name = "CELL4_DMM_RELAY_CONTROL"
-    cell4.current_sense.output.override_net_name = "CELL4_CURRENT_SENSE_OUTPUT"
-    cell4.filter.power_out.vcc.override_net_name = "CELL4_FILTER_POWER_OUT_VCC"
-    cell4.buck.power_out.vcc.override_net_name = "CELL4_BUCK_POWER_OUT_VCC"
-    cell4.ldo.power_out.vcc.override_net_name = "CELL4_LDO_POWER_OUT_VCC"
-    cell4.current_sense.power_out.vcc.override_net_name = "CELL4_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell5._power_5v.vcc.override_net_name = "CELL5_5V_VCC"
-    cell5._power_3v3.vcc.override_net_name = "CELL5_3V3_VCC"
-    cell5._iso_i2c.scl.override_net_name = "CELL5_I2C_SCL"
-    cell5._iso_i2c.sda.override_net_name = "CELL5_I2C_SDA"
-    cell5.buck.enable.override_net_name = "CELL5_BUCK_ENABLE"
-    cell5.ldo.enable.override_net_name = "CELL5_LDO_ENABLE"
-    cell5.load_switch.control.override_net_name = "CELL5_LOAD_SWITCH_CONTROL"
-    cell5.output_relay.input.override_net_name = "CELL5_OUTPUT_RELAY_CONTROL"
-    cell5.dmm_relay.input.override_net_name = "CELL5_DMM_RELAY_CONTROL"
-    cell5.current_sense.output.override_net_name = "CELL5_CURRENT_SENSE_OUTPUT"
-    cell5.filter.power_out.vcc.override_net_name = "CELL5_FILTER_POWER_OUT_VCC"
-    cell5.buck.power_out.vcc.override_net_name = "CELL5_BUCK_POWER_OUT_VCC"
-    cell5.ldo.power_out.vcc.override_net_name = "CELL5_LDO_POWER_OUT_VCC"
-    cell5.current_sense.power_out.vcc.override_net_name = "CELL5_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell6._power_5v.vcc.override_net_name = "CELL6_5V_VCC"
-    cell6._power_3v3.vcc.override_net_name = "CELL6_3V3_VCC"
-    cell6._iso_i2c.scl.override_net_name = "CELL6_I2C_SCL"
-    cell6._iso_i2c.sda.override_net_name = "CELL6_I2C_SDA"
-    cell6.buck.enable.override_net_name = "CELL6_BUCK_ENABLE"
-    cell6.ldo.enable.override_net_name = "CELL6_LDO_ENABLE"
-    cell6.load_switch.control.override_net_name = "CELL6_LOAD_SWITCH_CONTROL"
-    cell6.output_relay.input.override_net_name = "CELL6_OUTPUT_RELAY_CONTROL"
-    cell6.dmm_relay.input.override_net_name = "CELL6_DMM_RELAY_CONTROL"
-    cell6.current_sense.output.override_net_name = "CELL6_CURRENT_SENSE_OUTPUT"
-    cell6.filter.power_out.vcc.override_net_name = "CELL6_FILTER_POWER_OUT_VCC"
-    cell6.buck.power_out.vcc.override_net_name = "CELL6_BUCK_POWER_OUT_VCC"
-    cell6.ldo.power_out.vcc.override_net_name = "CELL6_LDO_POWER_OUT_VCC"
-    cell6.current_sense.power_out.vcc.override_net_name = "CELL6_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell7._power_5v.vcc.override_net_name = "CELL7_5V_VCC"
-    cell7._power_3v3.vcc.override_net_name = "CELL7_3V3_VCC"
-    cell7._iso_i2c.scl.override_net_name = "CELL7_I2C_SCL"
-    cell7._iso_i2c.sda.override_net_name = "CELL7_I2C_SDA"
-    cell7.buck.enable.override_net_name = "CELL7_BUCK_ENABLE"
-    cell7.ldo.enable.override_net_name = "CELL7_LDO_ENABLE"
-    cell7.load_switch.control.override_net_name = "CELL7_LOAD_SWITCH_CONTROL"
-    cell7.output_relay.input.override_net_name = "CELL7_OUTPUT_RELAY_CONTROL"
-    cell7.dmm_relay.input.override_net_name = "CELL7_DMM_RELAY_CONTROL"
-    cell7.current_sense.output.override_net_name = "CELL7_CURRENT_SENSE_OUTPUT"
-    cell7.filter.power_out.vcc.override_net_name = "CELL7_FILTER_POWER_OUT_VCC"
-    cell7.buck.power_out.vcc.override_net_name = "CELL7_BUCK_POWER_OUT_VCC"
-    cell7.ldo.power_out.vcc.override_net_name = "CELL7_LDO_POWER_OUT_VCC"
-    cell7.current_sense.power_out.vcc.override_net_name = "CELL7_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell8._power_5v.vcc.override_net_name = "CELL8_5V_VCC"
-    cell8._power_3v3.vcc.override_net_name = "CELL8_3V3_VCC"
-    cell8._iso_i2c.scl.override_net_name = "CELL8_I2C_SCL"
-    cell8._iso_i2c.sda.override_net_name = "CELL8_I2C_SDA"
-    cell8.buck.enable.override_net_name = "CELL8_BUCK_ENABLE"
-    cell8.ldo.enable.override_net_name = "CELL8_LDO_ENABLE"
-    cell8.load_switch.control.override_net_name = "CELL8_LOAD_SWITCH_CONTROL"
-    cell8.output_relay.input.override_net_name = "CELL8_OUTPUT_RELAY_CONTROL"
-    cell8.dmm_relay.input.override_net_name = "CELL8_DMM_RELAY_CONTROL"
-    cell8.current_sense.output.override_net_name = "CELL8_CURRENT_SENSE_OUTPUT"
-    cell8.filter.power_out.vcc.override_net_name = "CELL8_FILTER_POWER_OUT_VCC"
-    cell8.buck.power_out.vcc.override_net_name = "CELL8_BUCK_POWER_OUT_VCC"
-    cell8.ldo.power_out.vcc.override_net_name = "CELL8_LDO_POWER_OUT_VCC"
-    cell8.current_sense.power_out.vcc.override_net_name = "CELL8_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell9._power_5v.vcc.override_net_name = "CELL9_5V_VCC"
-    cell9._power_3v3.vcc.override_net_name = "CELL9_3V3_VCC"
-    cell9._iso_i2c.scl.override_net_name = "CELL9_I2C_SCL"
-    cell9._iso_i2c.sda.override_net_name = "CELL9_I2C_SDA"
-    cell9.buck.enable.override_net_name = "CELL9_BUCK_ENABLE"
-    cell9.ldo.enable.override_net_name = "CELL9_LDO_ENABLE"
-    cell9.load_switch.control.override_net_name = "CELL9_LOAD_SWITCH_CONTROL"
-    cell9.output_relay.input.override_net_name = "CELL9_OUTPUT_RELAY_CONTROL"
-    cell9.dmm_relay.input.override_net_name = "CELL9_DMM_RELAY_CONTROL"
-    cell9.current_sense.output.override_net_name = "CELL9_CURRENT_SENSE_OUTPUT"
-    cell9.filter.power_out.vcc.override_net_name = "CELL9_FILTER_POWER_OUT_VCC"
-    cell9.buck.power_out.vcc.override_net_name = "CELL9_BUCK_POWER_OUT_VCC"
-    cell9.ldo.power_out.vcc.override_net_name = "CELL9_LDO_POWER_OUT_VCC"
-    cell9.current_sense.power_out.vcc.override_net_name = "CELL9_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell10._power_5v.vcc.override_net_name = "CELL10_5V_VCC"
-    cell10._power_3v3.vcc.override_net_name = "CELL10_3V3_VCC"
-    cell10._iso_i2c.scl.override_net_name = "CELL10_I2C_SCL"
-    cell10._iso_i2c.sda.override_net_name = "CELL10_I2C_SDA"
-    cell10.buck.enable.override_net_name = "CELL10_BUCK_ENABLE"
-    cell10.ldo.enable.override_net_name = "CELL10_LDO_ENABLE"
-    cell10.load_switch.control.override_net_name = "CELL10_LOAD_SWITCH_CONTROL"
-    cell10.output_relay.input.override_net_name = "CELL10_OUTPUT_RELAY_CONTROL"
-    cell10.dmm_relay.input.override_net_name = "CELL10_DMM_RELAY_CONTROL"
-    cell10.current_sense.output.override_net_name = "CELL10_CURRENT_SENSE_OUTPUT"
-    cell10.filter.power_out.vcc.override_net_name = "CELL10_FILTER_POWER_OUT_VCC"
-    cell10.buck.power_out.vcc.override_net_name = "CELL10_BUCK_POWER_OUT_VCC"
-    cell10.ldo.power_out.vcc.override_net_name = "CELL10_LDO_POWER_OUT_VCC"
-    cell10.current_sense.power_out.vcc.override_net_name = "CELL10_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell11._power_5v.vcc.override_net_name = "CELL11_5V_VCC"
-    cell11._power_3v3.vcc.override_net_name = "CELL11_3V3_VCC"
-    cell11._iso_i2c.scl.override_net_name = "CELL11_I2C_SCL"
-    cell11._iso_i2c.sda.override_net_name = "CELL11_I2C_SDA"
-    cell11.buck.enable.override_net_name = "CELL11_BUCK_ENABLE"
-    cell11.ldo.enable.override_net_name = "CELL11_LDO_ENABLE"
-    cell11.load_switch.control.override_net_name = "CELL11_LOAD_SWITCH_CONTROL"
-    cell11.output_relay.input.override_net_name = "CELL11_OUTPUT_RELAY_CONTROL"
-    cell11.dmm_relay.input.override_net_name = "CELL11_DMM_RELAY_CONTROL"
-    cell11.current_sense.output.override_net_name = "CELL11_CURRENT_SENSE_OUTPUT"
-    cell11.filter.power_out.vcc.override_net_name = "CELL11_FILTER_POWER_OUT_VCC"
-    cell11.buck.power_out.vcc.override_net_name = "CELL11_BUCK_POWER_OUT_VCC"
-    cell11.ldo.power_out.vcc.override_net_name = "CELL11_LDO_POWER_OUT_VCC"
-    cell11.current_sense.power_out.vcc.override_net_name = "CELL11_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell12._power_5v.vcc.override_net_name = "CELL12_5V_VCC"
-    cell12._power_3v3.vcc.override_net_name = "CELL12_3V3_VCC"
-    cell12._iso_i2c.scl.override_net_name = "CELL12_I2C_SCL"
-    cell12._iso_i2c.sda.override_net_name = "CELL12_I2C_SDA"
-    cell12.buck.enable.override_net_name = "CELL12_BUCK_ENABLE"
-    cell12.ldo.enable.override_net_name = "CELL12_LDO_ENABLE"
-    cell12.load_switch.control.override_net_name = "CELL12_LOAD_SWITCH_CONTROL"
-    cell12.output_relay.input.override_net_name = "CELL12_OUTPUT_RELAY_CONTROL"
-    cell12.dmm_relay.input.override_net_name = "CELL12_DMM_RELAY_CONTROL"
-    cell12.current_sense.output.override_net_name = "CELL12_CURRENT_SENSE_OUTPUT"
-    cell12.filter.power_out.vcc.override_net_name = "CELL12_FILTER_POWER_OUT_VCC"
-    cell12.buck.power_out.vcc.override_net_name = "CELL12_BUCK_POWER_OUT_VCC"
-    cell12.ldo.power_out.vcc.override_net_name = "CELL12_LDO_POWER_OUT_VCC"
-    cell12.current_sense.power_out.vcc.override_net_name = "CELL12_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell13._power_5v.vcc.override_net_name = "CELL13_5V_VCC"
-    cell13._power_3v3.vcc.override_net_name = "CELL13_3V3_VCC"
-    cell13._iso_i2c.scl.override_net_name = "CELL13_I2C_SCL"
-    cell13._iso_i2c.sda.override_net_name = "CELL13_I2C_SDA"
-    cell13.buck.enable.override_net_name = "CELL13_BUCK_ENABLE"
-    cell13.ldo.enable.override_net_name = "CELL13_LDO_ENABLE"
-    cell13.load_switch.control.override_net_name = "CELL13_LOAD_SWITCH_CONTROL"
-    cell13.output_relay.input.override_net_name = "CELL13_OUTPUT_RELAY_CONTROL"
-    cell13.dmm_relay.input.override_net_name = "CELL13_DMM_RELAY_CONTROL"
-    cell13.current_sense.output.override_net_name = "CELL13_CURRENT_SENSE_OUTPUT"
-    cell13.filter.power_out.vcc.override_net_name = "CELL13_FILTER_POWER_OUT_VCC"
-    cell13.buck.power_out.vcc.override_net_name = "CELL13_BUCK_POWER_OUT_VCC"
-    cell13.ldo.power_out.vcc.override_net_name = "CELL13_LDO_POWER_OUT_VCC"
-    cell13.current_sense.power_out.vcc.override_net_name = "CELL13_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell14._power_5v.vcc.override_net_name = "CELL14_5V_VCC"
-    cell14._power_3v3.vcc.override_net_name = "CELL14_3V3_VCC"
-    cell14._iso_i2c.scl.override_net_name = "CELL14_I2C_SCL"
-    cell14._iso_i2c.sda.override_net_name = "CELL14_I2C_SDA"
-    cell14.buck.enable.override_net_name = "CELL14_BUCK_ENABLE"
-    cell14.ldo.enable.override_net_name = "CELL14_LDO_ENABLE"
-    cell14.load_switch.control.override_net_name = "CELL14_LOAD_SWITCH_CONTROL"
-    cell14.output_relay.input.override_net_name = "CELL14_OUTPUT_RELAY_CONTROL"
-    cell14.dmm_relay.input.override_net_name = "CELL14_DMM_RELAY_CONTROL"
-    cell14.current_sense.output.override_net_name = "CELL14_CURRENT_SENSE_OUTPUT"
-    cell14.filter.power_out.vcc.override_net_name = "CELL14_FILTER_POWER_OUT_VCC"
-    cell14.buck.power_out.vcc.override_net_name = "CELL14_BUCK_POWER_OUT_VCC"
-    cell14.ldo.power_out.vcc.override_net_name = "CELL14_LDO_POWER_OUT_VCC"
-    cell14.current_sense.power_out.vcc.override_net_name = "CELL14_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell15._power_5v.vcc.override_net_name = "CELL15_5V_VCC"
-    cell15._power_3v3.vcc.override_net_name = "CELL15_3V3_VCC"
-    cell15._iso_i2c.scl.override_net_name = "CELL15_I2C_SCL"
-    cell15._iso_i2c.sda.override_net_name = "CELL15_I2C_SDA"
-    cell15.buck.enable.override_net_name = "CELL15_BUCK_ENABLE"
-    cell15.ldo.enable.override_net_name = "CELL15_LDO_ENABLE"
-    cell15.load_switch.control.override_net_name = "CELL15_LOAD_SWITCH_CONTROL"
-    cell15.output_relay.input.override_net_name = "CELL15_OUTPUT_RELAY_CONTROL"
-    cell15.dmm_relay.input.override_net_name = "CELL15_DMM_RELAY_CONTROL"
-    cell15.current_sense.output.override_net_name = "CELL15_CURRENT_SENSE_OUTPUT"
-    cell15.filter.power_out.vcc.override_net_name = "CELL15_FILTER_POWER_OUT_VCC"
-    cell15.buck.power_out.vcc.override_net_name = "CELL15_BUCK_POWER_OUT_VCC"
-    cell15.ldo.power_out.vcc.override_net_name = "CELL15_LDO_POWER_OUT_VCC"
-    cell15.current_sense.power_out.vcc.override_net_name = "CELL15_CURRENT_SENSE_POWER_OUT_VCC"
-
-    cell16._power_5v.vcc.override_net_name = "CELL16_5V_VCC"
-    cell16._power_3v3.vcc.override_net_name = "CELL16_3V3_VCC"
-    cell16._iso_i2c.scl.override_net_name = "CELL16_I2C_SCL"
-    cell16._iso_i2c.sda.override_net_name = "CELL16_I2C_SDA"
-    cell16.buck.enable.override_net_name = "CELL16_BUCK_ENABLE"
-    cell16.ldo.enable.override_net_name = "CELL16_LDO_ENABLE"
-    cell16.load_switch.control.override_net_name = "CELL16_LOAD_SWITCH_CONTROL"
-    cell16.output_relay.input.override_net_name = "CELL16_OUTPUT_RELAY_CONTROL"
-    cell16.dmm_relay.input.override_net_name = "CELL16_DMM_RELAY_CONTROL"
-    cell16.current_sense.output.override_net_name = "CELL16_CURRENT_SENSE_OUTPUT"
-    cell16.filter.power_out.vcc.override_net_name = "CELL16_FILTER_POWER_OUT_VCC"
-    cell16.buck.power_out.vcc.override_net_name = "CELL16_BUCK_POWER_OUT_VCC"
-    cell16.ldo.power_out.vcc.override_net_name = "CELL16_LDO_POWER_OUT_VCC"
-    cell16.current_sense.power_out.vcc.override_net_name = "CELL16_CURRENT_SENSE_POWER_OUT_VCC"
+    digital_thermistor.power_3v3.suggest_net_name = "THERMISTOR_POWER_3V3"
+    digital_thermistor.isolated_converter.power_out.suggest_net_name = "THERMISTOR_POWER_5V"

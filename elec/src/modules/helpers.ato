@@ -1,0 +1,54 @@
+import Resistor
+import MOSFET
+import ElectricPower
+import ElectricSignal
+import can_bridge_by_name
+
+module SeriesPowerResistors:
+    """
+    Power shunted by 2 resistors in series. For current limiting power.
+    """
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+
+    current_limiting_resistors = new Resistor[2]
+    for resistor in current_limiting_resistors:
+        resistor.package = "0402"
+        resistor.resistance = 10kohm +/- 1%
+
+    power_in.hv ~> current_limiting_resistors[0] ~> power_out.hv
+    power_in.lv ~> current_limiting_resistors[1] ~> power_out.lv
+
+    trait can_bridge_by_name<input_name = "power_in", output_name = "power_out">
+
+module SwitchableLoad:
+    """Simple MOSFET switching a small load resistor"""
+    fet = new MOSFET
+    gate_resistor = new Resistor
+    pulldown_resistor = new Resistor
+    load_resistor = new Resistor
+
+    fet.lcsc_id = "C67273"
+
+    load_resistor.package = "0805"
+
+    gate_resistor.package = "0402"
+    gate_resistor.resistance = 1kohm +/- 5%
+    pulldown_resistor.package = "0402"
+    pulldown_resistor.resistance = 10kohm +/- 5%
+
+    power_in = new ElectricPower
+    control = new ElectricSignal
+
+    power_in.hv ~ load_resistor.unnamed[0]
+    fet.drain ~ load_resistor.unnamed[1]
+
+    # connect up circuit
+    control.line ~> gate_resistor ~> fet.gate
+    control.reference.lv ~ power_in.lv
+
+    # Pull down resistor on control
+    control.line ~> pulldown_resistor ~> power_in.lv
+
+    # source to ground
+    fet.source ~ power_in.lv

@@ -1,0 +1,21 @@
+import ElectricPower
+import I2C
+
+from "parts/BOOMELE_2_54_1_4P/BOOMELE_2_54_1_4P.ato" import BOOMELE_2_54_1_4P_package
+
+module OLEDModuleConnector:
+    """Connector for OLED modules"""
+    package = new BOOMELE_2_54_1_4P_package
+
+    # external interfaces
+    i2c = new I2C
+    i2c.required = True
+    power = new ElectricPower
+    power.voltage = 3.3V +/- 10%
+    power.required = True
+
+    i2c.sda ~ package.1
+    i2c.scl ~ package.2
+
+    power.vcc ~ package.3
+    power.gnd ~ package.4

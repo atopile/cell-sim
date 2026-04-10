@@ -48,3 +48,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# LLM & AI
+.cursor/mcp.json
+.mcp.json
+CLAUDE.md
+.windsurf/
+.cursor/rules/

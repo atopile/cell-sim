@@ -1,6 +1,0 @@
-ato-version: ^0.2.0
-builds:
-  default:
-    entry: elec/src/level-shifter.ato:LevelShifter
-dependencies:
-- generics

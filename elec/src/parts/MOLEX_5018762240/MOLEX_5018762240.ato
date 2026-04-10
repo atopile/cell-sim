@@ -1,0 +1,40 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component MOLEX_5018762240_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C293584", date="2026-01-20T01:34:01.755071+00:00", checksum="be1c1fe27e891d9532f3cb31329a5446ff39ea00f02cad0a81920fbc9ca992ea">
+
+    trait is_atomic_part<manufacturer="MOLEX", partnumber="5018762240", footprint="CONN-TH_22P-P2.00_5018762240.kicad_mod", symbol="5018762240.kicad_sym", model="CONN-TH_22P-P2.00_5018762240.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C293584", manufacturer="MOLEX", partno="5018762240">
+    trait has_designator_prefix<prefix="CN">
+    trait has_datasheet<datasheet="https://datasheet.lcsc.com/lcsc/2304140030_MOLEX-5018762240_C293584.pdf">
+
+    # pins
+    pin 1
+    pin 22
+    pin 3
+    pin 20
+    pin 5
+    pin 18
+    pin 7
+    pin 16
+    pin 9
+    pin 14
+    pin 11
+    pin 12
+    pin 13
+    pin 10
+    pin 15
+    pin 8
+    pin 17
+    pin 6
+    pin 19
+    pin 4
+    pin 21
+    pin 2

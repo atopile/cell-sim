@@ -1,0 +1,22 @@
+#pragma experiment("TRAITS")
+import has_datasheet
+import has_designator_prefix
+import has_part_picked
+import is_atomic_part
+import is_auto_generated
+
+component BOOMELE_2_54_1_4P_package:
+    # This trait marks this file as auto-generated
+    # If you want to manually change it, remove the trait
+    trait is_auto_generated<system="ato_part", source="easyeda:C2718488", date="2026-01-21T05:23:24.668712+00:00", checksum="a1839d0152a80f1c97b98a1e31091aef493163c229da794c84ff9de4101fba1a">
+
+    trait is_atomic_part<manufacturer="BOOMELE", partnumber="2.54-1*4P母", footprint="HDR-TH_4P-P2.54-V-F.kicad_mod", symbol="2.54-1*4P母.kicad_sym", model="HDR-TH_4P-P2.54-V-F.step">
+    trait has_part_picked::by_supplier<supplier_id="lcsc", supplier_partno="C2718488", manufacturer="BOOMELE", partno="2.54-1*4P母">
+    trait has_designator_prefix<prefix="H">
+    trait has_datasheet<datasheet="https://www.lcsc.com/datasheet/lcsc_datasheet_2412111658_BOOMELE-Boom-Precision-Elec-2-54-1-4P_C2718488.pdf">
+
+    # pins
+    pin 1
+    pin 2
+    pin 3
+    pin 4

@@ -1,0 +1,32 @@
+import Resistor
+import ElectricPower
+import ElectricLogic
+import can_bridge_by_name
+
+from "atopile/relays/relays.ato" import LogicLevelRelayDPDT1A5V
+
+module PowerRelay:
+    """
+    DPDT relay with 5V coil and logic indicator LED
+    Logic level control with N-FET
+    Designed to switch + and - of a power rail
+    """
+    # External interfaces
+    power_relay = new ElectricPower
+    power_in = new ElectricPower
+    power_out = new ElectricPower
+    enable = new ElectricLogic
+
+    # Relay
+    relay = new LogicLevelRelayDPDT1A5V
+
+    relay.enable ~ enable
+
+    # coil connections
+    relay.coil_power ~ power_relay
+
+    # power connections
+    power_in.hv ~> relay.relay.switch_no[0] ~> power_out.hv
+    power_in.lv ~> relay.relay.switch_no[1] ~> power_out.lv
+
+    trait can_bridge_by_name<input_name = "power_in", output_name = "power_out">

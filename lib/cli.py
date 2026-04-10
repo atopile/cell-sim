@@ -1,5 +1,5 @@
 import argparse
-from cell_sim.client import CellSimClient
+from lib.client import CellSimClient
 
 
 def main():
